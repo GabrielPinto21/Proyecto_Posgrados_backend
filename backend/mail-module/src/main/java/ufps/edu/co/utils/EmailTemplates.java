@@ -29,6 +29,8 @@ public class EmailTemplates {
 
   public static final String ASUNTO_CALIFICACION_CRITERIO = "Calificación de criterio registrada - Posgrados UFPS";
 
+  public static final String ASUNTO_CONFIRMACION_CORREO = "Confirma tu correo electrónico - Posgrados UFPS";
+
   public static final String ASUNTO_ADMITIDO = "¡Felicitaciones! Has sido admitido - Posgrados UFPS";
 
   public static final String ASUNTO_RECHAZADO = "Resultado del proceso de admisión - Posgrados UFPS";
@@ -380,6 +382,34 @@ public class EmailTemplates {
         </body>
         </html>
         """.formatted(nombreAspirante, nombreCriterio, puntajeObtenido, puntajeTotal);
+  }
+
+  public static String cuerpoConfirmacionCorreo(String nombres, String enlaceConfirmacion) {
+    return """
+        <!DOCTYPE html>
+        <html lang="es">
+        <body style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #1a5276;">Confirma tu correo electrónico</h2>
+          <p>Estimado/a <strong>%s</strong>,</p>
+          <p>Gracias por inscribirte en el proceso de admisión de posgrados de la UFPS.
+             Para continuar, por favor confirma tu correo electrónico haciendo clic en el siguiente botón:</p>
+          <p style="text-align: center; margin: 32px 0;">
+            <a href="%s"
+               style="background-color: #1a5276; color: #ffffff; padding: 12px 28px;
+                      text-decoration: none; border-radius: 4px; font-size: 1em; display: inline-block;">
+              Confirmar correo
+            </a>
+          </p>
+          <p style="color: #888; font-size: 0.85em;">
+            Este enlace es válido por 24 horas. Si no realizaste esta solicitud, ignora este correo.
+          </p>
+          <br/>
+          <p style="color: #666; font-size: 0.9em;">
+            Universidad Francisco de Paula Santander &mdash; Oficina de Posgrados
+          </p>
+        </body>
+        </html>
+        """.formatted(nombres, enlaceConfirmacion);
   }
 
   public static String cuerpoAdmitido(
