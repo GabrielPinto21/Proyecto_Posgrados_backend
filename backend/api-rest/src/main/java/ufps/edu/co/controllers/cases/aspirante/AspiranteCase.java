@@ -326,7 +326,7 @@ public class AspiranteCase {
     public ResponseEntity<EntrevistaSimpleOutput> cancelarEntrevista(
             @PathVariable Integer idEntrevista,
             @RequestBody ENTREVISTA_CANCELAR_REQUEST body) {
-        EntrevistaOutput o = entrevistaProcessor.cancelInterview(idEntrevista, body.motivocambio());
+        EntrevistaOutput o = entrevistaProcessor.cancelInterview(idEntrevista, body.motivocambio(), "ASPIRANTE");
         return ResponseEntity.ok(EntrevistaSimpleOutput.builder()
                 .idEntrevista(o.id())
                 .idAspirante(o.idAspirante())
@@ -366,7 +366,7 @@ public class AspiranteCase {
     public ResponseEntity<PruebaSimpleOutput> cancelarPrueba(
             @PathVariable Integer idPrueba,
             @RequestBody PRUEBA_CANCELAR_REQUEST body) {
-        return ResponseEntity.ok(pruebaProcessor.cancelarPrueba(idPrueba, body.motivocambio()));
+        return ResponseEntity.ok(pruebaProcessor.cancelarPrueba(idPrueba, body.motivocambio(), "ASPIRANTE"));
     }
 
     @PatchMapping("/{idAspirante}/confirmar-correo")
