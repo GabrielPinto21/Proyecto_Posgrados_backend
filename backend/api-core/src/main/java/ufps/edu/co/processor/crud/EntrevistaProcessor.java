@@ -363,7 +363,7 @@ public class EntrevistaProcessor implements
             AspiranteDTO aspirante = aspiranteService.findById(entrevista.getIdAspirante());
             if (aspirante == null || aspirante.getPersona() == null) return;
             String tipo = entrevista.getTipoentrevista() != null ? entrevista.getTipoentrevista().getTipo() : "No definido";
-            String lugar = entrevista.getUbicacion() != null ? entrevista.getUbicacion().getDireccion() : "No definido";
+            // String lugar = entrevista.getUbicacion() != null ? entrevista.getUbicacion().getDireccion() : "No definido";
             String motivoTexto = motivo != null ? motivo : "Sin motivo especificado";
 
             if ("ASPIRANTE".equalsIgnoreCase(canceladoPor)) {
