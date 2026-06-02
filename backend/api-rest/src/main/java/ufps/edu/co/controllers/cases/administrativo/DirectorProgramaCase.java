@@ -685,7 +685,7 @@ public class DirectorProgramaCase {
             @PathVariable Integer idEntrevista,
             @RequestBody ENTREVISTA_CANCELAR_REQUEST request) {
         try {
-            EntrevistaOutput o = entrevistaProcessor.cancelInterview(idEntrevista, request.motivocambio());
+            EntrevistaOutput o = entrevistaProcessor.cancelInterview(idEntrevista, request.motivocambio(), "DIRECTOR");
             return ResponseEntity.ok(EntrevistaSimpleOutput.builder()
                     .idEntrevista(o.id())
                     .idAspirante(o.idAspirante())
@@ -764,7 +764,7 @@ public class DirectorProgramaCase {
             @PathVariable Integer idPrueba,
             @RequestBody PRUEBA_CANCELAR_REQUEST request) {
         try {
-            return ResponseEntity.ok(pruebaProcessor.cancelarPrueba(idPrueba, request.motivocambio()));
+            return ResponseEntity.ok(pruebaProcessor.cancelarPrueba(idPrueba, request.motivocambio(), "DIRECTOR"));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();
