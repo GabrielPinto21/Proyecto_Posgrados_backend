@@ -379,7 +379,8 @@ public class AspiranteCase {
         if (!"INSCRITO".equalsIgnoreCase(estadoActual)) {
             throw new DomainException(AspiranteErrorCode.ESTADO_TRANSICION_INVALIDA_CONFLICT, estadoActual);
         }
-        ufps.edu.co.rest.dto.EstadoDTO estadoNuevo = estadoService.findByTipoAndEntidad("CORREO_CONFIRMADO", "aspirante");
+        ufps.edu.co.rest.dto.EstadoDTO estadoNuevo = estadoService.findByTipoAndEntidad("CORREO_CONFIRMADO",
+                "aspirante");
         if (estadoNuevo == null) {
             throw new RuntimeException("Estado 'CORREO_CONFIRMADO' para aspirante no encontrado en la base de datos");
         }
@@ -394,7 +395,7 @@ public class AspiranteCase {
             throw new DomainException(AspiranteErrorCode.ASPIRANTE_NOT_FOUND, idAspirante);
         }
         String estadoActual = aspirante.getEstado() != null ? aspirante.getEstado().getTipo() : null;
-        if (!"INSCRITO".equalsIgnoreCase(estadoActual)) {
+        if (!"NO CONFIRMADO".equalsIgnoreCase(estadoActual)) {
             throw new DomainException(AspiranteErrorCode.ESTADO_TRANSICION_INVALIDA_CONFLICT, estadoActual);
         }
         String token = confirmationTokenService.generateToken(idAspirante);
@@ -458,7 +459,8 @@ public class AspiranteCase {
         String estadoActual = aspirante.getEstado() != null ? aspirante.getEstado().getTipo() : null;
         if (!"INSCRITO".equalsIgnoreCase(estadoActual)) {
             return ResponseEntity.badRequest()
-                    .body(java.util.Map.of("error", "El correo ya fue confirmado o el aspirante no está en estado INSCRITO"));
+                    .body(java.util.Map.of("error",
+                            "El correo ya fue confirmado o el aspirante no está en estado INSCRITO"));
         }
         ufps.edu.co.rest.dto.EstadoDTO estadoNuevo = estadoService.findByTipoAndEntidad("INSCRITO", "aspirante");
         if (estadoNuevo == null) {
