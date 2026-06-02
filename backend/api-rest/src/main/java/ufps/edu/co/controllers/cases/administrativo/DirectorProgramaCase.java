@@ -212,6 +212,38 @@ public class DirectorProgramaCase {
 
     }
 
+    @GetMapping(value = "/documentos/{idDocumento}/archivo")
+    public ResponseEntity<byte[]> verDocumentoInline(@PathVariable Integer idDocumento) {
+        try {
+            DOCUMENTO_FIND req = DOCUMENTO_FIND.builder().id(idDocumento).build();
+            var result = s3Service.downloadDocumentWithMetadata(req);
+            DocumentoOutput fileInfo = documentoProcessor.findById(req);
+
+            String filename = fileInfo != null ? fileInfo.keyfile() : result != null ? result.keyfile() : "file";
+            String disposition = "inline";
+            if (filename != null && !filename.isBlank()) {
+                disposition = disposition + "; filename=\"" + filename.replace('"', '_') + "\"";
+            }
+
+            org.springframework.http.MediaType mediaType = org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
+            if (result != null && result.contentType() != null && !result.contentType().isBlank()) {
+                try {
+                    mediaType = org.springframework.http.MediaType.parseMediaType(result.contentType());
+                } catch (Exception e) {
+                    // fallback to octet-stream
+                }
+            }
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, disposition)
+                    .contentType(mediaType)
+                    .body(result != null ? result.content() : new byte[0]);
+        } catch (Exception e) {
+            logger.error("Error visualizando documento inline {}: {}", idDocumento, e.getMessage(), e);
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @GetMapping(value = "/aspirantsWithDocuments")
     public ResponseEntity<List<AspiranteOutput>> findAspirantsWithDocuments() {
         try {
