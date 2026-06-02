@@ -460,10 +460,10 @@ public class AspiranteCase {
             return ResponseEntity.badRequest()
                     .body(java.util.Map.of("error", "El correo ya fue confirmado o el aspirante no está en estado INSCRITO"));
         }
-        ufps.edu.co.rest.dto.EstadoDTO estadoNuevo = estadoService.findByTipoAndEntidad("CORREO_CONFIRMADO", "aspirante");
+        ufps.edu.co.rest.dto.EstadoDTO estadoNuevo = estadoService.findByTipoAndEntidad("INSCRITO", "aspirante");
         if (estadoNuevo == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(java.util.Map.of("error", "Estado 'CORREO_CONFIRMADO' no configurado en la base de datos"));
+                    .body(java.util.Map.of("error", "Estado 'INSCRITO' no configurado en la base de datos"));
         }
         aspiranteService.updateEstado(idAspirante, estadoNuevo.getId());
         return ResponseEntity.ok(java.util.Map.of("message", "Correo confirmado exitosamente"));
