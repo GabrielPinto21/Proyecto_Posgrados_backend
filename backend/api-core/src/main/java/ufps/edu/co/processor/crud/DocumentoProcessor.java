@@ -1,7 +1,10 @@
 package ufps.edu.co.processor.crud;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -284,12 +287,16 @@ public class DocumentoProcessor implements
                 estadoGeneral = "pendiente";
             }
 
+            Integer idCohorte = aspirante != null ? aspirante.getIdCohorte() : null;
+            Map<Integer, String> nombresPorConsejoCohorte = buildNombreMapConsejo(idCohorte);
+            Map<Integer, String> nombresPorProgramaCohorte = buildNombreMapPrograma(idCohorte);
+
             List<DocumentoResumenOutput> documentosResumen = docs.stream()
                     .map(doc -> DocumentoResumenOutput.builder()
                             .idDocumento(doc.getId())
                             .idDocumentosrequisitoconsejocohorte(doc.getIdDocumentosrequisitoconsejocohorte())
                             .idDocumentosrequisitoprogramacohorte(doc.getIdDocumentosrequisitoprogramacohorte())
-                            .nombreTitulo(resolverNombreTitulo(doc))
+                            .nombreTitulo(resolverNombreTituloDesdeMap(doc, nombresPorConsejoCohorte, nombresPorProgramaCohorte))
                             .estado(doc.getEstadodocumento() != null ? doc.getEstadodocumento().getEstado()
                                     : "PENDIENTE")
                             .motivoRechazo(doc.getObservaciones())
@@ -390,12 +397,15 @@ public class DocumentoProcessor implements
             estadoGeneral = "pendiente";
         }
 
+        Map<Integer, String> nombresPorConsejoCohorte = buildNombreMapConsejo(aspirante.getIdCohorte());
+        Map<Integer, String> nombresPorProgramaCohorte = buildNombreMapPrograma(aspirante.getIdCohorte());
+
         List<DocumentoResumenOutput> documentosResumen = docs.stream()
             .map(doc -> DocumentoResumenOutput.builder()
                 .idDocumento(doc.getId())
                 .idDocumentosrequisitoconsejocohorte(doc.getIdDocumentosrequisitoconsejocohorte())
                 .idDocumentosrequisitoprogramacohorte(doc.getIdDocumentosrequisitoprogramacohorte())
-                .nombreTitulo(resolverNombreTitulo(doc))
+                .nombreTitulo(resolverNombreTituloDesdeMap(doc, nombresPorConsejoCohorte, nombresPorProgramaCohorte))
                 .estado(doc.getEstadodocumento() != null ? doc.getEstadodocumento().getEstado()
                     : "PENDIENTE")
                 .motivoRechazo(doc.getObservaciones())
@@ -489,6 +499,54 @@ public class DocumentoProcessor implements
         } catch (Exception e) {
             throw new RuntimeException("Error actualizando estado del documento: " + e.getMessage(), e);
         }
+    }
+
+    private Map<Integer, String> buildNombreMapConsejo(Integer idCohorte) {
+        if (idCohorte == null) return Map.of();
+        List<DocumentosrequisitoconsejocohorteDTO> puentes = documentosrequisitoconsejocohorteService.findByIdCohorte(idCohorte);
+        List<Integer> idRequisitos = puentes.stream()
+                .map(DocumentosrequisitoconsejocohorteDTO::getIdDocrequisito)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+        Map<Integer, String> nombrePorIdRequisito = documentosrequisitoconsejoService.findAllByIds(idRequisitos)
+                .stream()
+                .collect(Collectors.toMap(DocumentosrequisitoconsejoDTO::getId, DocumentosrequisitoconsejoDTO::getNombre));
+        return puentes.stream()
+                .filter(p -> p.getIdDocrequisito() != null && nombrePorIdRequisito.containsKey(p.getIdDocrequisito()))
+                .collect(Collectors.toMap(
+                        DocumentosrequisitoconsejocohorteDTO::getId,
+                        p -> nombrePorIdRequisito.get(p.getIdDocrequisito())));
+    }
+
+    private Map<Integer, String> buildNombreMapPrograma(Integer idCohorte) {
+        if (idCohorte == null) return Map.of();
+        List<DocumentosrequisitoprogramacohorteDTO> puentes = documentosrequisitoprogramacohorteService.findByIdCohorte(idCohorte);
+        List<Integer> idRequisitos = puentes.stream()
+                .map(DocumentosrequisitoprogramacohorteDTO::getIdDocrequisito)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+        Map<Integer, String> nombrePorIdRequisito = documentosrequisitoprogramaService.findAllByIds(idRequisitos)
+                .stream()
+                .collect(Collectors.toMap(DocumentosrequisitoprogramaDTO::getId, DocumentosrequisitoprogramaDTO::getNombre));
+        return puentes.stream()
+                .filter(p -> p.getIdDocrequisito() != null && nombrePorIdRequisito.containsKey(p.getIdDocrequisito()))
+                .collect(Collectors.toMap(
+                        DocumentosrequisitoprogramacohorteDTO::getId,
+                        p -> nombrePorIdRequisito.get(p.getIdDocrequisito())));
+    }
+
+    private String resolverNombreTituloDesdeMap(DocumentoDTO doc,
+            Map<Integer, String> nombresPorConsejoCohorte,
+            Map<Integer, String> nombresPorProgramaCohorte) {
+        if (doc.getIdDocumentosrequisitoconsejocohorte() != null) {
+            return nombresPorConsejoCohorte.get(doc.getIdDocumentosrequisitoconsejocohorte());
+        }
+        if (doc.getIdDocumentosrequisitoprogramacohorte() != null) {
+            return nombresPorProgramaCohorte.get(doc.getIdDocumentosrequisitoprogramacohorte());
+        }
+        return null;
     }
 
     public DocumentoEstadoOutput updateEstadoDocumentoParaDirector(Integer docId, DOCUMENTO_ESTADO_UPDATE input) {
