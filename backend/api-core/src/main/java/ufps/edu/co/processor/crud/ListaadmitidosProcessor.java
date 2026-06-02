@@ -189,6 +189,36 @@ public class ListaadmitidosProcessor {
                 .toList();
     }
 
+    public List<ListaadmitidosOutput> findByIdCohorte(Integer idCohorte) {
+        return listaadmitidosService.findByIdCohorte(idCohorte).stream()
+                .map(map::toOutput)
+                .toList();
+    }
+
+    public byte[] generarPdfAdmitidos(Integer idCohorte, String directorNombre) {
+        CohorteDTO cohorte = cohorteService.findById(idCohorte);
+        if (cohorte == null) {
+            throw new DomainException(CohorteErrorCode.COHORTE_NOT_FOUND, idCohorte);
+        }
+
+        List<AspiranteDTO> admitidos = aspiranteService.findAdmitidosByCohorte(idCohorte);
+
+        List<AspiranteOutput> aspirantesOutput = admitidos.stream()
+                .map(a -> AspiranteOutput.builder()
+                        .id(a.getId())
+                        .puntuacion(a.getPuntuacion())
+                        .persona(a.getPersona() != null ? PersonaOutput.builder()
+                                .nombres(a.getPersona().getNombres())
+                                .apellidos(a.getPersona().getApellidos())
+                                .correo(a.getPersona().getCorreo())
+                                .build() : null)
+                        .build())
+                .toList();
+
+        return pdfGeneratorService.generarListaAdmitidos(
+                cohorte.getNombre(), LocalDateTime.now(), aspirantesOutput, directorNombre);
+    }
+
     private CohorteDTO validateAndGetCohorte(Integer idCohorte, Integer idAdministrativo) {
         CohorteDTO cohorte = cohorteService.findById(idCohorte);
         if (cohorte == null) {
