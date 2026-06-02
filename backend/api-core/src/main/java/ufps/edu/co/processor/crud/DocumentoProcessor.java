@@ -126,9 +126,12 @@ public class DocumentoProcessor implements
             DocumentoDTO approve = service.update(input.id(), dto);
             checkAndUpdateEstadoValidacion(dto.getIdAspirante());
             String nombreDocumento = resolverNombreTitulo(dto);
-            PersonaDTO persona = dto.getAspirante().getPersona();
-            sesService.enviarCorreoAsync(persona.getCorreo(), EmailTemplates.ASUNTO_APROBACION_DOCUMENTO,
-                    EmailTemplates.cuerpoAprobacionDocumento(persona.getNombres(), nombreDocumento));
+            AspiranteDTO aspirante = aspiranteService.findById(dto.getIdAspirante());
+            PersonaDTO persona = aspirante != null ? aspirante.getPersona() : null;
+            if (persona != null) {
+                sesService.enviarCorreoAsync(persona.getCorreo(), EmailTemplates.ASUNTO_APROBACION_DOCUMENTO,
+                        EmailTemplates.cuerpoAprobacionDocumento(persona.getNombres(), nombreDocumento));
+            }
             return AprobarDocumentoOutput.builder()
                     .id(approve.getId())
                     .nombre(approve.getKeyfile())
@@ -148,9 +151,12 @@ public class DocumentoProcessor implements
             dto.setIdEstadodocumento(estadodocumentoDTO.getId());
             DocumentoDTO reject = service.update(input.id(), dto);
             String nombreDocumento = resolverNombreTitulo(dto);
-            PersonaDTO persona = dto.getAspirante().getPersona();
-            sesService.enviarCorreoAsync(persona.getCorreo(), EmailTemplates.ASUNTO_RECHAZO_DOCUMENTO,
-                    EmailTemplates.cuerpoRechazoDocumento(persona.getNombres(), nombreDocumento, input.motivoRechazo()));
+            AspiranteDTO aspirante = aspiranteService.findById(dto.getIdAspirante());
+            PersonaDTO persona = aspirante != null ? aspirante.getPersona() : null;
+            if (persona != null) {
+                sesService.enviarCorreoAsync(persona.getCorreo(), EmailTemplates.ASUNTO_RECHAZO_DOCUMENTO,
+                        EmailTemplates.cuerpoRechazoDocumento(persona.getNombres(), nombreDocumento, input.motivoRechazo()));
+            }
             return DocumentoEstadoOutput.builder()
                     .id(reject.getId())
                     .nombre(reject.getKeyfile())
