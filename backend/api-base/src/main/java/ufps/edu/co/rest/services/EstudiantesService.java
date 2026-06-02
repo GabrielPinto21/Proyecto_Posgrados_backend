@@ -73,4 +73,11 @@ public class EstudiantesService extends GenericService<EstudiantesEntity, Estudi
     public boolean existsByCedulaAndIdNot(String cedula, Integer id) {
         return repository.existsByCedulaAndIdNot(cedula, id);
     }
+
+    @Transactional
+    public String findUltimoCodigoPorPrograma(Integer programaId) {
+        return repository.findFirstByProgramaIdOrderByCodigoDesc(programaId)
+                .map(EstudiantesEntity::getCodigo)
+                .orElse(null);
+    }
 }
