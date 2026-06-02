@@ -1,47 +1,24 @@
 package ufps.edu.co.processor.crud;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.*;
+import java.util.stream.*;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ufps.edu.co.domain.exceptions.DomainException;
-import ufps.edu.co.domain.exceptions.errorcodes.AspiranteErrorCode;
-import ufps.edu.co.maps.specific.DocumentoMap;
-import ufps.edu.co.maps.specific.PersonaMap;
-import ufps.edu.co.records.input.entity.AspiranteInput.ASPIRANTE_FIND;
+
+import ufps.edu.co.domain.exceptions.*;
+import ufps.edu.co.domain.exceptions.errorcodes.*;
+import ufps.edu.co.maps.specific.*;
+import ufps.edu.co.records.input.entity.AspiranteInput.*;
 import ufps.edu.co.records.input.entity.DocumentoInput.*;
-import ufps.edu.co.records.output.entity.AprobarDocumentoOutput;
-import ufps.edu.co.records.output.entity.AspiranteDocumentosOutput;
+import ufps.edu.co.records.output.entity.*;
 import ufps.edu.co.records.output.entity.AspiranteDocumentosOutput.DocumentoResumenOutput;
-import ufps.edu.co.records.output.entity.DocumentoEstadoOutput;
-import ufps.edu.co.records.output.entity.DocumentoOutput;
-import ufps.edu.co.records.output.entity.PersonaOutput;
-import ufps.edu.co.rest.dto.AspiranteDTO;
-import ufps.edu.co.rest.dto.DocumentoDTO;
-import ufps.edu.co.rest.dto.DocumentosrequisitoconsejoDTO;
-import ufps.edu.co.rest.dto.DocumentosrequisitoconsejocohorteDTO;
-import ufps.edu.co.rest.dto.DocumentosrequisitoprogramaDTO;
-import ufps.edu.co.rest.dto.DocumentosrequisitoprogramacohorteDTO;
-import ufps.edu.co.rest.dto.EstadoDTO;
-import ufps.edu.co.rest.dto.EstadodocumentoDTO;
-import ufps.edu.co.rest.dto.PersonaDTO;
-import ufps.edu.co.rest.services.AspiranteService;
-import ufps.edu.co.rest.services.DocumentoService;
-import ufps.edu.co.rest.services.DocumentosrequisitoconsejoService;
-import ufps.edu.co.rest.services.DocumentosrequisitoconsejocohorteService;
-import ufps.edu.co.rest.services.DocumentosrequisitoprogramaService;
-import ufps.edu.co.rest.services.DocumentosrequisitoprogramacohorteService;
-import ufps.edu.co.rest.services.EstadoService;
-import ufps.edu.co.rest.services.EstadodocumentoService;
+import ufps.edu.co.rest.dto.*;
+import ufps.edu.co.rest.services.*;
 import ufps.edu.co.services.*;
+import ufps.edu.co.usecase.*;
 import ufps.edu.co.utils.*;
-import ufps.edu.co.usecase.GlobalUseCase;
 
 @Service
 public class DocumentoProcessor implements
@@ -150,13 +127,8 @@ public class DocumentoProcessor implements
             checkAndUpdateEstadoValidacion(dto.getIdAspirante());
             String nombreDocumento = resolverNombreTitulo(dto);
             PersonaDTO persona = dto.getAspirante().getPersona();
-            try {
-                sesService.enviarCorreo(persona.getCorreo(), EmailTemplates.ASUNTO_APROBACION_DOCUMENTO,
-                        EmailTemplates.cuerpoAprobacionDocumento(persona.getNombres(), nombreDocumento));
-            } catch (Exception emailEx) {
-                logger.error("[APROBACION_EMAIL] Fallo al enviar correo de aprobación a '{}': {}",
-                        persona.getCorreo(), emailEx.getMessage(), emailEx);
-            }
+            sesService.enviarCorreoAsync(persona.getCorreo(), EmailTemplates.ASUNTO_APROBACION_DOCUMENTO,
+                    EmailTemplates.cuerpoAprobacionDocumento(persona.getNombres(), nombreDocumento));
             return AprobarDocumentoOutput.builder()
                     .id(approve.getId())
                     .nombre(approve.getKeyfile())
@@ -177,13 +149,8 @@ public class DocumentoProcessor implements
             DocumentoDTO reject = service.update(input.id(), dto);
             String nombreDocumento = resolverNombreTitulo(dto);
             PersonaDTO persona = dto.getAspirante().getPersona();
-            try {
-                sesService.enviarCorreo(persona.getCorreo(), EmailTemplates.ASUNTO_RECHAZO_DOCUMENTO,
-                        EmailTemplates.cuerpoRechazoDocumento(persona.getNombres(), nombreDocumento, input.motivoRechazo()));
-            } catch (Exception emailEx) {
-                logger.error("[RECHAZO_EMAIL] Fallo al enviar correo de rechazo a '{}': {}",
-                        persona.getCorreo(), emailEx.getMessage(), emailEx);
-            }
+            sesService.enviarCorreoAsync(persona.getCorreo(), EmailTemplates.ASUNTO_RECHAZO_DOCUMENTO,
+                    EmailTemplates.cuerpoRechazoDocumento(persona.getNombres(), nombreDocumento, input.motivoRechazo()));
             return DocumentoEstadoOutput.builder()
                     .id(reject.getId())
                     .nombre(reject.getKeyfile())
@@ -216,7 +183,6 @@ public class DocumentoProcessor implements
 
             List<DocumentosrequisitoconsejocohorteDTO> requisitosConsejo = documentosrequisitoconsejocohorteService
                     .findByIdCohorte(idCohorte);
-
             List<DocumentosrequisitoprogramacohorteDTO> requisitosPrograma = documentosrequisitoprogramacohorteService
                     .findByIdCohorte(idCohorte);
 
@@ -225,22 +191,28 @@ public class DocumentoProcessor implements
                         "La cohorte con id " + idCohorte + " no tiene documentos requisito configurados.");
             }
 
-            for (DocumentosrequisitoconsejocohorteDTO requisito : requisitosConsejo) {
-                Optional<DocumentoDTO> doc = service.findByIdAspiranteAndIdDocumentosrequisitoconsejocohorte(
-                        idAspirante, requisito.getId());
-                if (doc.isEmpty() || doc.get().getEstadodocumento() == null
-                        || !"APROBADO".equalsIgnoreCase(doc.get().getEstadodocumento().getEstado())) {
-                    return;
-                }
-            }
+            // Cargar todos los documentos del aspirante en una sola query y verificar en memoria
+            List<DocumentoDTO> todosLosDocs = service.findByIdAspirante(idAspirante);
 
+            java.util.Set<Integer> aprobadosConsejo = todosLosDocs.stream()
+                    .filter(d -> d.getIdDocumentosrequisitoconsejocohorte() != null
+                            && d.getEstadodocumento() != null
+                            && "APROBADO".equalsIgnoreCase(d.getEstadodocumento().getEstado()))
+                    .map(DocumentoDTO::getIdDocumentosrequisitoconsejocohorte)
+                    .collect(Collectors.toSet());
+
+            java.util.Set<Integer> aprobadosPrograma = todosLosDocs.stream()
+                    .filter(d -> d.getIdDocumentosrequisitoprogramacohorte() != null
+                            && d.getEstadodocumento() != null
+                            && "APROBADO".equalsIgnoreCase(d.getEstadodocumento().getEstado()))
+                    .map(DocumentoDTO::getIdDocumentosrequisitoprogramacohorte)
+                    .collect(Collectors.toSet());
+
+            for (DocumentosrequisitoconsejocohorteDTO requisito : requisitosConsejo) {
+                if (!aprobadosConsejo.contains(requisito.getId())) return;
+            }
             for (DocumentosrequisitoprogramacohorteDTO requisito : requisitosPrograma) {
-                Optional<DocumentoDTO> doc = service.findByIdAspiranteAndIdDocumentosrequisitoprogramacohorte(
-                        idAspirante, requisito.getId());
-                if (doc.isEmpty() || doc.get().getEstadodocumento() == null
-                        || !"APROBADO".equalsIgnoreCase(doc.get().getEstadodocumento().getEstado())) {
-                    return;
-                }
+                if (!aprobadosPrograma.contains(requisito.getId())) return;
             }
 
             EstadoDTO estadoValidado = estadoService.findByTipoAndEntidad("VALIDADO_POR_CALIFICAR", "aspirante");
