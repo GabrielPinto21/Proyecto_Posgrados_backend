@@ -117,7 +117,7 @@ public class ListaadmitidosProcessor {
             estadoPorLegalizar = estadoService.findByTipoAndEntidad("POR LEGALIZAR", "ASPIRANTE");
         }
         if (estadoPorLegalizar == null) {
-            throw new DomainException(ListaadmitidosErrorCode.ESTADO_POR_LEGALIZAR_NOT_FOUND);
+            throw new DomainException(ListaadmitidosErrorCode.ESTADO_POR_LEGALIZAR_NOT_FOUND, null);
         }
         final Integer idEstadoPorLegalizar = estadoPorLegalizar.getId();
 
