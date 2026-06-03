@@ -6,6 +6,7 @@ package ufps.edu.co.persistence.repositories;
 
 import java.util.List;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,6 +17,7 @@ import ufps.edu.co.persistence.entities.DocumentosrequisitoconsejocohorteEntity;
 @Repository
 public interface DocumentosrequisitoconsejocohorteRepository extends JpaRepository<DocumentosrequisitoconsejocohorteEntity, Integer> {
 
+	@EntityGraph(type = EntityGraph.EntityGraphType.FETCH)
 	List<DocumentosrequisitoconsejocohorteEntity> findByIdCohorte(Integer idCohorte);
 
 	@Query("SELECT dcc FROM DocumentosrequisitoconsejocohorteEntity dcc JOIN FETCH dcc.documentosrequisitoconsejo WHERE dcc.idCohorte = :idCohorte")

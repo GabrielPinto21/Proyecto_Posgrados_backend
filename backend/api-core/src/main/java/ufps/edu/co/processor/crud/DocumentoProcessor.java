@@ -126,11 +126,10 @@ public class DocumentoProcessor implements
             DocumentoDTO approve = service.update(input.id(), dto);
             checkAndUpdateEstadoValidacion(dto.getIdAspirante());
             String nombreDocumento = resolverNombreTitulo(dto);
-            AspiranteDTO aspirante = aspiranteService.findById(dto.getIdAspirante());
-            PersonaDTO persona = aspirante != null ? aspirante.getPersona() : null;
-            if (persona != null) {
-                sesService.enviarCorreoAsync(persona.getCorreo(), EmailTemplates.ASUNTO_APROBACION_DOCUMENTO,
-                        EmailTemplates.cuerpoAprobacionDocumento(persona.getNombres(), nombreDocumento));
+            AspiranteCheckoutDTO aspirante = aspiranteService.findCheckoutById(dto.getIdAspirante());
+            if (aspirante != null) {
+                sesService.enviarCorreoAsync(aspirante.correo(), EmailTemplates.ASUNTO_APROBACION_DOCUMENTO,
+                        EmailTemplates.cuerpoAprobacionDocumento(aspirante.nombres(), nombreDocumento));
             }
             return AprobarDocumentoOutput.builder()
                     .id(approve.getId())
@@ -181,11 +180,10 @@ public class DocumentoProcessor implements
 
     private void checkAndUpdateEstadoValidacion(Integer idAspirante) {
         try {
-            AspiranteDTO aspirante = aspiranteService.findById(idAspirante);
-            if (aspirante == null || aspirante.getIdCohorte() == null) {
+            Integer idCohorte = aspiranteService.findIdCohorteById(idAspirante);
+            if (idCohorte == null) {
                 return;
             }
-            Integer idCohorte = aspirante.getIdCohorte();
 
             List<DocumentosrequisitoconsejocohorteDTO> requisitosConsejo = documentosrequisitoconsejocohorteService
                     .findByIdCohorte(idCohorte);

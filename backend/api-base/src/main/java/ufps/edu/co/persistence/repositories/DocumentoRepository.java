@@ -20,6 +20,10 @@ import ufps.edu.co.persistence.entities.DocumentoEntity;
 @Repository
 public interface DocumentoRepository extends JpaRepository<DocumentoEntity, Integer> {
 
+	@Override
+	@EntityGraph(attributePaths = {"estadodocumento"}, type = EntityGraph.EntityGraphType.FETCH)
+	Optional<DocumentoEntity> findById(Integer id);
+
 	@EntityGraph(attributePaths = {"estadodocumento"}, type = EntityGraph.EntityGraphType.FETCH)
 	@Query("SELECT d FROM DocumentoEntity d WHERE d.idAspirante = :idAspirante")
 	List<DocumentoEntity> findByIdAspirante(@Param("idAspirante") Integer idAspirante);
