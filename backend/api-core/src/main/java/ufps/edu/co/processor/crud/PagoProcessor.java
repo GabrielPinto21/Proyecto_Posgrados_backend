@@ -1405,6 +1405,7 @@ public class PagoProcessor {
         return (nombresLimpios + " " + apellidosLimpios).trim();
     }
 
+    @SuppressWarnings("unused")
     private String formatearDocumento(String numerodocumento) {
         if (numerodocumento == null) {
             return null;
