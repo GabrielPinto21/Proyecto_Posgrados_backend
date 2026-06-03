@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 
 import ufps.edu.co.domain.exceptions.DomainException;
-import ufps.edu.co.domain.exceptions.errorcodes.ListaadmitidosErrorCode;
+// import ufps.edu.co.domain.exceptions.errorcodes.ListaadmitidosErrorCode;
 import ufps.edu.co.domain.exceptions.DuplicateAdmisionException;
 import ufps.edu.co.processor.crud.AspiranteProcessor;
 import ufps.edu.co.processor.crud.CalificacioncriterioProcessor;
