@@ -393,6 +393,17 @@ public class DirectorProgramaCase {
                     .estado(estadoName)
                     .build();
 
+            if (persona != null && persona.getCorreo() != null) {
+                try {
+                    sesService.enviarCorreoAsync(persona.getCorreo(),
+                            EmailTemplates.ASUNTO_RECHAZO_PAGO_INSCRIPCION,
+                            EmailTemplates.cuerpoRechazoPagoInscripcion(
+                                    persona.getNombres(), persona.getApellidos()));
+                } catch (Exception emailEx) {
+                    logger.warn("No se pudo enviar correo de rechazo de inscripción: {}", emailEx.getMessage());
+                }
+            }
+
             return ResponseEntity.ok(out);
         } catch (DomainException e) {
             throw e;
@@ -443,6 +454,17 @@ public class DirectorProgramaCase {
                     .idEstado(pag.getIdEstado())
                     .estado(estadoName)
                     .build();
+
+            if (persona != null && persona.getCorreo() != null) {
+                try {
+                    sesService.enviarCorreoAsync(persona.getCorreo(),
+                            EmailTemplates.ASUNTO_RECHAZO_PAGO_MATRICULA,
+                            EmailTemplates.cuerpoRechazoPagoMatricula(
+                                    persona.getNombres(), persona.getApellidos()));
+                } catch (Exception emailEx) {
+                    logger.warn("No se pudo enviar correo de rechazo de matrícula: {}", emailEx.getMessage());
+                }
+            }
 
             return ResponseEntity.ok(out);
         } catch (DomainException e) {
