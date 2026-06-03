@@ -192,10 +192,10 @@ public class DirectorProgramaCase {
         }
     }
 
-    @GetMapping(value = "/cohortes/{idCohorte}/aspirantes")
-    public ResponseEntity<List<AspiranteCohorteOutput>> getAspirantesByCohorte(@PathVariable Integer idCohorte) {
+    @GetMapping(value = "/cohorte/{idCohorte}/aspirantes-a-validar")
+    public ResponseEntity<List<AspiranteCohorteOutput>> getAspirantesAValidar(@PathVariable Integer idCohorte) {
         try {
-            return ResponseEntity.ok(aspiranteProcessor.findByCohorteConResumen(idCohorte));
+            return ResponseEntity.ok(aspiranteProcessor.findAValidarByCohorte(idCohorte));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
