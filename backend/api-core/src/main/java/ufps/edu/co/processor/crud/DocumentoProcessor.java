@@ -345,19 +345,13 @@ public class DocumentoProcessor implements
     }
 
         private AspiranteDocumentosOutput buildAspiranteDocumentosOutputForDirector(Integer aspiranteId) {
-        AspiranteDTO aspirante = aspiranteService.findById(aspiranteId);
+        AspiranteCheckoutDTO aspirante = aspiranteService.findCheckoutById(aspiranteId);
         if (aspirante == null) {
             throw new DomainException(AspiranteErrorCode.ASPIRANTE_NOT_FOUND, aspiranteId);
         }
-        PersonaDTO p = aspirante != null ? aspirante.getPersona() : null;
-        String nombre = p != null
-            ? ((p.getNombres() != null ? p.getNombres() : "") + " "
-                + (p.getApellidos() != null ? p.getApellidos() : "")).trim()
-            : "";
-        String cedula = p != null && p.getDocumentopersona() != null
-            && p.getDocumentopersona().getNumerodocumento() != null
-                ? p.getDocumentopersona().getNumerodocumento().toString()
-                : null;
+        String nombre = ((aspirante.nombres() != null ? aspirante.nombres() : "") + " "
+                + (aspirante.apellidos() != null ? aspirante.apellidos() : "")).trim();
+        String cedula = aspirante.numerodocumento();
 
         List<DocumentoDTO> docs = service.findByIdAspirante(aspiranteId);
         long total = docs.size();
@@ -375,8 +369,8 @@ public class DocumentoProcessor implements
             estadoGeneral = "pendiente";
         }
 
-        Map<Integer, String> nombresPorConsejoCohorte = buildNombreMapConsejo(aspirante.getIdCohorte());
-        Map<Integer, String> nombresPorProgramaCohorte = buildNombreMapPrograma(aspirante.getIdCohorte());
+        Map<Integer, String> nombresPorConsejoCohorte = buildNombreMapConsejo(aspirante.idCohorte());
+        Map<Integer, String> nombresPorProgramaCohorte = buildNombreMapPrograma(aspirante.idCohorte());
 
         List<DocumentoResumenOutput> documentosResumen = docs.stream()
             .map(doc -> DocumentoResumenOutput.builder()
@@ -481,38 +475,12 @@ public class DocumentoProcessor implements
 
     private Map<Integer, String> buildNombreMapConsejo(Integer idCohorte) {
         if (idCohorte == null) return Map.of();
-        List<DocumentosrequisitoconsejocohorteDTO> puentes = documentosrequisitoconsejocohorteService.findByIdCohorte(idCohorte);
-        List<Integer> idRequisitos = puentes.stream()
-                .map(DocumentosrequisitoconsejocohorteDTO::getIdDocrequisito)
-                .filter(Objects::nonNull)
-                .distinct()
-                .toList();
-        Map<Integer, String> nombrePorIdRequisito = documentosrequisitoconsejoService.findAllByIds(idRequisitos)
-                .stream()
-                .collect(Collectors.toMap(DocumentosrequisitoconsejoDTO::getId, DocumentosrequisitoconsejoDTO::getNombre));
-        return puentes.stream()
-                .filter(p -> p.getIdDocrequisito() != null && nombrePorIdRequisito.containsKey(p.getIdDocrequisito()))
-                .collect(Collectors.toMap(
-                        DocumentosrequisitoconsejocohorteDTO::getId,
-                        p -> nombrePorIdRequisito.get(p.getIdDocrequisito())));
+        return documentosrequisitoconsejocohorteService.findNombreMapByCohorte(idCohorte);
     }
 
     private Map<Integer, String> buildNombreMapPrograma(Integer idCohorte) {
         if (idCohorte == null) return Map.of();
-        List<DocumentosrequisitoprogramacohorteDTO> puentes = documentosrequisitoprogramacohorteService.findByIdCohorte(idCohorte);
-        List<Integer> idRequisitos = puentes.stream()
-                .map(DocumentosrequisitoprogramacohorteDTO::getIdDocrequisito)
-                .filter(Objects::nonNull)
-                .distinct()
-                .toList();
-        Map<Integer, String> nombrePorIdRequisito = documentosrequisitoprogramaService.findAllByIds(idRequisitos)
-                .stream()
-                .collect(Collectors.toMap(DocumentosrequisitoprogramaDTO::getId, DocumentosrequisitoprogramaDTO::getNombre));
-        return puentes.stream()
-                .filter(p -> p.getIdDocrequisito() != null && nombrePorIdRequisito.containsKey(p.getIdDocrequisito()))
-                .collect(Collectors.toMap(
-                        DocumentosrequisitoprogramacohorteDTO::getId,
-                        p -> nombrePorIdRequisito.get(p.getIdDocrequisito())));
+        return documentosrequisitoprogramacohorteService.findNombreMapByCohorte(idCohorte);
     }
 
     private String resolverNombreTituloDesdeMap(DocumentoDTO doc,
