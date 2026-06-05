@@ -16,9 +16,6 @@ public enum CohorteErrorCode implements BaseErrorCode {
     COHORTE_SEMESTRE_NO_VALIDO_CONFLICT(
             "COHORTE_SEMESTRE_NO_VALIDO_CONFLICT",
             "La cohorte solo puede crearse en un semestre EN CURSO o PROGRAMADO"),
-    COHORTE_SEMESTRE_FECHA_INVALIDA_CONFLICT(
-            "COHORTE_SEMESTRE_FECHA_INVALIDA_CONFLICT",
-            "La fecha de inicio de la cohorte debe coincidir con la fecha de inicio del semestre o estar dentro de los 2 meses posteriores"),
     COHORTE_CON_ASIGNACIONES_BLOQUEADAS(
             "COHORTE_CON_ASIGNACIONES_BLOQUEADAS",
             "No se pueden eliminar asignaciones porque existen documentos cargados que dependen de ellas"),
