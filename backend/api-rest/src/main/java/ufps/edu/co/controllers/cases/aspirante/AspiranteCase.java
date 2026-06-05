@@ -439,7 +439,7 @@ public class AspiranteCase {
         }
         EstadoDTO estadoNuevo = estadoService.findByTipoAndEntidad("INSCRITO", "aspirante");
         if (estadoNuevo == null) {
-            throw new RuntimeException("Estado 'INSCRITO' para aspirante no encontrado en la base de datos");
+            throw new DomainException(AspiranteErrorCode.ESTADO_INSCRITO_NOT_FOUND, null);
         }
         aspiranteService.updateEstado(idAspirante, estadoNuevo.getId());
         return ResponseEntity.ok().build();

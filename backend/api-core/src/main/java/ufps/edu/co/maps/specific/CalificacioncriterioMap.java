@@ -2,6 +2,8 @@ package ufps.edu.co.maps.specific;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.*;
+import org.springframework.context.annotation.*;
 import org.springframework.stereotype.Component;
 
 import ufps.edu.co.maps.GlobalMapper;
@@ -12,6 +14,13 @@ import ufps.edu.co.rest.dto.CalificacioncriterioDTO;
 @Component
 public class CalificacioncriterioMap extends
         GlobalMapper<CALIFICACIONCRITERIO_CREATE, CALIFICACIONCRITERIO_UPDATE, CALIFICACIONCRITERIO_DELETE, CALIFICACIONCRITERIO_PATCH, CALIFICACIONCRITERIO_FIND, CalificacioncriterioOutput, CalificacioncriterioDTO> {
+
+    @Lazy
+    @Autowired
+    private AspiranteMap aspiranteMap;
+
+    @Autowired
+    private CriteriocohorteMap criterioevaluacionMap;
 
     public CalificacioncriterioMap() {
         super(CALIFICACIONCRITERIO_CREATE.class, CALIFICACIONCRITERIO_UPDATE.class,
@@ -71,9 +80,6 @@ public class CalificacioncriterioMap extends
     public CalificacioncriterioOutput toOutput(CalificacioncriterioDTO dto) {
         if (dto == null)
             return null;
-
-        AspiranteMap aspiranteMap = new AspiranteMap();
-        CriteriocohorteMap criterioevaluacionMap = new CriteriocohorteMap();
 
         return CalificacioncriterioOutput.builder()
                 .id(dto.getId())

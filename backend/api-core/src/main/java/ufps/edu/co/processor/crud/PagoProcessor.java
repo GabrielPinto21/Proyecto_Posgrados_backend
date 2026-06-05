@@ -1,51 +1,29 @@
 package ufps.edu.co.processor.crud;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import ufps.edu.co.domain.exceptions.errorcodes.AspiranteErrorCode;
-import ufps.edu.co.domain.exceptions.DomainException;
-import ufps.edu.co.domain.exceptions.errorcodes.PagoErrorCode;
-import ufps.edu.co.maps.specific.PagoMap;
-import ufps.edu.co.rest.dto.AspiranteCheckoutDTO;
-import ufps.edu.co.rest.dto.PagoCheckoutPreviewDTO;
-import ufps.edu.co.rest.dto.PagoCheckoutPreviewDataDTO;
-import ufps.edu.co.rest.dto.PagoreciboinscripcionDTO;
-import ufps.edu.co.rest.dto.PagorecibomatriculaDTO;
-import ufps.edu.co.rest.dto.PersonaDTO;
-import ufps.edu.co.records.output.entity.PagoListadoOutput;
-import ufps.edu.co.records.output.entity.PagoconceptoResumenOutput;
-import ufps.edu.co.records.output.entity.PagoOutput;
-import ufps.edu.co.rest.dto.AspiranteDTO;
-import ufps.edu.co.rest.dto.EstadoDTO;
-import ufps.edu.co.rest.dto.PagoDTO;
-import ufps.edu.co.rest.dto.PagoResumenDTO;
-import ufps.edu.co.rest.dto.PagoconceptoDTO;
-import ufps.edu.co.processor.receipt.ReciboInscripcionBuildInput;
-import ufps.edu.co.processor.receipt.ReciboInscripcionBuilderPort;
+import java.math.*;
+import java.nio.charset.*;
+import java.security.*;
+import java.time.*;
+import java.util.*;
+import java.util.function.*;
+import java.util.stream.*;
+import org.slf4j.*;
+import org.springframework.beans.factory.annotation.*;
+import org.springframework.context.*;
+import org.springframework.stereotype.*;
+import org.springframework.transaction.annotation.*;
+import ufps.edu.co.domain.exceptions.*;
+import ufps.edu.co.domain.exceptions.errorcodes.*;
+import ufps.edu.co.maps.specific.*;
+import ufps.edu.co.processor.events.*;
+import ufps.edu.co.processor.receipt.*;
+import ufps.edu.co.records.output.entity.*;
+import ufps.edu.co.rest.dto.*;
 import ufps.edu.co.rest.services.*;
 import ufps.edu.co.services.*;
 import ufps.edu.co.utils.*;
-import org.springframework.context.ApplicationEventPublisher;
-import ufps.edu.co.processor.events.AspiranteLegalizadoEvent;
-import ufps.edu.co.wompi.WompiGateway;
-import ufps.edu.co.wompi.config.WompiProperties;
+import ufps.edu.co.wompi.*;
+import ufps.edu.co.wompi.config.*;
 import ufps.edu.co.wompi.model.*;
 
 @Service
@@ -693,8 +671,23 @@ public class PagoProcessor {
         actualizarEstadosPagoYRecibo(pago, estadoRealizado);
         PagoDTO updated = pagoService.findById(pago.getId());
 
-        // TODO: disparar notificación por correo al aspirante cuando el pago de
-        // inscripción quede realizado.
+        String tipoConcepto = pagoconceptoService.findAll().stream()
+                .filter(c -> c.getId() != null && Objects.equals(c.getId(), pago.getIdPagoconcepto()))
+                .map(PagoconceptoDTO::getTipo)
+                .filter(t -> t != null && !t.isBlank())
+                .findFirst()
+                .orElse(null);
+
+        if ("INSCRIPCION".equalsIgnoreCase(tipoConcepto)) {
+            notificarPago(updated.getIdAspirante(),
+                    EmailTemplates.ASUNTO_CONFIRMACION_PAGO_VIRTUAL_INSCRIPCION,
+                    (n, a) -> EmailTemplates.cuerpoConfirmacionPagoVirtualInscripcion(n, a));
+        } else if ("MATRICULA".equalsIgnoreCase(tipoConcepto)) {
+            notificarPago(updated.getIdAspirante(),
+                    EmailTemplates.ASUNTO_CONFIRMACION_PAGO_VIRTUAL_MATRICULA,
+                    (n, a) -> EmailTemplates.cuerpoConfirmacionPagoVirtualMatricula(n, a));
+        }
+
         return pagoMap.toOutput(updated);
     }
 
@@ -1592,7 +1585,7 @@ public class PagoProcessor {
     }
 
     private void notificarPago(Integer idAspirante, String asunto,
-            java.util.function.BiFunction<String, String, String> cuerpoFn) {
+            BiFunction<String, String, String> cuerpoFn) {
         try {
             AspiranteDTO aspirante = aspiranteService.findById(idAspirante);
             if (aspirante == null) return;

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ufps.edu.co.domain.exceptions.DomainException;
@@ -153,6 +154,10 @@ public class AspiranteProcessor implements
         } catch (Exception e) {
             throw new RuntimeException("Error finding all Aspirantes: " + e.getMessage(), e);
         }
+    }
+
+    public Page<AspiranteOutput> findAll(Pageable pageable) {
+        return service.findAll(pageable).map(map::toOutput);
     }
 
     @Override
@@ -675,28 +680,47 @@ public class AspiranteProcessor implements
 
     @Transactional
     public CohorteListadoOutput createCohorte(Integer programaId, COHORTE_DIRECTOR_CREATE body) {
-        LocalDate fechaInicio = body.fechaInicio();
         String nombre = body.nombre();
 
         List<TipoplazoDTO> tipoplazos = tipoplazoService.findAll();
         if (tipoplazos.isEmpty()) {
             throw new RuntimeException("No hay tipos de plazo configurados");
         }
-        Integer tipoplazoId = tipoplazos.get(0).getId();
+        Integer tipoplazoDocId = tipoplazos.stream()
+                .filter(t -> "DOCUMENTACION".equalsIgnoreCase(t.getTipo()))
+                .map(TipoplazoDTO::getId)
+                .findFirst()
+                .orElse(tipoplazos.get(0).getId());
+        Integer tipoplazoInscId = tipoplazos.stream()
+                .filter(t -> "INSCRIPCION".equalsIgnoreCase(t.getTipo()))
+                .map(TipoplazoDTO::getId)
+                .findFirst()
+                .orElse(tipoplazos.get(0).getId());
+        Integer tipoplazoPagoId = tipoplazos.stream()
+                .filter(t -> "PAGO".equalsIgnoreCase(t.getTipo()))
+                .map(TipoplazoDTO::getId)
+                .findFirst()
+                .orElse(tipoplazos.get(0).getId());
 
         PlazoDTO plazoDoc = plazoService.create(PlazoDTO.builder()
-                .fechainicio(fechaInicio)
-                .fechafin(body.fechaLimiteDocumentos())
-                .idTipoplazo(tipoplazoId)
+                .fechainicio(body.fechaInicioDocumentacion())
+                .fechafin(body.fechaFinDocumentacion())
+                .idTipoplazo(tipoplazoDocId)
+                .build());
+
+        PlazoDTO plazoInsc = plazoService.create(PlazoDTO.builder()
+                .fechainicio(body.fechaInicioInscripcion())
+                .fechafin(body.fechaFinInscripcion())
+                .idTipoplazo(tipoplazoInscId)
                 .build());
 
         PlazoDTO plazoPago = plazoService.create(PlazoDTO.builder()
-                .fechainicio(fechaInicio)
-                .fechafin(body.fechaLimitePago())
-                .idTipoplazo(tipoplazoId)
+                .fechainicio(body.fechaInicioPago())
+                .fechafin(body.fechaFinPago())
+                .idTipoplazo(tipoplazoPagoId)
                 .build());
 
-        SemestreDTO semestre = resolverSemestreHabilitado(body.idSemestre(), fechaInicio);
+        SemestreDTO semestre = resolverSemestreHabilitado(body.idSemestre(), body.fechaInicioDocumentacion());
 
         EstadoDTO estadoCohorte = estadoService.findByTipoAndEntidad("CERRADA", "cohorte");
         if (estadoCohorte == null) {
@@ -710,7 +734,7 @@ public class AspiranteProcessor implements
                 .idSemestre(semestre.getId())
                 .idModalidad(body.idModalidad())
                 .idPlazodocumentacion(plazoDoc.getId())
-                .idPlazoinscripcion(plazoDoc.getId())
+                .idPlazoinscripcion(plazoInsc.getId())
                 .idPlazopago(plazoPago.getId())
                 .idPrograma(programaId)
                 .build());
@@ -759,9 +783,9 @@ public class AspiranteProcessor implements
                 .inscritos(0)
                 .admitidos(0)
                 .cupos(body.cupos())
-                .fechaLimiteDocumentos(body.fechaLimiteDocumentos())
-                .fechaLimitePago(body.fechaLimitePago())
-                .fechaInicio(fechaInicio)
+                .fechaLimiteDocumentos(body.fechaFinDocumentacion())
+                .fechaLimitePago(body.fechaFinPago())
+                .fechaInicio(body.fechaInicioDocumentacion())
                 .build();
     }
 
@@ -1012,7 +1036,7 @@ public class AspiranteProcessor implements
             cohorteChanged = true;
         }
 
-        LocalDate fechaReferencia = body.fechaInicio();
+        LocalDate fechaReferencia = body.fechaInicioDocumentacion();
         SemestreDTO semestreActual = cohorte.getSemestre();
         if (fechaReferencia == null && semestreActual != null) {
             fechaReferencia = semestreActual.getFechaInicio();
@@ -1044,19 +1068,32 @@ public class AspiranteProcessor implements
         LocalDate fechaInicio = semestre.getFechaInicio();
 
         LocalDate fechaLimiteDocumentos = cohorte.getPlazo() != null ? cohorte.getPlazo().getFechafin() : null;
-        if (body.fechaLimiteDocumentos() != null && cohorte.getPlazo() != null) {
+        if (cohorte.getPlazo() != null && (body.fechaInicioDocumentacion() != null || body.fechaFinDocumentacion() != null)) {
             PlazoDTO plazo = cohorte.getPlazo();
-            plazo.setFechafin(body.fechaLimiteDocumentos());
+            if (body.fechaInicioDocumentacion() != null) plazo.setFechainicio(body.fechaInicioDocumentacion());
+            if (body.fechaFinDocumentacion() != null) {
+                plazo.setFechafin(body.fechaFinDocumentacion());
+                fechaLimiteDocumentos = body.fechaFinDocumentacion();
+            }
             plazoService.update(plazo.getId(), plazo);
-            fechaLimiteDocumentos = body.fechaLimiteDocumentos();
+        }
+
+        if (cohorte.getPlazo2() != null && (body.fechaInicioInscripcion() != null || body.fechaFinInscripcion() != null)) {
+            PlazoDTO plazo2 = cohorte.getPlazo2();
+            if (body.fechaInicioInscripcion() != null) plazo2.setFechainicio(body.fechaInicioInscripcion());
+            if (body.fechaFinInscripcion() != null) plazo2.setFechafin(body.fechaFinInscripcion());
+            plazoService.update(plazo2.getId(), plazo2);
         }
 
         LocalDate fechaLimitePago = cohorte.getPlazo3() != null ? cohorte.getPlazo3().getFechafin() : null;
-        if (body.fechaLimitePago() != null && cohorte.getPlazo3() != null) {
+        if (cohorte.getPlazo3() != null && (body.fechaInicioPago() != null || body.fechaFinPago() != null)) {
             PlazoDTO plazo3 = cohorte.getPlazo3();
-            plazo3.setFechafin(body.fechaLimitePago());
+            if (body.fechaInicioPago() != null) plazo3.setFechainicio(body.fechaInicioPago());
+            if (body.fechaFinPago() != null) {
+                plazo3.setFechafin(body.fechaFinPago());
+                fechaLimitePago = body.fechaFinPago();
+            }
             plazoService.update(plazo3.getId(), plazo3);
-            fechaLimitePago = body.fechaLimitePago();
         }
 
         if (cohorteChanged) {

@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import ufps.edu.co.domain.exceptions.*;
+import ufps.edu.co.domain.exceptions.errorcodes.*;
 import ufps.edu.co.records.input.entity.EstudiantesInput.*;
 import ufps.edu.co.records.output.entity.*;
 import ufps.edu.co.rest.dto.*;
@@ -37,6 +39,9 @@ public class EstudiantesProcessor {
 
     @Autowired
     private EstadoService estadoService;
+
+    @Autowired
+    private UltimocodigoprogramaService ultimocodigoprogramaService;
 
     @Autowired
     private SESService sesService;
@@ -202,20 +207,19 @@ public class EstudiantesProcessor {
             throw new RuntimeException("Programa no encontrado o sin código: " + cohorte.getIdPrograma());
         }
 
-        String ultimoCodigo = estudiantesService.findUltimoCodigoPorPrograma(cohorte.getIdPrograma());
-        String secuencial;
-        if (ultimoCodigo == null || ultimoCodigo.length() < 4) {
-            secuencial = "0000";
-        } else {
-            try {
-                int ultimo = Integer.parseInt(ultimoCodigo.substring(ultimoCodigo.length() - 4));
-                secuencial = String.format("%04d", (ultimo + 1) % 10000);
-            } catch (NumberFormatException e) {
-                log.warn("No se pudo parsear el secuencial del código '{}', comenzando en 0000", ultimoCodigo);
-                secuencial = "0000";
-            }
+        UltimocodigoprogramaDTO ultimoCodigoDto = ultimocodigoprogramaService.findByIdPrograma(cohorte.getIdPrograma());
+        if (ultimoCodigoDto == null) {
+            throw new DomainException(UltimocodigoprogramaErrorCode.ULTIMOCODIGOPROGRAMA_NOT_FOUND,
+                    "idPrograma=" + cohorte.getIdPrograma());
         }
+        String secuencial = String.format("%04d", ultimoCodigoDto.getCodigo());
         String codigoEstudiante = programa.getCodigo() + secuencial;
+        ultimocodigoprogramaService.update(ultimoCodigoDto.getId(),
+                UltimocodigoprogramaDTO.builder()
+                        .id(ultimoCodigoDto.getId())
+                        .idPrograma(ultimoCodigoDto.getIdPrograma())
+                        .codigo(ultimoCodigoDto.getCodigo() + 1)
+                        .build());
         log.info("Código generado para aspirante {}: {}", idAspirante, codigoEstudiante);
 
         String[] partesNombre = persona.getNombres() != null

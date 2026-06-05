@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import ufps.edu.co.domain.exceptions.*;
+import ufps.edu.co.domain.exceptions.errorcodes.*;
 import ufps.edu.co.processor.crud.AspiranteProcessor;
 import ufps.edu.co.records.output.entity.AspiranteCohorteOutput;
 import ufps.edu.co.records.output.entity.CohorteResumenOutput;
@@ -46,11 +48,11 @@ public class CohorteCase {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Integer idPersona = usuarioService.findIdPersonaByNombreusuario(username);
         if (idPersona == null) {
-            throw new RuntimeException("No se pudo derivar el administrativo desde el usuario autenticado");
+            throw new DomainException(AdministrativoErrorCode.ADMINISTRATIVO_DERIVACION_FORBIDDEN, null);
         }
         Integer idPrograma = administrativoService.findIdProgramaByIdPersona(idPersona);
         if (idPrograma == null) {
-            throw new RuntimeException("El usuario autenticado no tiene un programa asignado");
+            throw new DomainException(AdministrativoErrorCode.ADMINISTRATIVO_SIN_PROGRAMA_FORBIDDEN, null);
         }
         return idPrograma;
     }

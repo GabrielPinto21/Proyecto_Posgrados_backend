@@ -1,5 +1,6 @@
 package ufps.edu.co.maps.specific;
 
+import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.Component;
 
 import ufps.edu.co.maps.GlobalMapper;
@@ -14,6 +15,18 @@ import ufps.edu.co.rest.dto.AdministrativoDTO;
 @Component
 public class AdministrativoMap extends
         GlobalMapper<ADMINISTRATIVO_CREATE, ADMINISTRATIVO_UPDATE, ADMINISTRATIVO_DELETE, ADMINISTRATIVO_PATCH, ADMINISTRATIVO_FIND, AdministrativoOutput, AdministrativoDTO> {
+
+    @Autowired
+    private DocumentoMap documentoMap;
+
+    @Autowired
+    private PersonaMap personaMap;
+
+    @Autowired
+    private EstadoMap estadoMap;
+
+    @Autowired
+    private CargoMap cargoMap;
 
     public AdministrativoMap() {
         super(ADMINISTRATIVO_CREATE.class, ADMINISTRATIVO_UPDATE.class, ADMINISTRATIVO_DELETE.class,
@@ -79,11 +92,6 @@ public class AdministrativoMap extends
 
         if (dto == null)
             return null;
-
-        DocumentoMap documentoMap = new DocumentoMap();
-        PersonaMap personaMap = new PersonaMap();
-        EstadoMap estadoMap = new EstadoMap();
-        CargoMap cargoMap = new CargoMap();
 
         return AdministrativoOutput.builder()
                 .id(dto.getId())

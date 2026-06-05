@@ -32,7 +32,7 @@ import jakarta.validation.Valid;
 
 import ufps.edu.co.persistence.entities.*;
 import ufps.edu.co.persistence.repositories.*;
-import ufps.edu.co.domain.exceptions.DomainException;
+import ufps.edu.co.domain.exceptions.*;
 // import ufps.edu.co.domain.exceptions.errorcodes.ListaadmitidosErrorCode;
 import ufps.edu.co.domain.exceptions.DuplicateAdmisionException;
 import ufps.edu.co.processor.crud.AspiranteProcessor;
@@ -70,7 +70,7 @@ import ufps.edu.co.rest.dto.EstadoDTO;
 import ufps.edu.co.rest.services.AdministrativoService;
 import ufps.edu.co.rest.services.UsuarioService;
 import ufps.edu.co.rest.services.ListaadmitidosService;
-import ufps.edu.co.domain.exceptions.errorcodes.ListaadmitidosErrorCode;
+import ufps.edu.co.domain.exceptions.errorcodes.*;
 import ufps.edu.co.rest.services.AspiranteService;
 import ufps.edu.co.rest.services.EstadoService;
 import ufps.edu.co.records.input.entity.DocumentoInput.DOCUMENTO_FIND;
@@ -122,7 +122,10 @@ import ufps.edu.co.rest.services.PagorecibomatriculaService;
 import ufps.edu.co.rest.services.PagoService;
 import ufps.edu.co.rest.services.CohorteService;
 import ufps.edu.co.processor.crud.PagoProcessor;
+import ufps.edu.co.processor.crud.UltimocodigoprogramaProcessor;
+import ufps.edu.co.records.input.entity.UltimocodigoprogramaInput.*;
 import ufps.edu.co.records.output.entity.PagoOutput;
+import ufps.edu.co.records.output.entity.UltimocodigoprogramaOutput;
 
 @RestController
 @RequestMapping("/director-programa")
@@ -201,6 +204,9 @@ public class DirectorProgramaCase {
 
     @Autowired
     private PagoProcessor pagoProcessor;
+
+    @Autowired
+    private UltimocodigoprogramaProcessor ultimocodigoprogramaProcessor;
 
     @GetMapping(value = "/cohortes")
     public ResponseEntity<List<CohorteResumenOutput>> getCohortesByPrograma() {
@@ -1403,13 +1409,27 @@ public class DirectorProgramaCase {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Integer idPersona = usuarioService.findIdPersonaByNombreusuario(username);
         if (idPersona == null) {
-            throw new RuntimeException("No se pudo derivar el administrativo desde el usuario autenticado");
+            throw new DomainException(AdministrativoErrorCode.ADMINISTRATIVO_DERIVACION_FORBIDDEN, null);
         }
         Integer idPrograma = administrativoService.findIdProgramaByIdPersona(idPersona);
         if (idPrograma == null) {
-            throw new RuntimeException("El usuario autenticado no tiene un programa asignado");
+            throw new DomainException(AdministrativoErrorCode.ADMINISTRATIVO_SIN_PROGRAMA_FORBIDDEN, null);
         }
         return idPrograma;
+    }
+
+    @PutMapping(value = "/programa/{idPrograma}/ultimocodigo", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<UltimocodigoprogramaOutput> updateUltimoCodigoPrograma(
+            @PathVariable Integer idPrograma,
+            @RequestBody ULTIMOCODIGOPROGRAMA_UPDATE_CODIGO body) {
+        try {
+            return ResponseEntity.ok(ultimocodigoprogramaProcessor.updateCodigoPorPrograma(idPrograma, body.codigo()));
+        } catch (DomainException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error actualizando último código del programa {}", idPrograma, e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @PutMapping("/interview/rate")

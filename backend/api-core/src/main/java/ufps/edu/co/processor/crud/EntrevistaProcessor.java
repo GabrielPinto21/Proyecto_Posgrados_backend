@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -135,6 +136,10 @@ public class EntrevistaProcessor implements
         } catch (Exception e) {
             throw new RuntimeException("Error finding all Entrevistas: " + e.getMessage(), e);
         }
+    }
+
+    public Page<EntrevistaOutput> findAll(Pageable pageable) {
+        return service.findAll(pageable).map(map::toOutput);
     }
 
     @Override

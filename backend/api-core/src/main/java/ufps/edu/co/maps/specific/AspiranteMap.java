@@ -2,6 +2,7 @@ package ufps.edu.co.maps.specific;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.Component;
 
 import ufps.edu.co.maps.GlobalMapper;
@@ -17,7 +18,17 @@ import ufps.edu.co.rest.dto.AspiranteDTO;
 public class AspiranteMap extends
         GlobalMapper<ASPIRANTE_CREATE, ASPIRANTE_UPDATE, ASPIRANTE_DELETE, ASPIRANTE_PATCH, ASPIRANTE_FIND, AspiranteOutput, AspiranteDTO> {
 
-    
+    @Autowired
+    private PersonaMap personaMap;
+
+    @Autowired
+    private EstadoMap estadoMap;
+
+    @Autowired
+    private CohorteMap cohorteMap;
+
+    @Autowired
+    private CalificacioncriterioMap calificacioncriterioMap;
 
     public AspiranteMap() {
         super(ASPIRANTE_CREATE.class, ASPIRANTE_UPDATE.class, ASPIRANTE_DELETE.class, ASPIRANTE_PATCH.class,
@@ -86,11 +97,6 @@ public class AspiranteMap extends
     @Override
     public AspiranteOutput toOutput(AspiranteDTO dto) {
         if (dto == null) return null;
-
-        PersonaMap personaMap = new PersonaMap();
-        EstadoMap estadoMap = new EstadoMap();
-        CohorteMap cohorteMap = new CohorteMap();
-        CalificacioncriterioMap calificacioncriterioMap = new CalificacioncriterioMap();
 
         return AspiranteOutput.builder()
                 .id(dto.getId())

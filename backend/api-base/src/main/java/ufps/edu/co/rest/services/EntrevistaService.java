@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ufps.edu.co.persistence.entities.EntrevistaEntity;
@@ -73,6 +74,11 @@ public class EntrevistaService extends GenericService<EntrevistaEntity, Entrevis
     @Transactional(readOnly = true)
     public List<EntrevistaDTO> findAll() {
         return entityListToDtoList(repository.findAll());
+    }
+
+    @Transactional(readOnly = true)
+    public Page<EntrevistaDTO> findAll(Pageable pageable) {
+        return repository.findAll(pageable).map(this::entityToDto);
     }
 
     @Transactional(readOnly = true)
