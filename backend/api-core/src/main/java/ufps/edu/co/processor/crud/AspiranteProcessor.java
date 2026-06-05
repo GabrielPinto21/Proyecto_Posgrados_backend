@@ -724,7 +724,15 @@ public class AspiranteProcessor implements
                 .idTipoplazo(tipoplazoPagoId)
                 .build());
 
-        SemestreDTO semestre = resolverSemestreHabilitado(body.idSemestre(), body.fechaInicioDocumentacion());
+        SemestreDTO semestre = semestreService.findById(body.idSemestre());
+        if (semestre == null) {
+            throw new DomainException(CohorteErrorCode.COHORTE_NOT_FOUND, body.idSemestre());
+        }
+        String tipoEstadoSemestre = semestre.getEstado() != null ? semestre.getEstado().getTipo() : null;
+        if (!"EN CURSO".equalsIgnoreCase(tipoEstadoSemestre) && !"PROGRAMADO".equalsIgnoreCase(tipoEstadoSemestre)) {
+            throw new DomainException(CohorteErrorCode.COHORTE_SEMESTRE_NO_VALIDO_CONFLICT,
+                    body.idSemestre() + " / " + tipoEstadoSemestre);
+        }
 
         EstadoDTO estadoCohorte = estadoService.findByTipoAndEntidad("CERRADA", "cohorte");
         if (estadoCohorte == null) {
@@ -791,34 +799,6 @@ public class AspiranteProcessor implements
                 .fechaLimitePago(body.fechaFinPago())
                 .fechaInicio(body.fechaInicioDocumentacion())
                 .build();
-    }
-
-    private SemestreDTO resolverSemestreHabilitado(Integer idSemestre, LocalDate fechaInicio) {
-        SemestreDTO semestre = semestreService.findById(idSemestre);
-        if (semestre == null) {
-            throw new DomainException(CohorteErrorCode.COHORTE_NOT_FOUND, idSemestre);
-        }
-
-        String tipoEstado = semestre.getEstado() != null ? semestre.getEstado().getTipo() : null;
-        boolean estadoPermitido = "EN CURSO".equalsIgnoreCase(tipoEstado) || "PROGRAMADO".equalsIgnoreCase(tipoEstado);
-        if (!estadoPermitido) {
-            throw new DomainException(CohorteErrorCode.COHORTE_SEMESTRE_NO_VALIDO_CONFLICT,
-                    idSemestre + " / " + tipoEstado);
-        }
-
-        LocalDate fechaInicioSemestre = semestre.getFechaInicio();
-        if (fechaInicioSemestre == null) {
-            throw new DomainException(CohorteErrorCode.COHORTE_SEMESTRE_NO_VALIDO_CONFLICT, idSemestre);
-        }
-
-        LocalDate limiteSuperior = fechaInicioSemestre.plusMonths(2);
-        if (fechaInicio.isBefore(fechaInicioSemestre) || fechaInicio.isAfter(limiteSuperior)) {
-            throw new DomainException(CohorteErrorCode.COHORTE_SEMESTRE_FECHA_INVALIDA_CONFLICT,
-                    "fechaInicio=" + fechaInicio + ", semestre=" + idSemestre + ", rango=" + fechaInicioSemestre + ".."
-                            + limiteSuperior);
-        }
-
-        return semestre;
     }
 
     public List<CohorteResumenOutput> getCohortesByProgramaResumen(Integer programaId) {
@@ -1040,12 +1020,6 @@ public class AspiranteProcessor implements
             cohorteChanged = true;
         }
 
-        LocalDate fechaReferencia = body.fechaInicioDocumentacion();
-        SemestreDTO semestreActual = cohorte.getSemestre();
-        if (fechaReferencia == null && semestreActual != null) {
-            fechaReferencia = semestreActual.getFechaInicio();
-        }
-
         if (body.idSemestre() == null) {
             throw new IllegalArgumentException("Debe enviar el id del semestre");
         }
@@ -1054,11 +1028,15 @@ public class AspiranteProcessor implements
             throw new IllegalArgumentException("Debe enviar el id de la modalidad");
         }
 
-        if (fechaReferencia == null) {
-            throw new IllegalArgumentException("Debe enviar la fecha de inicio para validar el semestre");
+        SemestreDTO semestre = semestreService.findById(body.idSemestre());
+        if (semestre == null) {
+            throw new DomainException(CohorteErrorCode.COHORTE_NOT_FOUND, body.idSemestre());
         }
-
-        SemestreDTO semestre = resolverSemestreHabilitado(body.idSemestre(), fechaReferencia);
+        String tipoEstadoSemestre = semestre.getEstado() != null ? semestre.getEstado().getTipo() : null;
+        if (!"EN CURSO".equalsIgnoreCase(tipoEstadoSemestre) && !"PROGRAMADO".equalsIgnoreCase(tipoEstadoSemestre)) {
+            throw new DomainException(CohorteErrorCode.COHORTE_SEMESTRE_NO_VALIDO_CONFLICT,
+                    body.idSemestre() + " / " + tipoEstadoSemestre);
+        }
         if (cohorte.getIdSemestre() == null || !cohorte.getIdSemestre().equals(semestre.getId())) {
             cohorte.setIdSemestre(semestre.getId());
             cohorteChanged = true;
