@@ -21,7 +21,16 @@ public enum CohorteErrorCode implements BaseErrorCode {
             "La fecha de inicio de la cohorte debe coincidir con la fecha de inicio del semestre o estar dentro de los 2 meses posteriores"),
     COHORTE_CON_ASIGNACIONES_BLOQUEADAS(
             "COHORTE_CON_ASIGNACIONES_BLOQUEADAS",
-            "No se pueden eliminar asignaciones porque existen documentos cargados que dependen de ellas");
+            "No se pueden eliminar asignaciones porque existen documentos cargados que dependen de ellas"),
+    COHORTE_ID_REQUERIDO(
+            "COHORTE_ID_REQUERIDO",
+            "Se debe enviar idCohorte en el formulario de inscripción"),
+    COHORTE_NO_ABIERTA_FORBIDDEN(
+            "COHORTE_NO_ABIERTA_FORBIDDEN",
+            "La cohorte indicada no está abierta"),
+    COHORTE_SIN_PROGRAMA_CONFLICT(
+            "COHORTE_SIN_PROGRAMA_CONFLICT",
+            "La cohorte indicada no tiene programa asociado");
 
     private final String code;
     private final String defaultMessage;

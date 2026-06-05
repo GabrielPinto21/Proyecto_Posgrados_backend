@@ -14,9 +14,8 @@ import org.springframework.web.bind.annotation.*;
 
 import ufps.edu.co.processor.crud.*;
 // import ufps.edu.co.rest.services.TipodocumentoService;
-import ufps.edu.co.domain.exceptions.DomainException;
-import ufps.edu.co.domain.exceptions.errorcodes.AspiranteErrorCode;
-import ufps.edu.co.domain.exceptions.errorcodes.UsuarioErrorCode;
+import ufps.edu.co.domain.exceptions.*;
+import ufps.edu.co.domain.exceptions.errorcodes.*;
 import ufps.edu.co.records.input.entity.ProgramaInput;
 import ufps.edu.co.records.output.entity.*;
 import ufps.edu.co.rest.dto.*;
@@ -219,8 +218,7 @@ public class InscripcionCase {
                 if (body.promedioPonderadoAcumulado() != null) {
                         BigDecimal promedio = body.promedioPonderadoAcumulado();
                         if (promedio.compareTo(BigDecimal.ZERO) < 0) {
-                                throw new RuntimeException(
-                                                "El promedio ponderado acumulado debe ser un valor positivo");
+                                throw new DomainException(AspiranteErrorCode.PROMEDIO_INVALIDO, null);
                         }
                 }
 
@@ -299,30 +297,29 @@ public class InscripcionCase {
                 // 10. Estado inicial del aspirante
                 EstadoDTO estado = estadoService.findByTipoAndEntidad("NO CONFIRMADO", "ASPIRANTE");
                 if (estado == null) {
-                        throw new RuntimeException(
-                                        "Estado inicial 'NO CONFIRMADO' para ASPIRANTE no encontrado en la base de datos");
+                        throw new DomainException(AspiranteErrorCode.ESTADO_NO_CONFIRMADO_NOT_FOUND, null);
                 }
 
                 // Validar cohorte enviada por el front
                 if (body.idCohorte() == null) {
-                        throw new RuntimeException("Se debe enviar idCohorte en el formulario de inscripción");
+                        throw new DomainException(CohorteErrorCode.COHORTE_ID_REQUERIDO, null);
                 }
                 CohorteDTO cohorte = cohorteService.findById(body.idCohorte());
                 if (cohorte == null) {
-                        throw new RuntimeException("Cohorte no encontrada con id: " + body.idCohorte());
+                        throw new DomainException(CohorteErrorCode.COHORTE_NOT_FOUND, body.idCohorte());
                 }
                 if (cohorte.getEstado() != null && cohorte.getEstado().getTipo() != null
                                 && !"ABIERTA".equalsIgnoreCase(cohorte.getEstado().getTipo())) {
-                        throw new RuntimeException("La cohorte indicada no está abierta");
+                        throw new DomainException(CohorteErrorCode.COHORTE_NO_ABIERTA_FORBIDDEN, null);
                 }
 
                 if (cohorte.getIdPrograma() == null) {
-                        throw new RuntimeException("La cohorte indicada no tiene programa asociado");
+                        throw new DomainException(CohorteErrorCode.COHORTE_SIN_PROGRAMA_CONFLICT, null);
                 }
                 ProgramaOutput programa = programaProcessor
                                 .findById(new ProgramaInput.PROGRAMA_FIND(cohorte.getIdPrograma()));
                 if (programa == null) {
-                        throw new RuntimeException("Programa no encontrado con id: " + cohorte.getIdPrograma());
+                        throw new DomainException(ProgramaErrorCode.PROGRAMA_NOT_FOUND, cohorte.getIdPrograma());
                 }
 
                 // 11. Aspirante
@@ -459,8 +456,7 @@ public class InscripcionCase {
                 if (body.promedioPonderadoAcumulado() != null) {
                         BigDecimal promedio = body.promedioPonderadoAcumulado();
                         if (promedio.compareTo(BigDecimal.ZERO) < 0) {
-                                throw new RuntimeException(
-                                                "El promedio ponderado acumulado debe ser un valor positivo");
+                                throw new DomainException(AspiranteErrorCode.PROMEDIO_INVALIDO, null);
                         }
                 }
 
@@ -541,30 +537,29 @@ public class InscripcionCase {
                 // 10. Estado inicial del aspirante
                 EstadoDTO estado = estadoService.findByTipoAndEntidad("NO CONFIRMADO", "ASPIRANTE");
                 if (estado == null) {
-                        throw new RuntimeException(
-                                        "Estado inicial 'NO CONFIRMADO' para ASPIRANTE no encontrado en la base de datos");
+                        throw new DomainException(AspiranteErrorCode.ESTADO_NO_CONFIRMADO_NOT_FOUND, null);
                 }
 
                 // Validar cohorte enviada por el front
                 if (body.idCohorte() == null) {
-                        throw new RuntimeException("Se debe enviar idCohorte en el formulario de inscripción");
+                        throw new DomainException(CohorteErrorCode.COHORTE_ID_REQUERIDO, null);
                 }
                 CohorteDTO cohorte = cohorteService.findById(body.idCohorte());
                 if (cohorte == null) {
-                        throw new RuntimeException("Cohorte no encontrada con id: " + body.idCohorte());
+                        throw new DomainException(CohorteErrorCode.COHORTE_NOT_FOUND, body.idCohorte());
                 }
                 if (cohorte.getEstado() != null && cohorte.getEstado().getTipo() != null
                                 && !"ABIERTA".equalsIgnoreCase(cohorte.getEstado().getTipo())) {
-                        throw new RuntimeException("La cohorte indicada no está abierta");
+                        throw new DomainException(CohorteErrorCode.COHORTE_NO_ABIERTA_FORBIDDEN, null);
                 }
 
                 if (cohorte.getIdPrograma() == null) {
-                        throw new RuntimeException("La cohorte indicada no tiene programa asociado");
+                        throw new DomainException(CohorteErrorCode.COHORTE_SIN_PROGRAMA_CONFLICT, null);
                 }
                 ProgramaOutput programa = programaProcessor
                                 .findById(new ProgramaInput.PROGRAMA_FIND(cohorte.getIdPrograma()));
                 if (programa == null) {
-                        throw new RuntimeException("Programa no encontrado con id: " + cohorte.getIdPrograma());
+                        throw new DomainException(ProgramaErrorCode.PROGRAMA_NOT_FOUND, cohorte.getIdPrograma());
                 }
 
                 // 11. Aspirante
