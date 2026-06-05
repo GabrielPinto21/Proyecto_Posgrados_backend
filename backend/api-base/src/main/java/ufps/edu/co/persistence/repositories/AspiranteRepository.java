@@ -4,17 +4,14 @@
  */
 package ufps.edu.co.persistence.repositories;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.query.*;
+import org.springframework.stereotype.*;
 
-import ufps.edu.co.persistence.entities.AspiranteEntity;
-import ufps.edu.co.rest.dto.AspiranteCheckoutDTO;
-import ufps.edu.co.rest.dto.PagoCheckoutPreviewDataDTO;
+import ufps.edu.co.persistence.entities.*;
+import ufps.edu.co.rest.dto.*;
 
 /**
  * Spring Data JPA repository for the AspiranteEntity entity.
@@ -206,4 +203,23 @@ public interface AspiranteRepository extends JpaRepository<AspiranteEntity, Inte
 		   "    )" +
 		   ")")
 	List<AspiranteEntity> findCalificados();
+
+	@Query(value = """
+		SELECT
+		    c.id AS idCohorte,
+		    COUNT(a.id) AS totalInscritos,
+		    SUM(CASE WHEN e.tipo = 'NO CONFIRMADO' THEN 1 ELSE 0 END) AS totalNoConfirmados,
+		    SUM(CASE WHEN e.tipo = 'INSCRITO' THEN 1 ELSE 0 END) AS totalConfirmados,
+		    SUM(CASE WHEN e.tipo = 'PAZ Y SALVO' THEN 1 ELSE 0 END) AS totalPazysalvo,
+		    SUM(CASE WHEN e.tipo IN ('VALIDADO_POR_CALIFICAR', 'VALIDADO_EN_PROGRESO') THEN 1 ELSE 0 END) AS totalValidados,
+		    SUM(CASE WHEN e.tipo = 'VALIDADO_CALIFICADO' THEN 1 ELSE 0 END) AS totalCalificados,
+		    SUM(CASE WHEN e.tipo IN ('ADMITIDO', 'POR LEGALIZAR', 'LEGALIZADO') THEN 1 ELSE 0 END) AS totalAdmitidos,
+		    SUM(CASE WHEN e.tipo = 'LEGALIZADO' THEN 1 ELSE 0 END) AS totalLegalizados
+		FROM cohorte c
+		LEFT JOIN aspirante a ON a.id_cohorte = c.id
+		LEFT JOIN estado e ON a.id_estado = e.id
+		WHERE c.id_programa = :programaId
+		GROUP BY c.id
+		""", nativeQuery = true)
+	List<CohorteCountsProjection> countAllByProgramaId(@Param("programaId") Integer programaId);
 }

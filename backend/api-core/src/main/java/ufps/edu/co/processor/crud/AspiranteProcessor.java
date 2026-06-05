@@ -32,21 +32,8 @@ import ufps.edu.co.records.output.entity.CriteriosCohorteOutput;
 import ufps.edu.co.records.output.entity.EstadoOutput;
 import ufps.edu.co.records.output.entity.PasoProcesoOutput;
 import ufps.edu.co.records.output.entity.ProgramaInicioOutput;
-import ufps.edu.co.rest.dto.CohorteDTO;
-import ufps.edu.co.rest.dto.AspiranteDTO;
-import ufps.edu.co.rest.dto.CriteriocohorteDTO;
-import ufps.edu.co.rest.dto.DocumentoDTO;
-import ufps.edu.co.rest.dto.DocumentosrequisitoconsejocohorteDTO;
-import ufps.edu.co.rest.dto.DocumentosrequisitoconsejoDTO;
-import ufps.edu.co.rest.dto.DocumentosrequisitoprogramacohorteDTO;
-import ufps.edu.co.rest.dto.DocumentosrequisitoprogramaDTO;
+import ufps.edu.co.rest.dto.*;
 import ufps.edu.co.rest.services.DocumentoService;
-import ufps.edu.co.rest.dto.CriterioevaluacionDTO;
-import ufps.edu.co.rest.dto.EstadoDTO;
-import ufps.edu.co.rest.dto.PersonaDTO;
-import ufps.edu.co.rest.dto.PlazoDTO;
-import ufps.edu.co.rest.dto.SemestreDTO;
-import ufps.edu.co.rest.dto.TipoplazoDTO;
 import ufps.edu.co.rest.services.AdmitidoService;
 import ufps.edu.co.rest.services.AspiranteService;
 import ufps.edu.co.rest.services.CalificacioncriterioService;
@@ -807,6 +794,10 @@ public class AspiranteProcessor implements
     }
 
     public List<CohorteResumenOutput> getCohortesByProgramaResumen(Integer programaId) {
+        Map<Integer, CohorteCountsProjection> countsMap = service.countAllByProgramaId(programaId)
+                .stream()
+                .collect(Collectors.toMap(CohorteCountsProjection::getIdCohorte, p -> p));
+
         return cohorteService.findResumenDataByIdPrograma(programaId).stream().map(row -> {
             Integer id = row.getId();
             String nombre = row.getNombre();
@@ -819,14 +810,7 @@ public class AspiranteProcessor implements
 
             boolean activa = "ABIERTA".equalsIgnoreCase(estadoTipo);
             int cupos = cuposRaw != null ? cuposRaw : 0;
-            long inscritos = service.countByCohorte(id);
-            long noConfirmados = service.countNoConfirmadosByCohorte(id);
-            long confirmados = service.countConfirmadosByCohorte(id);
-            long pazYSalvo = service.countPazYSalvoByCohorte(id);
-            long validados = service.countValidadosByCohorte(id);
-            long calificados = service.countCalificadosByCohorte(id);
-            long admitidos = service.countAdmitidosByCohorte(id);
-            long legalizados = service.countLegalizadosByCohorte(id);
+            CohorteCountsProjection c = countsMap.get(id);
 
             return CohorteResumenOutput.builder()
                     .id(id)
@@ -837,14 +821,14 @@ public class AspiranteProcessor implements
                     .fechaLimitePago(plazoPagoFin)
                     .fechaLimiteDocs(plazoDocFin)
                     .fechaLimiteInscripcion(plazoInsFin)
-                    .totalInscritos(inscritos)
-                    .totalNoConfirmados(noConfirmados)
-                    .totalConfirmados(confirmados)
-                    .totalPazysalvo(pazYSalvo)
-                    .totalValidados(validados)
-                    .totalCalificados(calificados)
-                    .totalAdmitidos(admitidos)
-                    .totalLegalizados(legalizados)
+                    .totalInscritos(c != null && c.getTotalInscritos() != null ? c.getTotalInscritos() : 0L)
+                    .totalNoConfirmados(c != null && c.getTotalNoConfirmados() != null ? c.getTotalNoConfirmados() : 0L)
+                    .totalConfirmados(c != null && c.getTotalConfirmados() != null ? c.getTotalConfirmados() : 0L)
+                    .totalPazysalvo(c != null && c.getTotalPazysalvo() != null ? c.getTotalPazysalvo() : 0L)
+                    .totalValidados(c != null && c.getTotalValidados() != null ? c.getTotalValidados() : 0L)
+                    .totalCalificados(c != null && c.getTotalCalificados() != null ? c.getTotalCalificados() : 0L)
+                    .totalAdmitidos(c != null && c.getTotalAdmitidos() != null ? c.getTotalAdmitidos() : 0L)
+                    .totalLegalizados(c != null && c.getTotalLegalizados() != null ? c.getTotalLegalizados() : 0L)
                     .build();
         }).toList();
     }
