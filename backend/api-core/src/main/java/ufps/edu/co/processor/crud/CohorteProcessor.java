@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import ufps.edu.co.domain.exceptions.DomainException;
@@ -68,6 +69,8 @@ public class CohorteProcessor implements GlobalUseCase<COHORTE_CREATE, COHORTE_U
     public void deleteById(COHORTE_DELETE input) {
         try {
             service.deleteById(input.id());
+        } catch (DataIntegrityViolationException e) {
+            throw new DomainException(CohorteErrorCode.COHORTE_CON_DEPENDENCIAS_CONFLICT, input.id());
         } catch (Exception e) {
             throw new DomainException(CohorteErrorCode.COHORTE_NOT_FOUND, input.id());
         }
