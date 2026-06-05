@@ -35,6 +35,11 @@ public class DocumentopersonaService extends GenericService<DocumentopersonaEnti
     }
 
     @Transactional(readOnly = true)
+    public boolean existsByNumerodocumentoAndIdTipodocumento(String numerodocumento, Integer idTipodocumento) {
+        return repository.existsByNumerodocumentoAndIdTipodocumento(numerodocumento, idTipodocumento);
+    }
+
+    @Transactional(readOnly = true)
     public DocumentopersonaDTO findById(Integer id) {
         return entityToDto(repository.findById(id));
     }

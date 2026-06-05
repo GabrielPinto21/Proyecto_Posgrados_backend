@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ufps.edu.co.domain.exceptions.DomainException;
@@ -153,6 +154,10 @@ public class AspiranteProcessor implements
         } catch (Exception e) {
             throw new RuntimeException("Error finding all Aspirantes: " + e.getMessage(), e);
         }
+    }
+
+    public Page<AspiranteOutput> findAll(Pageable pageable) {
+        return service.findAll(pageable).map(map::toOutput);
     }
 
     @Override

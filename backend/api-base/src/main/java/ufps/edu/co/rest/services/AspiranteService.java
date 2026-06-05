@@ -7,6 +7,7 @@ package ufps.edu.co.rest.services;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.*;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.*;
 import org.springframework.transaction.annotation.*;
 
@@ -71,6 +72,11 @@ public class AspiranteService extends GenericService<AspiranteEntity, AspiranteD
     @Transactional(readOnly = true)
     public List<AspiranteDTO> findAll() {
         return entityListToDtoList(repository.findAll());
+    }
+
+    @Transactional(readOnly = true)
+    public Page<AspiranteDTO> findAll(Pageable pageable) {
+        return repository.findAll(pageable).map(this::entityToDto);
     }
 
     @Transactional(readOnly = true)

@@ -369,15 +369,9 @@ public class InscripcionCase {
                         throw new DomainException(UsuarioErrorCode.USUARIO_YA_EXISTE_CONFLICT, body.usuario());
                 }
 
-                boolean personaExistePorDocumento = false;
-                if (body.numeroDocumento() != null && body.idTipoDoc() != null) {
-                        personaExistePorDocumento = documentopersonaService.findAll().stream()
-                                        .anyMatch(doc -> doc.getNumerodocumento() != null
-                                                        && body.numeroDocumento().equals(
-                                                                        String.valueOf(doc.getNumerodocumento()))
-                                                        && java.util.Objects.equals(doc.getIdTipodocumento(),
-                                                                        body.idTipoDoc()));
-                }
+                boolean personaExistePorDocumento = body.numeroDocumento() != null && body.idTipoDoc() != null
+                        && documentopersonaService.existsByNumerodocumentoAndIdTipodocumento(
+                                body.numeroDocumento(), body.idTipoDoc());
 
                 if (personaExistePorDocumento) {
                         throw new DomainException(AspiranteErrorCode.PERSONA_INSCRIPCION_YA_EXISTE_CONFLICT,

@@ -2,17 +2,12 @@ package ufps.edu.co.controllers.rest;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import ufps.edu.co.processor.crud.AspiranteProcessor;
 import ufps.edu.co.records.input.entity.AspiranteInput.*;
@@ -30,6 +25,13 @@ public class AspiranteRestController {
     public ResponseEntity<List<AspiranteOutput>> findAll() {
         List<AspiranteOutput> list = processor.findAll();
         return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/listall/paged")
+    public ResponseEntity<Page<AspiranteOutput>> findAllPaged(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(processor.findAll(PageRequest.of(page, size)));
     }
 
     @PostMapping(value = "/list", consumes = MediaType.APPLICATION_JSON_VALUE)

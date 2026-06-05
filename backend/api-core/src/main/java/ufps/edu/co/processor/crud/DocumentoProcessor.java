@@ -169,10 +169,7 @@ public class DocumentoProcessor implements
 
     public List<DocumentoOutput> findByAspiranteId(ASPIRANTE_FIND input) {
         try {
-            return service.findAll().stream()
-                    .filter(dto -> dto.getAspirante() != null && dto.getAspirante().getId().equals(input.id()))
-                    .map(map::toOutput)
-                    .toList();
+            return service.findByIdAspirante(input.id()).stream().map(map::toOutput).toList();
         } catch (Exception e) {
             throw new RuntimeException("Error finding Documentos by Aspirante ID: " + e.getMessage(), e);
         }
