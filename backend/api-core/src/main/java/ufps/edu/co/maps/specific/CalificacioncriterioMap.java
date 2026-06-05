@@ -3,6 +3,7 @@ package ufps.edu.co.maps.specific;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.*;
+import org.springframework.context.annotation.*;
 import org.springframework.stereotype.Component;
 
 import ufps.edu.co.maps.GlobalMapper;
@@ -14,6 +15,7 @@ import ufps.edu.co.rest.dto.CalificacioncriterioDTO;
 public class CalificacioncriterioMap extends
         GlobalMapper<CALIFICACIONCRITERIO_CREATE, CALIFICACIONCRITERIO_UPDATE, CALIFICACIONCRITERIO_DELETE, CALIFICACIONCRITERIO_PATCH, CALIFICACIONCRITERIO_FIND, CalificacioncriterioOutput, CalificacioncriterioDTO> {
 
+    @Lazy
     @Autowired
     private AspiranteMap aspiranteMap;
 
