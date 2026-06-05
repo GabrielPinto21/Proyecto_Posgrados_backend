@@ -122,7 +122,10 @@ import ufps.edu.co.rest.services.PagorecibomatriculaService;
 import ufps.edu.co.rest.services.PagoService;
 import ufps.edu.co.rest.services.CohorteService;
 import ufps.edu.co.processor.crud.PagoProcessor;
+import ufps.edu.co.processor.crud.UltimocodigoprogramaProcessor;
+import ufps.edu.co.records.input.entity.UltimocodigoprogramaInput.*;
 import ufps.edu.co.records.output.entity.PagoOutput;
+import ufps.edu.co.records.output.entity.UltimocodigoprogramaOutput;
 
 @RestController
 @RequestMapping("/director-programa")
@@ -201,6 +204,9 @@ public class DirectorProgramaCase {
 
     @Autowired
     private PagoProcessor pagoProcessor;
+
+    @Autowired
+    private UltimocodigoprogramaProcessor ultimocodigoprogramaProcessor;
 
     @GetMapping(value = "/cohortes")
     public ResponseEntity<List<CohorteResumenOutput>> getCohortesByPrograma() {
@@ -1410,6 +1416,20 @@ public class DirectorProgramaCase {
             throw new DomainException(AdministrativoErrorCode.ADMINISTRATIVO_SIN_PROGRAMA_FORBIDDEN, null);
         }
         return idPrograma;
+    }
+
+    @PutMapping(value = "/programa/{idPrograma}/ultimocodigo", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<UltimocodigoprogramaOutput> updateUltimoCodigoPrograma(
+            @PathVariable Integer idPrograma,
+            @RequestBody ULTIMOCODIGOPROGRAMA_UPDATE_CODIGO body) {
+        try {
+            return ResponseEntity.ok(ultimocodigoprogramaProcessor.updateCodigoPorPrograma(idPrograma, body.codigo()));
+        } catch (DomainException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error actualizando último código del programa {}", idPrograma, e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @PutMapping("/interview/rate")

@@ -34,4 +34,8 @@ public enum UltimocodigoprogramaInput {
     public record ULTIMOCODIGOPROGRAMA_FIND_BY_PROGRAMA(
             @NotNull Integer idPrograma) implements FindType {
     }
+
+    public record ULTIMOCODIGOPROGRAMA_UPDATE_CODIGO(
+            @NotNull Integer codigo) {
+    }
 }

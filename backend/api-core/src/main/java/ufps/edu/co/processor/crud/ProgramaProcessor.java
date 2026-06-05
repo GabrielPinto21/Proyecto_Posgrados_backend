@@ -21,11 +21,8 @@ import ufps.edu.co.rest.dto.ProgramaDTO;
 import ufps.edu.co.rest.dto.SedeDTO;
 import ufps.edu.co.rest.dto.TiporegistroDTO;
 import ufps.edu.co.rest.dto.ModalidadDTO;
-import ufps.edu.co.rest.services.ModalidadService;
-import ufps.edu.co.rest.services.OtrosvaloresService;
-import ufps.edu.co.rest.services.ProgramaService;
-import ufps.edu.co.rest.services.SedeService;
-import ufps.edu.co.rest.services.TiporegistroService;
+import ufps.edu.co.rest.dto.*;
+import ufps.edu.co.rest.services.*;
 import ufps.edu.co.usecase.GlobalUseCase;
 
 @Service
@@ -53,12 +50,19 @@ public class ProgramaProcessor implements
     @Autowired
     private SedeService sedeService;
 
+    @Autowired
+    private UltimocodigoprogramaService ultimocodigoprogramaService;
+
     @Override
     public ProgramaOutput create(PROGRAMA_CREATE input) {
         try {
             ProgramaDTO dto = map.toDto(input);
             resolveModalidad(dto);
             ProgramaDTO created = service.create(dto);
+            ultimocodigoprogramaService.create(UltimocodigoprogramaDTO.builder()
+                    .idPrograma(created.getId())
+                    .codigo(0)
+                    .build());
             return map.toOutput(created);
         } catch (Exception e) {
             throw new RuntimeException("Error creating Programa: " + e.getMessage(), e);
@@ -208,6 +212,10 @@ public class ProgramaProcessor implements
                     input.otrosvalores(),
                     idFacultad);
             ProgramaDTO created = service.create(dto);
+            ultimocodigoprogramaService.create(UltimocodigoprogramaDTO.builder()
+                    .idPrograma(created.getId())
+                    .codigo(0)
+                    .build());
             return map.toOutput(created);
         } catch (Exception e) {
             throw new RuntimeException("Error creating Programa with relations: " + e.getMessage(), e);

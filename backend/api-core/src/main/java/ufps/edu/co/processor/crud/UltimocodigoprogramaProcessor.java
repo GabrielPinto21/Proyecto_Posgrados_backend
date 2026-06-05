@@ -84,4 +84,14 @@ public class UltimocodigoprogramaProcessor implements
         }
         return map.toOutput(dto);
     }
+
+    public UltimocodigoprogramaOutput updateCodigoPorPrograma(Integer idPrograma, Integer nuevoCodigo) {
+        UltimocodigoprogramaDTO dto = service.findByIdPrograma(idPrograma);
+        if (dto == null) {
+            throw new DomainException(UltimocodigoprogramaErrorCode.ULTIMOCODIGOPROGRAMA_NOT_FOUND,
+                    "idPrograma=" + idPrograma);
+        }
+        dto.setCodigo(nuevoCodigo);
+        return map.toOutput(service.update(dto.getId(), dto));
+    }
 }
