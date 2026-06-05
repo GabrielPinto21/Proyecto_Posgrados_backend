@@ -15,5 +15,6 @@ public record CohorteListadoOutput(
         int cupos,
         LocalDate fechaLimiteDocumentos,
         LocalDate fechaLimitePago,
+        // LocalDate fechaLimiteInscripcion,
         LocalDate fechaInicio
 ) implements OutputResponse {}
