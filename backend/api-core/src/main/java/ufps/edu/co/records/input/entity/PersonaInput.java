@@ -7,6 +7,7 @@ import ufps.edu.co.records.contracts.DeleteType;
 import ufps.edu.co.records.contracts.FindType;
 import ufps.edu.co.records.contracts.PatchType;
 import ufps.edu.co.records.contracts.UpdateType;
+import ufps.edu.co.records.input.entity.UbicacionInput.UBICACION_CREATE;
 
 public enum PersonaInput {
         ;
@@ -86,6 +87,33 @@ public enum PersonaInput {
                         String empresa,
                         String experiencialaboral,
                         Boolean egresadoufps) implements PatchType {
+        }
+
+        public record PERSONA_FULL_CREATE(
+                        String nombres,
+                        String apellidos,
+                        String correo,
+                        LocalDate fechanacimiento,
+                        String celular,
+                        String telefono,
+                        Integer idGenero,
+                        Integer idEstadocivil,
+                        Integer idGrupoetnico,
+                        Integer idPoblacionindigena,
+                        Integer idDiscapacidad,
+                        Integer idCapacidadexepcional,
+                        BigDecimal promediopregrado,
+                        String titulopregrado,
+                        String titulosposgrados,
+                        String empresa,
+                        String experiencialaboral,
+                        Boolean egresadoufps,
+                        UBICACION_CREATE ubicacionvivienda,
+                        UBICACION_CREATE ubicacionnacimiento,
+                        UBICACION_CREATE ubicaciontrabajo,
+                        Integer numerodocumento,
+                        Integer idTipodocumento,
+                        UBICACION_CREATE lugarexpedicion) implements CreateType {
         }
 
         public record PERSONA_DELETE(
