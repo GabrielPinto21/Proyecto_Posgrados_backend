@@ -2,6 +2,7 @@ package ufps.edu.co.maps.specific;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.Component;
 
 import ufps.edu.co.maps.GlobalMapper;
@@ -12,6 +13,9 @@ import ufps.edu.co.rest.dto.SemestreDTO;
 @Component
 public class SemestreMap extends
         GlobalMapper<SEMESTRE_CREATE, SEMESTRE_UPDATE, SEMESTRE_DELETE, SEMESTRE_PATCH, SEMESTRE_FIND, SemestreOutput, SemestreDTO> {
+
+    @Autowired
+    private EstadoMap estadoMap;
 
     public SemestreMap() {
         super(SEMESTRE_CREATE.class, SEMESTRE_UPDATE.class, SEMESTRE_DELETE.class,
@@ -68,8 +72,6 @@ public class SemestreMap extends
     public SemestreOutput toOutput(SemestreDTO dto) {
         if (dto == null)
             return null;
-
-        EstadoMap estadoMap = new EstadoMap();
 
         return SemestreOutput.builder()
                 .id(dto.getId())

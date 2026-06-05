@@ -1,10 +1,11 @@
 package ufps.edu.co.maps.specific;
 
 import java.util.List;
+import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.Component;
 
 import ufps.edu.co.maps.GlobalMapper;
-import ufps.edu.co.rest.dto.CohorteDTO;
+import ufps.edu.co.rest.dto.*;
 import ufps.edu.co.records.input.entity.CohorteInput.*;
 import ufps.edu.co.records.output.entity.CohorteOutput;
 import ufps.edu.co.records.output.entity.ModalidadOutput;
@@ -12,6 +13,21 @@ import ufps.edu.co.records.output.entity.ModalidadOutput;
 @Component
 public class CohorteMap extends
         GlobalMapper<COHORTE_CREATE, COHORTE_UPDATE, COHORTE_DELETE, COHORTE_PATCH, COHORTE_FIND, CohorteOutput, CohorteDTO> {
+
+    @Autowired
+    private ModalidadMap modalidadMap;
+
+    @Autowired
+    private EstadoMap estadoMap;
+
+    @Autowired
+    private PlazoMap plazoMap;
+
+    @Autowired
+    private ProgramaMap programaMap;
+
+    @Autowired
+    private SemestreMap semestreMap;
 
     @Override
     protected CohorteDTO toDtoCreate(COHORTE_CREATE input) {
@@ -77,11 +93,6 @@ public class CohorteMap extends
     @Override
     public CohorteOutput toOutput(CohorteDTO dto) {
         if (dto != null) {
-            ModalidadMap modalidadMap = new ModalidadMap();
-            EstadoMap estadoMap = new EstadoMap();
-            PlazoMap plazoMap = new PlazoMap();
-            ProgramaMap programaMap = new ProgramaMap();
-            SemestreMap semestreMap = new SemestreMap();
             return CohorteOutput.builder()
                     .id(dto.getId())
                     .nombre(dto.getNombre())
@@ -100,7 +111,7 @@ public class CohorteMap extends
                             semestreMap.toOutput(dto.getSemestre())
                         ) : null)
                     .modalidad(dto.getModalidad() != null ? (
-                            aux_Modalidad_cutCohortes(dto.getModalidad(), modalidadMap)
+                            aux_Modalidad_cutCohortes(dto.getModalidad())
                     ) : null)
                     .plazodocumentacion(dto.getPlazo() != null ? (
                             plazoMap.toOutput(dto.getPlazo())
@@ -125,8 +136,7 @@ public class CohorteMap extends
                 .toList();
     }
 
-    private ModalidadOutput aux_Modalidad_cutCohortes(
-            ufps.edu.co.rest.dto.ModalidadDTO modalidadDTO, ModalidadMap modalidadMap) {
+    private ModalidadOutput aux_Modalidad_cutCohortes(ModalidadDTO modalidadDTO) {
         modalidadDTO.setCohorteList(null);
         return modalidadMap.toOutput(modalidadDTO);
     }
