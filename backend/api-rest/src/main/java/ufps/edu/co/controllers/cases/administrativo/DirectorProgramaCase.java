@@ -272,15 +272,15 @@ public class DirectorProgramaCase {
         }
     }
 
-    @GetMapping(value = "/pagos/inscripcion")
+    @GetMapping(value = "/pagos/{idCohorte}/inscripcion")
     public ResponseEntity<?> listPagosInscripcion(
-            @RequestParam(value = "idPrograma") Integer programaId,
+            @PathVariable Integer idCohorte,
             @RequestParam(value = "page", required = false) Integer page,
             @RequestParam(value = "size", required = false) Integer size) {
         try {
             if (page == null) {
                 List<ufps.edu.co.rest.dto.PagoreciboDirectorProjectionDTO> recibos = pagoreciboinscripcionService
-                        .findDirectorByProgramaId(programaId);
+                        .findDirectorByCohorteId(idCohorte);
                 var outputs = recibos.stream().map(r -> {
                     try {
                         if (r == null)
@@ -310,7 +310,7 @@ public class DirectorProgramaCase {
                 int s = (size != null && size > 0) ? size : 50;
                 Pageable pageable = PageRequest.of(p, s);
                 Page<ufps.edu.co.rest.dto.PagoreciboDirectorProjectionDTO> pageResult = pagoreciboinscripcionService
-                        .findDirectorByProgramaId(programaId, pageable);
+                        .findDirectorByCohorteId(idCohorte, pageable);
                 Page<PagoreciboDirectorOutput> mapped = pageResult
                         .map(r -> PagoreciboDirectorOutput.builder()
                                 .id(r.getId())
@@ -333,15 +333,15 @@ public class DirectorProgramaCase {
         }
     }
 
-    @GetMapping(value = "/pagos/matricula")
+    @GetMapping(value = "/pagos/{idCohorte}/matricula")
     public ResponseEntity<?> listPagosMatricula(
-            @RequestParam(value = "idPrograma") Integer programaId,
+            @PathVariable Integer idCohorte,
             @RequestParam(value = "page", required = false) Integer page,
             @RequestParam(value = "size", required = false) Integer size) {
         try {
             if (page == null) {
                 List<ufps.edu.co.rest.dto.PagoreciboDirectorProjectionDTO> recibos = pagorecibomatriculaService
-                        .findDirectorByProgramaId(programaId);
+                        .findDirectorByCohorteId(idCohorte);
                 var outputs = recibos.stream().map(r -> {
                     try {
                         if (r == null)
@@ -371,7 +371,7 @@ public class DirectorProgramaCase {
                 int s = (size != null && size > 0) ? size : 50;
                 Pageable pageable = PageRequest.of(p, s);
                 Page<ufps.edu.co.rest.dto.PagoreciboDirectorProjectionDTO> pageResult = pagorecibomatriculaService
-                        .findDirectorByProgramaId(programaId, pageable);
+                        .findDirectorByCohorteId(idCohorte, pageable);
                 Page<PagoreciboDirectorOutput> mapped = pageResult
                         .map(r -> PagoreciboDirectorOutput.builder()
                                 .id(r.getId())

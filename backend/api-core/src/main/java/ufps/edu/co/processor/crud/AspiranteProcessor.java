@@ -820,10 +820,13 @@ public class AspiranteProcessor implements
             boolean activa = "ABIERTA".equalsIgnoreCase(estadoTipo);
             int cupos = cuposRaw != null ? cuposRaw : 0;
             long inscritos = service.countByCohorte(id);
+            long noConfirmados = service.countNoConfirmadosByCohorte(id);
+            long confirmados = service.countConfirmadosByCohorte(id);
             long pazYSalvo = service.countPazYSalvoByCohorte(id);
             long validados = service.countValidadosByCohorte(id);
             long calificados = service.countCalificadosByCohorte(id);
             long admitidos = service.countAdmitidosByCohorte(id);
+            long legalizados = service.countLegalizadosByCohorte(id);
 
             return CohorteResumenOutput.builder()
                     .id(id)
@@ -835,10 +838,13 @@ public class AspiranteProcessor implements
                     .fechaLimiteDocs(plazoDocFin)
                     .fechaLimiteInscripcion(plazoInsFin)
                     .totalInscritos(inscritos)
+                    .totalNoConfirmados(noConfirmados)
+                    .totalConfirmados(confirmados)
                     .totalPazysalvo(pazYSalvo)
                     .totalValidados(validados)
                     .totalCalificados(calificados)
                     .totalAdmitidos(admitidos)
+                    .totalLegalizados(legalizados)
                     .build();
         }).toList();
     }
