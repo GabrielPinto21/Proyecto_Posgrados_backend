@@ -4,21 +4,16 @@
  */
 package ufps.edu.co.rest.services;
 
-import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import ufps.edu.co.persistence.entities.AspiranteEntity;
-import ufps.edu.co.persistence.entities.DocumentopersonaEntity;
-import ufps.edu.co.persistence.entities.PersonaEntity;
-import ufps.edu.co.persistence.repositories.AspiranteRepository;
-import ufps.edu.co.rest.dto.AspiranteDTO;
-import ufps.edu.co.rest.dto.AspiranteCheckoutDTO;
-import ufps.edu.co.rest.dto.PagoCheckoutPreviewDataDTO;
-import ufps.edu.co.rest.dto.DocumentopersonaDTO;
-import ufps.edu.co.rest.dto.EstadoDTO;
-import ufps.edu.co.rest.dto.PersonaDTO;
-import ufps.edu.co.rest.services.commons.GenericService;
+import java.util.*;
+
+import org.springframework.beans.factory.annotation.*;
+import org.springframework.stereotype.*;
+import org.springframework.transaction.annotation.*;
+
+import ufps.edu.co.persistence.entities.*;
+import ufps.edu.co.persistence.repositories.*;
+import ufps.edu.co.rest.dto.*;
+import ufps.edu.co.rest.services.commons.*;
 
 /**
  * REST service for entity "Aspirante" <br>
@@ -193,6 +188,11 @@ public class AspiranteService extends GenericService<AspiranteEntity, AspiranteD
 
     public long countLegalizadosByCohorte(Integer cohorteId) {
         return repository.countByIdCohorteAndEstadoTipoIn(cohorteId, List.of("LEGALIZADO"));
+    }
+
+    @Transactional(readOnly = true)
+    public List<CohorteCountsProjection> countAllByProgramaId(Integer programaId) {
+        return repository.countAllByProgramaId(programaId);
     }
 
     @Transactional(readOnly = true)

@@ -4,14 +4,17 @@
  */
 package ufps.edu.co.rest.services;
 
-import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import ufps.edu.co.persistence.entities.PagorecibomatriculaEntity;
-import ufps.edu.co.persistence.repositories.PagorecibomatriculaRepository;
-import ufps.edu.co.rest.dto.PagorecibomatriculaDTO;
-import ufps.edu.co.rest.services.commons.GenericService;
+import java.util.*;
+
+import org.springframework.beans.factory.annotation.*;
+import org.springframework.data.domain.*;
+import org.springframework.stereotype.*;
+import org.springframework.transaction.annotation.*;
+
+import ufps.edu.co.persistence.entities.*;
+import ufps.edu.co.persistence.repositories.*;
+import ufps.edu.co.rest.dto.*;
+import ufps.edu.co.rest.services.commons.*;
 
 /**
  * REST service for entity "Pagorecibomatricula" <br>
@@ -73,22 +76,22 @@ public class PagorecibomatriculaService extends GenericService<Pagorecibomatricu
     }
 
     @Transactional(readOnly = true)
-    public List<ufps.edu.co.rest.dto.PagoreciboDirectorProjectionDTO> findDirectorByProgramaId(Integer programaId) {
+    public List<PagoreciboDirectorProjectionDTO> findDirectorByProgramaId(Integer programaId) {
         return repository.findDirectorByProgramaId(programaId);
     }
 
     @Transactional(readOnly = true)
-    public org.springframework.data.domain.Page<ufps.edu.co.rest.dto.PagoreciboDirectorProjectionDTO> findDirectorByProgramaId(Integer programaId, org.springframework.data.domain.Pageable pageable) {
+    public Page<PagoreciboDirectorProjectionDTO> findDirectorByProgramaId(Integer programaId, Pageable pageable) {
         return repository.findDirectorByProgramaId(programaId, pageable);
     }
 
     @Transactional(readOnly = true)
-    public List<ufps.edu.co.rest.dto.PagoreciboDirectorProjectionDTO> findDirectorByCohorteId(Integer cohorteId) {
+    public List<PagoreciboDirectorProjectionDTO> findDirectorByCohorteId(Integer cohorteId) {
         return repository.findDirectorByCohorteId(cohorteId);
     }
 
     @Transactional(readOnly = true)
-    public org.springframework.data.domain.Page<ufps.edu.co.rest.dto.PagoreciboDirectorProjectionDTO> findDirectorByCohorteId(Integer cohorteId, org.springframework.data.domain.Pageable pageable) {
+    public Page<PagoreciboDirectorProjectionDTO> findDirectorByCohorteId(Integer cohorteId, Pageable pageable) {
         return repository.findDirectorByCohorteId(cohorteId, pageable);
     }
 
