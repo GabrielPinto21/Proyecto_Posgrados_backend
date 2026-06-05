@@ -120,6 +120,10 @@ public class ProgramaProcessor implements
     @Override
     public void deleteById(PROGRAMA_DELETE input) {
         try {
+            UltimocodigoprogramaDTO ultimoCodigo = ultimocodigoprogramaService.findByIdPrograma(input.id());
+            if (ultimoCodigo != null) {
+                ultimocodigoprogramaService.deleteById(ultimoCodigo.getId());
+            }
             service.deleteById(input.id());
         } catch (Exception e) {
             throw new RuntimeException("Error deleting Programa: " + e.getMessage(), e);
