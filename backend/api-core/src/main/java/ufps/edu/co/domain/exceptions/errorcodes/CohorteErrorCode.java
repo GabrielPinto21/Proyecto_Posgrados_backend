@@ -30,7 +30,10 @@ public enum CohorteErrorCode implements BaseErrorCode {
             "La cohorte indicada no está abierta"),
     COHORTE_SIN_PROGRAMA_CONFLICT(
             "COHORTE_SIN_PROGRAMA_CONFLICT",
-            "La cohorte indicada no tiene programa asociado");
+            "La cohorte indicada no tiene programa asociado"),
+    COHORTE_CON_DEPENDENCIAS_CONFLICT(
+            "COHORTE_CON_DEPENDENCIAS_CONFLICT",
+            "No se puede eliminar la cohorte porque tiene registros dependientes asociados (criterios de cohorte u otros)");
 
     private final String code;
     private final String defaultMessage;
