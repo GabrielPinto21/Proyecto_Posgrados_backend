@@ -183,6 +183,18 @@ public class AspiranteService extends GenericService<AspiranteEntity, AspiranteD
         return repository.countByIdCohorteAndEstadoTipoIn(cohorteId, List.of("POR LEGALIZAR", "LEGALIZADO", "ADMITIDO"));
     }
 
+    public long countNoConfirmadosByCohorte(Integer cohorteId) {
+        return repository.countByIdCohorteAndEstadoTipoIn(cohorteId, List.of("NO CONFIRMADO"));
+    }
+
+    public long countConfirmadosByCohorte(Integer cohorteId) {
+        return repository.countByIdCohorteAndEstadoTipoIn(cohorteId, List.of("INSCRITO"));
+    }
+
+    public long countLegalizadosByCohorte(Integer cohorteId) {
+        return repository.countByIdCohorteAndEstadoTipoIn(cohorteId, List.of("LEGALIZADO"));
+    }
+
     @Transactional(readOnly = true)
     public List<AspiranteDTO> findAValidarByCohorte(int cohorteId) {
         return entityListToDtoList(repository.findByIdCohorteAndEstadoTipoIn(

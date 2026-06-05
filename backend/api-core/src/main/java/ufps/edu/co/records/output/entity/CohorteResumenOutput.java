@@ -16,8 +16,11 @@ public record CohorteResumenOutput(
         LocalDate fechaLimiteDocs,
         LocalDate fechaLimiteInscripcion,
         long totalInscritos,
+        long totalNoConfirmados,
+        long totalConfirmados,
         long totalPazysalvo,
         long totalValidados,
         long totalCalificados,
-        long totalAdmitidos
+        long totalAdmitidos,
+        long totalLegalizados
 ) implements OutputResponse {}
