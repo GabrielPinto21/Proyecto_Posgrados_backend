@@ -22,6 +22,9 @@ public class UltimocodigoprogramaProcessor implements
     @Autowired
     private UltimocodigoprogramaMap map;
 
+    @Autowired
+    private ProgramaService programaService;
+
     @Override
     public UltimocodigoprogramaOutput create(ULTIMOCODIGOPROGRAMA_CREATE input) {
         if (service.existsByIdPrograma(input.idPrograma())) {
@@ -64,7 +67,15 @@ public class UltimocodigoprogramaProcessor implements
 
     @Override
     public List<UltimocodigoprogramaOutput> findAll() {
-        return service.findAll().stream().map(map::toOutput).toList();
+        return service.findAll().stream().map(dto -> {
+            ProgramaDTO programa = dto.getIdPrograma() != null ? programaService.findById(dto.getIdPrograma()) : null;
+            return UltimocodigoprogramaOutput.builder()
+                    .id(dto.getId())
+                    .idPrograma(dto.getIdPrograma())
+                    .nombrePrograma(programa != null ? programa.getNombre() : null)
+                    .codigo(dto.getCodigo())
+                    .build();
+        }).toList();
     }
 
     @Override

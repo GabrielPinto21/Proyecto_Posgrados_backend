@@ -7,5 +7,6 @@ import ufps.edu.co.records.*;
 public record UltimocodigoprogramaOutput(
         Integer id,
         Integer idPrograma,
+        String nombrePrograma,
         Integer codigo) implements OutputResponse {
 }
