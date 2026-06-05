@@ -67,6 +67,10 @@ public class EmailTemplates {
 
   public static final String ASUNTO_RECHAZO_PAGO_MATRICULA = "Pago de matrícula rechazado - Posgrados UFPS";
 
+  public static final String ASUNTO_CONFIRMACION_PAGO_VIRTUAL_INSCRIPCION = "Pago de inscripción confirmado - Posgrados UFPS";
+
+  public static final String ASUNTO_CONFIRMACION_PAGO_VIRTUAL_MATRICULA = "Pago de matrícula confirmado - Posgrados UFPS";
+
   // ─── Cuerpos HTML ────────────────────────────────────────────────────────────
 
   public static String cuerpoInscripcion(
@@ -730,6 +734,48 @@ public class EmailTemplates {
         </body>
         </html>
         """.formatted(encabezado(), nombres, enlaceReset);
+  }
+
+  public static String cuerpoConfirmacionPagoVirtualInscripcion(String nombres, String apellidos) {
+    return """
+        <!DOCTYPE html>
+        <html lang="es">
+        <body style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+          %s
+          <h2 style="color: #1a7a4a;">¡Tu pago de inscripción fue confirmado!</h2>
+          <p>Estimado/a <strong>%s %s</strong>,</p>
+          <p>Le confirmamos que su <strong>pago de inscripción</strong> ha sido procesado y confirmado
+             exitosamente a través de la pasarela de pagos electrónicos Wompi.</p>
+          <p>Su expediente ha quedado registrado con el pago de inscripción. En los próximos días
+             recibirá instrucciones sobre los siguientes pasos de su proceso de admisión.</p>
+          <br/>
+          <p style="color: #666; font-size: 0.9em;">
+            Universidad Francisco de Paula Santander &mdash; Oficina de Posgrados
+          </p>
+        </body>
+        </html>
+        """.formatted(encabezado(), nombres, apellidos);
+  }
+
+  public static String cuerpoConfirmacionPagoVirtualMatricula(String nombres, String apellidos) {
+    return """
+        <!DOCTYPE html>
+        <html lang="es">
+        <body style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+          %s
+          <h2 style="color: #1a7a4a;">¡Tu pago de matrícula fue confirmado!</h2>
+          <p>Estimado/a <strong>%s %s</strong>,</p>
+          <p>Le confirmamos que su <strong>pago de matrícula</strong> ha sido procesado y confirmado
+             exitosamente a través de la pasarela de pagos electrónicos Wompi.</p>
+          <p>Su proceso de legalización ha sido completado satisfactoriamente. En breve recibirá
+             su código estudiantil para acceder a los servicios académicos de la universidad.</p>
+          <br/>
+          <p style="color: #666; font-size: 0.9em;">
+            Universidad Francisco de Paula Santander &mdash; Oficina de Posgrados
+          </p>
+        </body>
+        </html>
+        """.formatted(encabezado(), nombres, apellidos);
   }
 
   public static String cuerpoRechazoPagoMatricula(String nombres, String apellidos) {
