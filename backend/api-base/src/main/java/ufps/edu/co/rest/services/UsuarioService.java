@@ -5,6 +5,7 @@
 package ufps.edu.co.rest.services;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -90,6 +91,11 @@ public class UsuarioService extends GenericService<UsuarioEntity, UsuarioDTO> {
     @Transactional(readOnly = true)
     public UsuarioDTO findById(Integer id) {
         return entityToDto(repository.findById(id));
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<UsuarioDTO> findByIdPersona(Integer idPersona) {
+        return repository.findByIdPersona(idPersona).map(this::entityToDto);
     }
 
     @Transactional(readOnly = true)

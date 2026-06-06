@@ -5,6 +5,7 @@
 package ufps.edu.co.rest.services;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +49,11 @@ public class PersonaService extends GenericService<PersonaEntity, PersonaDTO> {
                 .orElseThrow(() -> new RuntimeException("Persona no encontrado con id: " + id));
         dto.setId(id);
         return entityToDto(repository.save(dtoToEntity(dto)));
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<PersonaDTO> findByCorreo(String correo) {
+        return repository.findByCorreoIgnoreCase(correo).map(this::entityToDto);
     }
 
     @Transactional(readOnly = true)
