@@ -35,6 +35,11 @@ public class ValoresglobalesService extends GenericService<ValoresglobalesEntity
     }
 
     @Transactional(readOnly = true)
+    public List<ValoresglobalesDTO> findByClaveStartingWith(String prefix) {
+        return entityListToDtoList(repository.findByClaveStartingWith(prefix));
+    }
+
+    @Transactional(readOnly = true)
     public ValoresglobalesDTO findById(Integer id) {
         return entityToDto(repository.findById(id));
     }
