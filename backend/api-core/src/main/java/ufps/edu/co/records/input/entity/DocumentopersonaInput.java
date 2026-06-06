@@ -9,14 +9,14 @@ import ufps.edu.co.records.contracts.UpdateType;
 
 public class DocumentopersonaInput {
     public record DOCUMENTOPERSONA_CREATE(
-            @NotNull Integer numerodocumento,
+            @NotNull String numerodocumento,
             @NotNull Integer idTipodocumento,
             @NotNull Integer idLugarexpedicion) implements CreateType {
     }
 
     public record DOCUMENTOPERSONA_UPDATE(
             @NotNull Integer id,
-            @NotNull Integer numerodocumento,
+            @NotNull String numerodocumento,
             @NotNull Integer idTipodocumento,
             @NotNull Integer idLugarexpedicion) implements UpdateType {
     }
