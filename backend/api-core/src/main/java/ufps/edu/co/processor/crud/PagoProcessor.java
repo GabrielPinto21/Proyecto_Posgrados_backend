@@ -90,12 +90,10 @@ public class PagoProcessor {
         BigDecimal valorMatricula = calcularMontoMatriculaEnPesos(idAspirante);
         // Pre-fetch receipts related to these pagos to prefer stored amounts when available
         var pagoIds = pagos.stream().map(PagoResumenDTO::id).filter(Objects::nonNull).collect(Collectors.toSet());
-        List<PagoreciboinscripcionDTO> recibosInscripcion = pagoreciboinscripcionService.findAll().stream()
-            .filter(item -> item.getIdPago() != null && pagoIds.contains(item.getIdPago()))
-            .collect(Collectors.toList());
-        List<PagorecibomatriculaDTO> recibosMatricula = pagorecibomatriculaService.findAll().stream()
-            .filter(item -> item.getIdPago() != null && pagoIds.contains(item.getIdPago()))
-            .collect(Collectors.toList());
+        List<PagoreciboinscripcionDTO> recibosInscripcion = pagoIds.isEmpty()
+            ? List.of() : pagoreciboinscripcionService.findByIdPagoIn(pagoIds);
+        List<PagorecibomatriculaDTO> recibosMatricula = pagoIds.isEmpty()
+            ? List.of() : pagorecibomatriculaService.findByIdPagoIn(pagoIds);
 
         return pagos.stream()
             .map(dto -> {

@@ -44,6 +44,8 @@ public interface PagorecibomatriculaRepository extends JpaRepository<Pagorecibom
 
 	Optional<PagorecibomatriculaEntity> findFirstByIdPagoOrderByIdDesc(Integer idPago);
 
+	List<PagorecibomatriculaEntity> findByIdPagoIn(Collection<Integer> idPagos);
+
 	PagorecibomatriculaEntity findFirstByPago_IdAspiranteAndEstado_TipoIgnoreCaseAndEstado_EntidadIgnoreCaseOrderByIdDesc(
 			Integer idAspirante, String tipoEstado, String entidadEstado);
 

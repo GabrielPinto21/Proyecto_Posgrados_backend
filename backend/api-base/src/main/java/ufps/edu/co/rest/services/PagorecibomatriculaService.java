@@ -120,4 +120,9 @@ public class PagorecibomatriculaService extends GenericService<Pagorecibomatricu
         var entity = repository.findFirstByIdPagoOrderByIdDesc(idPago).orElse(null);
         return entityToDto(entity);
     }
+
+    @Transactional(readOnly = true)
+    public List<PagorecibomatriculaDTO> findByIdPagoIn(Collection<Integer> idPagos) {
+        return entityListToDtoList(repository.findByIdPagoIn(idPagos));
+    }
 }
