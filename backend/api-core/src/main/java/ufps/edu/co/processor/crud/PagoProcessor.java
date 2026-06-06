@@ -671,12 +671,9 @@ public class PagoProcessor {
         actualizarEstadosPagoYRecibo(pago, estadoRealizado);
         PagoDTO updated = pagoService.findById(pago.getId());
 
-        String tipoConcepto = pagoconceptoService.findAll().stream()
-                .filter(c -> c.getId() != null && Objects.equals(c.getId(), pago.getIdPagoconcepto()))
-                .map(PagoconceptoDTO::getTipo)
-                .filter(t -> t != null && !t.isBlank())
-                .findFirst()
-                .orElse(null);
+        PagoconceptoDTO conceptoWebhook = pagoconceptoService.findById(pago.getIdPagoconcepto());
+        String tipoConcepto = (conceptoWebhook != null && conceptoWebhook.getTipo() != null
+                && !conceptoWebhook.getTipo().isBlank()) ? conceptoWebhook.getTipo() : null;
 
         if ("INSCRIPCION".equalsIgnoreCase(tipoConcepto)) {
             notificarPago(updated.getIdAspirante(),
@@ -760,13 +757,9 @@ public class PagoProcessor {
             throw new IllegalArgumentException("pago y estadoRealizado son requeridos");
         }
 
-        String tipoConcepto = pagoconceptoService.findAll().stream()
-                .filter(concepto -> concepto.getId() != null
-                        && Objects.equals(concepto.getId(), pago.getIdPagoconcepto()))
-                .map(PagoconceptoDTO::getTipo)
-                .filter(tipo -> tipo != null && !tipo.isBlank())
-                .findFirst()
-                .orElse(null);
+        PagoconceptoDTO conceptoPago = pagoconceptoService.findById(pago.getIdPagoconcepto());
+        String tipoConcepto = (conceptoPago != null && conceptoPago.getTipo() != null
+                && !conceptoPago.getTipo().isBlank()) ? conceptoPago.getTipo() : null;
 
         if (tipoConcepto == null) {
             throw new DomainException(PagoErrorCode.PAGO_CONCEPTO_NOT_FOUND, pago.getIdPagoconcepto());
@@ -802,10 +795,7 @@ public class PagoProcessor {
 
     private void actualizarReciboMatriculaYPago(PagoDTO pago, EstadoDTO estadoRealizado) {
         log.info("Actualizando recibo matricula para pago id={}", pago.getId());
-        PagorecibomatriculaDTO recibo = pagorecibomatriculaService.findAll().stream()
-                .filter(item -> item.getIdPago() != null && Objects.equals(item.getIdPago(), pago.getId()))
-                .findFirst()
-                .orElse(null);
+        PagorecibomatriculaDTO recibo = pagorecibomatriculaService.findByIdPago(pago.getId());
         if (recibo == null) {
             log.warn("No se encontro recibo matricula para pago id={} aspirante={}", pago.getId(), pago.getIdAspirante());
             throw new DomainException(PagoErrorCode.PAGO_NOT_FOUND, pago.getIdAspirante());
@@ -902,9 +892,7 @@ public class PagoProcessor {
     }
 
     private PagoResumenDTO encontrarPagoConceptoResumen(Integer idAspirante, String tipoConcepto) {
-        PagoconceptoDTO concepto = pagoconceptoService.findAll().stream()
-                .filter(item -> item.getTipo() != null && item.getTipo().equalsIgnoreCase(tipoConcepto))
-                .findFirst()
+        PagoconceptoDTO concepto = pagoconceptoService.findByTipoIgnoreCase(tipoConcepto)
                 .orElseThrow(() -> new DomainException(PagoErrorCode.PAGO_CONCEPTO_NOT_FOUND, tipoConcepto));
 
         return pagoService.findResumenByIdAspirante(idAspirante).stream()
