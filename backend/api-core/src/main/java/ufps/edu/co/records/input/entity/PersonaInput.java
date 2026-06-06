@@ -111,7 +111,7 @@ public enum PersonaInput {
                         UBICACION_CREATE ubicacionvivienda,
                         UBICACION_CREATE ubicacionnacimiento,
                         UBICACION_CREATE ubicaciontrabajo,
-                        Integer numerodocumento,
+                        String numerodocumento,
                         Integer idTipodocumento,
                         UBICACION_CREATE lugarexpedicion) implements CreateType {
         }
