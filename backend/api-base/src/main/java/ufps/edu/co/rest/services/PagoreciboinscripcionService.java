@@ -74,6 +74,12 @@ public class PagoreciboinscripcionService
     }
 
     @Transactional(readOnly = true)
+    public PagoreciboinscripcionDTO findByIdPago(Integer idPago) {
+        var entity = repository.findFirstByIdPagoOrderByIdDesc(idPago).orElse(null);
+        return entityToDto(entity);
+    }
+
+    @Transactional(readOnly = true)
     public boolean existsCurrentByIdAspirante(Integer idAspirante) {
         return repository.existsByPago_IdAspiranteAndEstado_TipoIgnoreCaseAndEstado_EntidadIgnoreCase(idAspirante,
                 "EN CURSO", "pagoinscripcion");

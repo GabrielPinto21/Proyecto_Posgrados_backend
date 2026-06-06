@@ -52,6 +52,8 @@ public interface PagoreciboinscripcionRepository extends JpaRepository<Pagorecib
 
 	List<PagoreciboinscripcionEntity> findByIdPagoIn(Collection<Integer> idPagos);
 
+	Optional<PagoreciboinscripcionEntity> findFirstByIdPagoOrderByIdDesc(Integer idPago);
+
 	Optional<PagoreciboinscripcionEntity> findFirstByPago_IdAspiranteAndEstado_TipoIgnoreCaseAndEstado_EntidadIgnoreCaseOrderByIdDesc(
 			Integer idAspirante, String tipo, String entidad);
 

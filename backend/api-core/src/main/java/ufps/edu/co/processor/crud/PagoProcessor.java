@@ -432,10 +432,7 @@ public class PagoProcessor {
         PagoreciboinscripcionDTO pagoreciboinscripcion = pagoreciboinscripcionService
             .findCurrentByIdAspirante(idAspirante);
         if (pagoreciboinscripcion == null) {
-            pagoreciboinscripcion = pagoreciboinscripcionService.findAll().stream()
-                .filter(item -> item.getIdPago() != null && Objects.equals(item.getIdPago(), pago.id()))
-                .findFirst()
-                .orElse(null);
+            pagoreciboinscripcion = pagoreciboinscripcionService.findByIdPago(pago.id());
         }
         if (pagoreciboinscripcion != null) {
             if (pagoreciboinscripcion.getValorpago() != null) {
@@ -463,10 +460,7 @@ public class PagoProcessor {
         BigDecimal montoTotal = calcularMontoMatriculaEnPesos(idAspirante);
         PagorecibomatriculaDTO recibo = pagorecibomatriculaService.findCurrentByIdAspirante(idAspirante);
         if (recibo == null) {
-            recibo = pagorecibomatriculaService.findAll().stream()
-                .filter(item -> item.getIdPago() != null && Objects.equals(item.getIdPago(), pago.id()))
-                .findFirst()
-                .orElse(null);
+            recibo = pagorecibomatriculaService.findByIdPago(pago.id());
         }
         BigDecimal monto;
         if (recibo != null && recibo.getValorpago() != null) {
@@ -499,10 +493,7 @@ public class PagoProcessor {
         PagoreciboinscripcionDTO pagoreciboinscripcion = pagoreciboinscripcionService
             .findCurrentByIdAspirante(idAspirante);
         if (pagoreciboinscripcion == null) {
-            pagoreciboinscripcion = pagoreciboinscripcionService.findAll().stream()
-                .filter(item -> item.getIdPago() != null && Objects.equals(item.getIdPago(), pago.id()))
-                .findFirst()
-                .orElse(null);
+            pagoreciboinscripcion = pagoreciboinscripcionService.findByIdPago(pago.id());
         }
         BigDecimal monto = calcularMontoInscripcionEnPesos();
         @SuppressWarnings("unused")
@@ -564,10 +555,7 @@ public class PagoProcessor {
 
         PagorecibomatriculaDTO recibo = pagorecibomatriculaService.findCurrentByIdAspirante(idAspirante);
         if (recibo == null) {
-            recibo = pagorecibomatriculaService.findAll().stream()
-                    .filter(item -> item.getIdPago() != null && Objects.equals(item.getIdPago(), pago.id()))
-                    .findFirst()
-                    .orElse(null);
+            recibo = pagorecibomatriculaService.findByIdPago(pago.id());
         }
         BigDecimal montoTotal = calcularMontoMatriculaEnPesos(idAspirante);
         BigDecimal valorMatricula = montoTotal;
