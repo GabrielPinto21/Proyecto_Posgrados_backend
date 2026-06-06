@@ -5,6 +5,7 @@
 package ufps.edu.co.rest.services;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +38,11 @@ public class PagoconceptoService extends GenericService<PagoconceptoEntity, Pago
     @Transactional(readOnly = true)
     public PagoconceptoDTO findById(Integer id) {
         return entityToDto(repository.findById(id));
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<PagoconceptoDTO> findByTipoIgnoreCase(String tipo) {
+        return repository.findByTipoIgnoreCase(tipo).map(this::entityToDto);
     }
 
     public PagoconceptoDTO create(PagoconceptoDTO dto) {

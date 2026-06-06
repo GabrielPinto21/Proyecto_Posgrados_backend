@@ -48,17 +48,12 @@ public class RecoveryPasswordRestCase {
 			return ResponseEntity.badRequest().body("Correo invalido");
 		}
 
-		Optional<PersonaDTO> persona = personaService.findAll().stream()
-				.filter(p -> p.getCorreo() != null
-						&& p.getCorreo().trim().toLowerCase(Locale.ROOT).equals(email))
-				.findFirst();
+		Optional<PersonaDTO> persona = personaService.findByCorreo(email);
 		if (persona.isEmpty()) {
 			return ResponseEntity.notFound().build();
 		}
 
-		Optional<UsuarioDTO> usuario = usuarioService.findAll().stream()
-				.filter(u -> u.getIdPersona() == persona.get().getId())
-				.findFirst();
+		Optional<UsuarioDTO> usuario = usuarioService.findByIdPersona(persona.get().getId());
 		if (usuario.isEmpty()) {
 			return ResponseEntity.notFound().build();
 		}

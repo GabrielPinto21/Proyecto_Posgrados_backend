@@ -42,4 +42,6 @@ public interface PersonaRepository extends JpaRepository<PersonaEntity, Integer>
 	boolean existsByCorreoIgnoreCase(String correo);
 
 	Optional<PersonaEntity> findByCorreo(String correo);
+
+	Optional<PersonaEntity> findByCorreoIgnoreCase(String correo);
 }

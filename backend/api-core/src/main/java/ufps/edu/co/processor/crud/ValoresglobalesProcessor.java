@@ -34,9 +34,9 @@ public class ValoresglobalesProcessor {
         String normalizedPrefix = normalizePrefix(prefix);
         int currentYear = LocalDate.now().getYear();
 
-        return findAll().stream()
+        return resolvePrefixAliases(normalizedPrefix).stream()
+            .flatMap(alias -> valoresglobalesService.findByClaveStartingWith(alias + "_" + currentYear + "_").stream())
             .filter(item -> item.getClave() != null)
-            .filter(item -> matchesCurrentFamily(item.getClave(), normalizedPrefix, currentYear))
             .max(Comparator.comparingInt(item -> extractVersionForAliases(item.getClave(), normalizedPrefix, currentYear)))
             .orElseThrow(() -> new DomainException(
                 VariablesglobalesErrorCode.VALOR_GLOBAL_NO_CONFIGURADO_NOT_FOUND_TAMANO_MAXIMO,
@@ -45,9 +45,9 @@ public class ValoresglobalesProcessor {
 
     public List<ValoresglobalesDTO> findAllByPrefix(String prefix) {
         String normalizedPrefix = normalizePrefix(prefix);
-        return findAll().stream()
+        return resolvePrefixAliases(normalizedPrefix).stream()
+                .flatMap(alias -> valoresglobalesService.findByClaveStartingWith(alias + "_").stream())
                 .filter(item -> item.getClave() != null)
-            .filter(item -> matchesFamily(item.getClave(), normalizedPrefix))
                 .sorted((left, right) -> right.getClave().compareToIgnoreCase(left.getClave()))
                 .collect(Collectors.toList());
     }
@@ -78,10 +78,6 @@ public class ValoresglobalesProcessor {
 
     public long calcularValorInscripcionCentavos() {
         return calcularValorInscripcionPesos().movePointRight(2).setScale(0, RoundingMode.HALF_UP).longValueExact();
-    }
-
-    private List<ValoresglobalesDTO> findAll() {
-        return valoresglobalesService.findAll();
     }
 
     private Integer extractVersion(String clave, String prefix, int year) {
@@ -169,9 +165,8 @@ public class ValoresglobalesProcessor {
         String normalizedValue = normalizeValueWithSuffix(dto.getValor(), requiredSuffix);
 
         int year = LocalDate.now().getYear();
-        List<ValoresglobalesDTO> existing = findAll();
-        int maxVersion = existing.stream()
-                .filter(item -> item.getClave() != null && item.getClave().startsWith(prefix + "_" + year + "_"))
+        int maxVersion = valoresglobalesService.findByClaveStartingWith(prefix + "_" + year + "_").stream()
+                .filter(item -> item.getClave() != null)
                 .mapToInt(item -> extractVersion(item.getClave(), prefix, year))
                 .max()
                 .orElse(0);

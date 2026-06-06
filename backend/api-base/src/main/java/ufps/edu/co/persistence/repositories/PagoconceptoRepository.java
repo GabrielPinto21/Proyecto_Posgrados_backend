@@ -4,6 +4,8 @@
  */
 package ufps.edu.co.persistence.repositories;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -37,7 +39,9 @@ import ufps.edu.co.persistence.entities.PagoconceptoEntity;
 @Repository
 public interface PagoconceptoRepository extends JpaRepository<PagoconceptoEntity, Integer> {
 
-	// Insert specific finders here 
+	Optional<PagoconceptoEntity> findByTipoIgnoreCase(String tipo);
+
+	// Insert specific finders here
 
 	//List<PagoconceptoEntity> findByXxx(String xxx);
 

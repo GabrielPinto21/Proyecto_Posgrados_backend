@@ -50,6 +50,10 @@ import ufps.edu.co.rest.dto.*;
 @Repository
 public interface PagoreciboinscripcionRepository extends JpaRepository<PagoreciboinscripcionEntity, Integer> {
 
+	List<PagoreciboinscripcionEntity> findByIdPagoIn(Collection<Integer> idPagos);
+
+	Optional<PagoreciboinscripcionEntity> findFirstByIdPagoOrderByIdDesc(Integer idPago);
+
 	Optional<PagoreciboinscripcionEntity> findFirstByPago_IdAspiranteAndEstado_TipoIgnoreCaseAndEstado_EntidadIgnoreCaseOrderByIdDesc(
 			Integer idAspirante, String tipo, String entidad);
 

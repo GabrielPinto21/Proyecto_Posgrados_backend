@@ -90,12 +90,10 @@ public class PagoProcessor {
         BigDecimal valorMatricula = calcularMontoMatriculaEnPesos(idAspirante);
         // Pre-fetch receipts related to these pagos to prefer stored amounts when available
         var pagoIds = pagos.stream().map(PagoResumenDTO::id).filter(Objects::nonNull).collect(Collectors.toSet());
-        List<PagoreciboinscripcionDTO> recibosInscripcion = pagoreciboinscripcionService.findAll().stream()
-            .filter(item -> item.getIdPago() != null && pagoIds.contains(item.getIdPago()))
-            .collect(Collectors.toList());
-        List<PagorecibomatriculaDTO> recibosMatricula = pagorecibomatriculaService.findAll().stream()
-            .filter(item -> item.getIdPago() != null && pagoIds.contains(item.getIdPago()))
-            .collect(Collectors.toList());
+        List<PagoreciboinscripcionDTO> recibosInscripcion = pagoIds.isEmpty()
+            ? List.of() : pagoreciboinscripcionService.findByIdPagoIn(pagoIds);
+        List<PagorecibomatriculaDTO> recibosMatricula = pagoIds.isEmpty()
+            ? List.of() : pagorecibomatriculaService.findByIdPagoIn(pagoIds);
 
         return pagos.stream()
             .map(dto -> {
@@ -152,18 +150,16 @@ public class PagoProcessor {
         }
 
         EstadoDTO estadoPendiente = resolveEstadoPago("PENDIENTE");
-        Map<String, PagoconceptoDTO> conceptos = pagoconceptoService.findAll().stream()
-                .filter(concepto -> concepto.getTipo() != null)
-                .collect(Collectors.toMap(concepto -> concepto.getTipo().toUpperCase(Locale.ROOT), concepto -> concepto,
-                        (primero, segundo) -> primero));
+        PagoconceptoDTO conceptoInscripcion = pagoconceptoService.findByTipoIgnoreCase("INSCRIPCION").orElse(null);
+        PagoconceptoDTO conceptoMatricula = pagoconceptoService.findByTipoIgnoreCase("MATRICULA").orElse(null);
 
         Set<Integer> conceptosExistentes = pagoService.findResumenByIdAspirante(idAspirante).stream()
                 .map(PagoResumenDTO::idPagoconcepto)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
 
-        crearPagoPendienteSiFalta(idAspirante, estadoPendiente, conceptosExistentes, conceptos.get("INSCRIPCION"));
-        crearPagoPendienteSiFalta(idAspirante, estadoPendiente, conceptosExistentes, conceptos.get("MATRICULA"));
+        crearPagoPendienteSiFalta(idAspirante, estadoPendiente, conceptosExistentes, conceptoInscripcion);
+        crearPagoPendienteSiFalta(idAspirante, estadoPendiente, conceptosExistentes, conceptoMatricula);
     }
 
     @SuppressWarnings("null")
@@ -434,10 +430,7 @@ public class PagoProcessor {
         PagoreciboinscripcionDTO pagoreciboinscripcion = pagoreciboinscripcionService
             .findCurrentByIdAspirante(idAspirante);
         if (pagoreciboinscripcion == null) {
-            pagoreciboinscripcion = pagoreciboinscripcionService.findAll().stream()
-                .filter(item -> item.getIdPago() != null && Objects.equals(item.getIdPago(), pago.id()))
-                .findFirst()
-                .orElse(null);
+            pagoreciboinscripcion = pagoreciboinscripcionService.findByIdPago(pago.id());
         }
         if (pagoreciboinscripcion != null) {
             if (pagoreciboinscripcion.getValorpago() != null) {
@@ -465,10 +458,7 @@ public class PagoProcessor {
         BigDecimal montoTotal = calcularMontoMatriculaEnPesos(idAspirante);
         PagorecibomatriculaDTO recibo = pagorecibomatriculaService.findCurrentByIdAspirante(idAspirante);
         if (recibo == null) {
-            recibo = pagorecibomatriculaService.findAll().stream()
-                .filter(item -> item.getIdPago() != null && Objects.equals(item.getIdPago(), pago.id()))
-                .findFirst()
-                .orElse(null);
+            recibo = pagorecibomatriculaService.findByIdPago(pago.id());
         }
         BigDecimal monto;
         if (recibo != null && recibo.getValorpago() != null) {
@@ -501,10 +491,7 @@ public class PagoProcessor {
         PagoreciboinscripcionDTO pagoreciboinscripcion = pagoreciboinscripcionService
             .findCurrentByIdAspirante(idAspirante);
         if (pagoreciboinscripcion == null) {
-            pagoreciboinscripcion = pagoreciboinscripcionService.findAll().stream()
-                .filter(item -> item.getIdPago() != null && Objects.equals(item.getIdPago(), pago.id()))
-                .findFirst()
-                .orElse(null);
+            pagoreciboinscripcion = pagoreciboinscripcionService.findByIdPago(pago.id());
         }
         BigDecimal monto = calcularMontoInscripcionEnPesos();
         @SuppressWarnings("unused")
@@ -566,10 +553,7 @@ public class PagoProcessor {
 
         PagorecibomatriculaDTO recibo = pagorecibomatriculaService.findCurrentByIdAspirante(idAspirante);
         if (recibo == null) {
-            recibo = pagorecibomatriculaService.findAll().stream()
-                    .filter(item -> item.getIdPago() != null && Objects.equals(item.getIdPago(), pago.id()))
-                    .findFirst()
-                    .orElse(null);
+            recibo = pagorecibomatriculaService.findByIdPago(pago.id());
         }
         BigDecimal montoTotal = calcularMontoMatriculaEnPesos(idAspirante);
         BigDecimal valorMatricula = montoTotal;
@@ -671,12 +655,9 @@ public class PagoProcessor {
         actualizarEstadosPagoYRecibo(pago, estadoRealizado);
         PagoDTO updated = pagoService.findById(pago.getId());
 
-        String tipoConcepto = pagoconceptoService.findAll().stream()
-                .filter(c -> c.getId() != null && Objects.equals(c.getId(), pago.getIdPagoconcepto()))
-                .map(PagoconceptoDTO::getTipo)
-                .filter(t -> t != null && !t.isBlank())
-                .findFirst()
-                .orElse(null);
+        PagoconceptoDTO conceptoWebhook = pagoconceptoService.findById(pago.getIdPagoconcepto());
+        String tipoConcepto = (conceptoWebhook != null && conceptoWebhook.getTipo() != null
+                && !conceptoWebhook.getTipo().isBlank()) ? conceptoWebhook.getTipo() : null;
 
         if ("INSCRIPCION".equalsIgnoreCase(tipoConcepto)) {
             notificarPago(updated.getIdAspirante(),
@@ -760,13 +741,9 @@ public class PagoProcessor {
             throw new IllegalArgumentException("pago y estadoRealizado son requeridos");
         }
 
-        String tipoConcepto = pagoconceptoService.findAll().stream()
-                .filter(concepto -> concepto.getId() != null
-                        && Objects.equals(concepto.getId(), pago.getIdPagoconcepto()))
-                .map(PagoconceptoDTO::getTipo)
-                .filter(tipo -> tipo != null && !tipo.isBlank())
-                .findFirst()
-                .orElse(null);
+        PagoconceptoDTO conceptoPago = pagoconceptoService.findById(pago.getIdPagoconcepto());
+        String tipoConcepto = (conceptoPago != null && conceptoPago.getTipo() != null
+                && !conceptoPago.getTipo().isBlank()) ? conceptoPago.getTipo() : null;
 
         if (tipoConcepto == null) {
             throw new DomainException(PagoErrorCode.PAGO_CONCEPTO_NOT_FOUND, pago.getIdPagoconcepto());
@@ -802,10 +779,7 @@ public class PagoProcessor {
 
     private void actualizarReciboMatriculaYPago(PagoDTO pago, EstadoDTO estadoRealizado) {
         log.info("Actualizando recibo matricula para pago id={}", pago.getId());
-        PagorecibomatriculaDTO recibo = pagorecibomatriculaService.findAll().stream()
-                .filter(item -> item.getIdPago() != null && Objects.equals(item.getIdPago(), pago.getId()))
-                .findFirst()
-                .orElse(null);
+        PagorecibomatriculaDTO recibo = pagorecibomatriculaService.findByIdPago(pago.getId());
         if (recibo == null) {
             log.warn("No se encontro recibo matricula para pago id={} aspirante={}", pago.getId(), pago.getIdAspirante());
             throw new DomainException(PagoErrorCode.PAGO_NOT_FOUND, pago.getIdAspirante());
@@ -902,9 +876,7 @@ public class PagoProcessor {
     }
 
     private PagoResumenDTO encontrarPagoConceptoResumen(Integer idAspirante, String tipoConcepto) {
-        PagoconceptoDTO concepto = pagoconceptoService.findAll().stream()
-                .filter(item -> item.getTipo() != null && item.getTipo().equalsIgnoreCase(tipoConcepto))
-                .findFirst()
+        PagoconceptoDTO concepto = pagoconceptoService.findByTipoIgnoreCase(tipoConcepto)
                 .orElseThrow(() -> new DomainException(PagoErrorCode.PAGO_CONCEPTO_NOT_FOUND, tipoConcepto));
 
         return pagoService.findResumenByIdAspirante(idAspirante).stream()

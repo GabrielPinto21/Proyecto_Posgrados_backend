@@ -4,6 +4,8 @@
  */
 package ufps.edu.co.persistence.repositories;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -37,7 +39,9 @@ import ufps.edu.co.persistence.entities.ValoresglobalesEntity;
 @Repository
 public interface ValoresglobalesRepository extends JpaRepository<ValoresglobalesEntity, Integer> {
 
-	// Insert specific finders here 
+	List<ValoresglobalesEntity> findByClaveStartingWith(String prefix);
+
+	// Insert specific finders here
 
 	//List<ValoresglobalesEntity> findByXxx(String xxx);
 
