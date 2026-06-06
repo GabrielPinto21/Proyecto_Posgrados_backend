@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ufps.edu.co.domain.exceptions.*;
 import ufps.edu.co.domain.exceptions.errorcodes.*;
 import ufps.edu.co.processor.crud.AspiranteProcessor;
+import ufps.edu.co.processor.crud.CohorteProcessor;
 import ufps.edu.co.records.output.entity.AspiranteCohorteOutput;
 import ufps.edu.co.records.output.entity.CohorteResumenOutput;
 import ufps.edu.co.rest.services.AdministrativoService;
@@ -27,6 +28,9 @@ public class CohorteCase {
     private AspiranteProcessor aspiranteProcessor;
 
     @Autowired
+    private CohorteProcessor cohorteProcessor;
+
+    @Autowired
     private UsuarioService usuarioService;
 
     @Autowired
@@ -35,7 +39,7 @@ public class CohorteCase {
     @GetMapping
     public ResponseEntity<List<CohorteResumenOutput>> getCohortesByPrograma() {
         Integer programaId = resolvePrograma();
-        return ResponseEntity.ok(aspiranteProcessor.getCohortesByProgramaResumen(programaId));
+        return ResponseEntity.ok(cohorteProcessor.getCohortesByProgramaResumen(programaId));
     }
 
     @GetMapping("/{idCohorte}/aspirantes")

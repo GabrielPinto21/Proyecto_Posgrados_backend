@@ -36,6 +36,7 @@ import ufps.edu.co.domain.exceptions.*;
 // import ufps.edu.co.domain.exceptions.errorcodes.ListaadmitidosErrorCode;
 import ufps.edu.co.domain.exceptions.DuplicateAdmisionException;
 import ufps.edu.co.processor.crud.AspiranteProcessor;
+import ufps.edu.co.processor.crud.CohorteProcessor;
 import ufps.edu.co.processor.crud.CalificacioncriterioProcessor;
 import ufps.edu.co.processor.crud.CriterioevaluacionProcessor;
 import ufps.edu.co.processor.crud.CriteriocohorteProcessor;
@@ -143,6 +144,9 @@ public class DirectorProgramaCase {
     private AspiranteProcessor aspiranteProcessor;
 
     @Autowired
+    private CohorteProcessor cohorteProcessor;
+
+    @Autowired
     private EntrevistaProcessor entrevistaProcessor;
 
     @Autowired
@@ -212,7 +216,7 @@ public class DirectorProgramaCase {
     public ResponseEntity<List<CohorteResumenOutput>> getCohortesByPrograma() {
         try {
             Integer programaId = resolvePrograma();
-            return ResponseEntity.ok(aspiranteProcessor.getCohortesByProgramaResumen(programaId));
+            return ResponseEntity.ok(cohorteProcessor.getCohortesByProgramaResumen(programaId));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
@@ -713,7 +717,7 @@ public class DirectorProgramaCase {
     @GetMapping("/cohorte/{cohorteId}/criterios")
     public ResponseEntity<CriteriosCohorteOutput> getCriteriosByCohorte(@PathVariable Integer cohorteId) {
         try {
-            return ResponseEntity.ok(aspiranteProcessor.getCriteriosByCohorte(cohorteId));
+            return ResponseEntity.ok(cohorteProcessor.getCriteriosByCohorte(cohorteId));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();
@@ -726,7 +730,7 @@ public class DirectorProgramaCase {
             @Valid @RequestBody COHORTE_DIRECTOR_CREATE body) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(aspiranteProcessor.createCohorte(programaId, body));
+                    .body(cohorteProcessor.createCohorte(programaId, body));
         } catch (DomainException e) {
             throw e;
         } catch (Exception e) {
@@ -738,7 +742,7 @@ public class DirectorProgramaCase {
     @GetMapping(value = "/programa/{programaId}/cohortes")
     public ResponseEntity<List<CohorteResumenOutput>> listCohorteResumen(@PathVariable Integer programaId) {
         try {
-            return ResponseEntity.ok(aspiranteProcessor.getCohortesByProgramaResumen(programaId));
+            return ResponseEntity.ok(cohorteProcessor.getCohortesByProgramaResumen(programaId));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();
@@ -748,7 +752,7 @@ public class DirectorProgramaCase {
     @PostMapping("/cohorte/{cohorteId}/abrir")
     public ResponseEntity<CohorteListadoOutput> abrirCohorte(@PathVariable Integer cohorteId) {
         try {
-            return ResponseEntity.ok(aspiranteProcessor.abrirCohorte(cohorteId));
+            return ResponseEntity.ok(cohorteProcessor.abrirCohorte(cohorteId));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();
@@ -758,7 +762,7 @@ public class DirectorProgramaCase {
     @PostMapping("/cohorte/{cohorteId}/cerrar")
     public ResponseEntity<CohorteListadoOutput> cerrarCohorte(@PathVariable Integer cohorteId) {
         try {
-            return ResponseEntity.ok(aspiranteProcessor.cerrarCohorte(cohorteId));
+            return ResponseEntity.ok(cohorteProcessor.cerrarCohorte(cohorteId));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();
@@ -770,7 +774,7 @@ public class DirectorProgramaCase {
             @PathVariable Integer cohorteId,
             @RequestBody COHORTE_DIRECTOR_UPDATE body) {
         try {
-            return ResponseEntity.ok(aspiranteProcessor.updateCohorte(cohorteId, body));
+            return ResponseEntity.ok(cohorteProcessor.updateCohorte(cohorteId, body));
         } catch (DomainException e) {
             throw e;
         } catch (IllegalArgumentException e) {
@@ -795,7 +799,7 @@ public class DirectorProgramaCase {
     @GetMapping("/programa/{programaId}/inicio")
     public ResponseEntity<List<ProgramaInicioOutput>> getProgramaInicio(@PathVariable Integer programaId) {
         try {
-            return ResponseEntity.ok(aspiranteProcessor.getProgramaInicioByPrograma(programaId));
+            return ResponseEntity.ok(cohorteProcessor.getProgramaInicioByPrograma(programaId));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();
@@ -841,7 +845,7 @@ public class DirectorProgramaCase {
     @GetMapping("/cohorte/{cohorteId}")
     public ResponseEntity<CohorteDetalleOutput> getCohorteDetalle(@PathVariable Integer cohorteId) {
         try {
-            return ResponseEntity.ok(aspiranteProcessor.getCohorteDetalle(cohorteId));
+            return ResponseEntity.ok(cohorteProcessor.getCohorteDetalle(cohorteId));
         } catch (DomainException e) {
             throw e;
         } catch (Exception e) {
