@@ -22,15 +22,8 @@ public class SuperAdminAdministrativoAsignarProgramaRestController {
 
     @PatchMapping(value = "/asignar-programa", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> asignarPrograma(@RequestBody AsignarProgramaRequest request) {
-        AdministrativoDTO dto = administrativoService.findById(request.id());
-        if (dto == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        dto.setIdCargo(request.id_cargo());
-        administrativoService.update(request.id(), dto);
-
-        return ResponseEntity.ok().build();
+        boolean found = administrativoService.patchCargo(request.id(), request.id_cargo());
+        return found ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
     }
 
     @PostMapping(value = "/crear-director", consumes = MediaType.APPLICATION_JSON_VALUE)

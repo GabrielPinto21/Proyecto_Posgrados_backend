@@ -215,4 +215,12 @@ public class AdministrativoService extends GenericService<AdministrativoEntity, 
 
         return entityListToDtoList(entities);
     }
+
+    public boolean patchCargo(Integer id, Integer idCargo) {
+        return repository.findById(id).map(entity -> {
+            entity.setIdCargo(idCargo);
+            repository.save(entity);
+            return true;
+        }).orElse(false);
+    }
 }
