@@ -150,18 +150,16 @@ public class PagoProcessor {
         }
 
         EstadoDTO estadoPendiente = resolveEstadoPago("PENDIENTE");
-        Map<String, PagoconceptoDTO> conceptos = pagoconceptoService.findAll().stream()
-                .filter(concepto -> concepto.getTipo() != null)
-                .collect(Collectors.toMap(concepto -> concepto.getTipo().toUpperCase(Locale.ROOT), concepto -> concepto,
-                        (primero, segundo) -> primero));
+        PagoconceptoDTO conceptoInscripcion = pagoconceptoService.findByTipoIgnoreCase("INSCRIPCION").orElse(null);
+        PagoconceptoDTO conceptoMatricula = pagoconceptoService.findByTipoIgnoreCase("MATRICULA").orElse(null);
 
         Set<Integer> conceptosExistentes = pagoService.findResumenByIdAspirante(idAspirante).stream()
                 .map(PagoResumenDTO::idPagoconcepto)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
 
-        crearPagoPendienteSiFalta(idAspirante, estadoPendiente, conceptosExistentes, conceptos.get("INSCRIPCION"));
-        crearPagoPendienteSiFalta(idAspirante, estadoPendiente, conceptosExistentes, conceptos.get("MATRICULA"));
+        crearPagoPendienteSiFalta(idAspirante, estadoPendiente, conceptosExistentes, conceptoInscripcion);
+        crearPagoPendienteSiFalta(idAspirante, estadoPendiente, conceptosExistentes, conceptoMatricula);
     }
 
     @SuppressWarnings("null")
