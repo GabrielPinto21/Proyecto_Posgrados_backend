@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ufps.edu.co.domain.exceptions.DomainException;
 import ufps.edu.co.domain.exceptions.errorcodes.CohorteErrorCode;
 import ufps.edu.co.maps.specific.AspiranteMap;
@@ -59,6 +60,7 @@ public class AspiranteProcessor implements
     private PagoProcessor pagoProcessor;
 
     @Override
+    @Transactional
     public AspiranteOutput create(ASPIRANTE_CREATE input) {
         AspiranteDTO dto = map.toDto(input);
         AspiranteDTO created = service.create(dto);

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import ufps.edu.co.domain.exceptions.DomainException;
 import ufps.edu.co.domain.exceptions.errorcodes.CalificacioncriterioErrorCode;
@@ -55,6 +56,7 @@ public class CalificacioncriterioProcessor implements
     // private EmailTemplates emailTemplates;
 
     @Override
+    @Transactional
     public CalificacioncriterioOutput create(CALIFICACIONCRITERIO_CREATE input) {
         if (service.existsByAspiranteAndCriterio(input.idAspirante(), input.idCriterio())) {
             throw new DomainException(CalificacioncriterioErrorCode.CALIFICACIONCRITERIO_ALREADY_EXISTS,
@@ -68,6 +70,7 @@ public class CalificacioncriterioProcessor implements
     }
 
     @Override
+    @Transactional
     public CalificacioncriterioOutput update(CALIFICACIONCRITERIO_UPDATE input) {
         try {
             CalificacioncriterioDTO dto = map.toDto(input);
@@ -120,6 +123,7 @@ public class CalificacioncriterioProcessor implements
         return service.findByIdCriterio(idCriterio).stream().map(map::toOutput).toList();
     }
 
+    @Transactional
     public CalificacionCriterioSimpleOutput calificarCriterio(Integer idAspirante, Integer idCriterio,
             BigDecimal puntaje) {
         CriteriocohorteDTO criteriocohorte = criteriocohorteService.findById(idCriterio);
@@ -206,6 +210,7 @@ public class CalificacioncriterioProcessor implements
         }
     }
 
+    @Transactional
     public void actualizarPesoSnapshotYRecalcular(Integer idCriterio, BigDecimal newPeso) {
         List<CalificacioncriterioDTO> calificaciones = service.findByIdCriterio(idCriterio);
         calificaciones.forEach(cal -> {

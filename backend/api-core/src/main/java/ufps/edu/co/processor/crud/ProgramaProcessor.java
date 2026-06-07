@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import ufps.edu.co.domain.exceptions.DomainException;
 import ufps.edu.co.domain.exceptions.errorcodes.CohorteErrorCode;
@@ -54,6 +55,7 @@ public class ProgramaProcessor implements
     private UltimocodigoprogramaService ultimocodigoprogramaService;
 
     @Override
+    @Transactional
     public ProgramaOutput create(PROGRAMA_CREATE input) {
         ProgramaDTO dto = map.toDto(input);
         resolveModalidad(dto);
@@ -102,6 +104,7 @@ public class ProgramaProcessor implements
     }
 
     @Override
+    @Transactional
     public void deleteById(PROGRAMA_DELETE input) {
         UltimocodigoprogramaDTO ultimoCodigo = ultimocodigoprogramaService.findByIdPrograma(input.id());
         if (ultimoCodigo != null) {
@@ -167,6 +170,7 @@ public class ProgramaProcessor implements
         }
     }
 
+    @Transactional
     public ProgramaOutput createWithRelations(PROGRAMA_CREATE_WITH_RELATIONS input, Integer idFacultad) {
         ProgramaDTO dto = buildDtoFromRelations(
                 input.codigo(),
