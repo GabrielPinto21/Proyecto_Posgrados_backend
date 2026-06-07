@@ -60,17 +60,11 @@ public class CalificacioncriterioProcessor implements
             throw new DomainException(CalificacioncriterioErrorCode.CALIFICACIONCRITERIO_ALREADY_EXISTS,
                     "aspirante=" + input.idAspirante() + ", criterio=" + input.idCriterio());
         }
-        try {
-            CalificacioncriterioDTO dto = map.toDto(input);
-            CalificacioncriterioOutput output = map.toOutput(service.create(dto));
-            recalcularPuntuacionAspirante(input.idAspirante());
-            actualizarEstadoCalificacion(input.idAspirante());
-            return output;
-        } catch (DomainException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException("Error creating Calificacioncriterio: " + e.getMessage(), e);
-        }
+        CalificacioncriterioDTO dto = map.toDto(input);
+        CalificacioncriterioOutput output = map.toOutput(service.create(dto));
+        recalcularPuntuacionAspirante(input.idAspirante());
+        actualizarEstadoCalificacion(input.idAspirante());
+        return output;
     }
 
     @Override

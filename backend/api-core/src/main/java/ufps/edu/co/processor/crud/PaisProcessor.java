@@ -23,60 +23,32 @@ public class PaisProcessor implements GlobalUseCase<PAIS_CREATE, PAIS_UPDATE, PA
 
     @Override
     public PaisOutput create(PAIS_CREATE input) {
-        try {
-            PaisDTO dto = map.toDto(input);
-            try {
-                PaisOutput output = map.toOutput(service.create(dto));
-                return output;
-            } catch (Exception e) {
-                throw new RuntimeException("Error creating Pais: " + e.getMessage(), e);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Error creating Pais: " + e.getMessage(), e);
-        }
+        PaisDTO dto = map.toDto(input);
+        PaisOutput output = map.toOutput(service.create(dto));
+        return output;
     }
 
     @Override
     public PaisOutput update(PAIS_UPDATE input) {
-        try {
-            PaisDTO dto = map.toDto(input);
-            try {
-                PaisOutput output = map.toOutput(service.update(dto.getId(), dto));
-                return output;
-            } catch (Exception e) {
-                throw new RuntimeException("Error updating Pais: " + e.getMessage(), e);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Error updating Pais: " + e.getMessage(), e);
-        }
+        PaisDTO dto = map.toDto(input);
+        PaisOutput output = map.toOutput(service.update(dto.getId(), dto));
+        return output;
     }
 
     @Override
     public PaisOutput findById(PAIS_FIND input) {
-        try {
-            PaisOutput output = map.toOutput(service.findById(input.id()));
-            return output;
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding Pais by ID: " + e.getMessage(), e);
-        }
+        PaisOutput output = map.toOutput(service.findById(input.id()));
+        return output;
     }
 
     @Override
     public List<PaisOutput> findAll() {
-        try {
-            return service.findAll().stream().map(map::toOutput).collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding all Paises: " + e.getMessage(), e);
-        }
+        return service.findAll().stream().map(map::toOutput).collect(Collectors.toList());
     }
 
     @Override
     public void deleteById(PAIS_DELETE input) {
-        try {
-            service.deleteById(input.id());
-        } catch (Exception e) {
-            throw new RuntimeException("Error deleting Pais by ID: " + e.getMessage(), e);
-        }
+        service.deleteById(input.id());
     }
 
     @Override

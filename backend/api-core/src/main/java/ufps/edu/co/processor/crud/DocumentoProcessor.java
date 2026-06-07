@@ -64,24 +64,16 @@ public class DocumentoProcessor implements
 
     @Override
     public DocumentoOutput create(DOCUMENTO_CREATE input) {
-        try {
-            DocumentoDTO dto = map.toDto(input);
-            DocumentoDTO created = service.create(dto);
-            return map.toOutput(created);
-        } catch (Exception e) {
-            throw new RuntimeException("Error creating Documento: " + e.getMessage(), e);
-        }
+        DocumentoDTO dto = map.toDto(input);
+        DocumentoDTO created = service.create(dto);
+        return map.toOutput(created);
     }
 
     @Override
     public DocumentoOutput update(DOCUMENTO_UPDATE input) {
-        try {
-            DocumentoDTO dto = map.toDto(input);
-            DocumentoDTO updated = service.update(input.id(), dto);
-            return map.toOutput(updated);
-        } catch (Exception e) {
-            throw new RuntimeException("Error updating Documento: " + e.getMessage(), e);
-        }
+        DocumentoDTO dto = map.toDto(input);
+        DocumentoDTO updated = service.update(input.id(), dto);
+        return map.toOutput(updated);
     }
 
     @Override
@@ -91,88 +83,64 @@ public class DocumentoProcessor implements
 
     @Override
     public DocumentoOutput findById(DOCUMENTO_FIND input) {
-        try {
-            DocumentoDTO dto = service.findById(input.id());
-            return map.toOutput(dto);
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding Documento by ID: " + e.getMessage(), e);
-        }
+        DocumentoDTO dto = service.findById(input.id());
+        return map.toOutput(dto);
     }
 
     @Override
     public List<DocumentoOutput> findAll() {
-        try {
-            return service.findAll().stream().map(map::toOutput).toList();
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding all Documentos: " + e.getMessage(), e);
-        }
+        return service.findAll().stream().map(map::toOutput).toList();
     }
 
     @Override
     public void deleteById(DOCUMENTO_DELETE input) {
-        try {
-            service.deleteById(input.id());
-        } catch (Exception e) {
-            throw new RuntimeException("Error deleting Documento by ID: " + e.getMessage(), e);
-        }
+        service.deleteById(input.id());
     }
 
     public AprobarDocumentoOutput approveDocument(DOCUMENTO_FIND input) {
-        try {
-            DocumentoDTO dto = service.findById(input.id());
-            EstadodocumentoDTO estadodocumentoDTO = estadodocumentoService.findByEstado("APROBADO");
-            dto.setEstadodocumento(estadodocumentoDTO);
-            dto.setIdEstadodocumento(estadodocumentoDTO.getId());
-            DocumentoDTO approve = service.update(input.id(), dto);
-            checkAndUpdateEstadoValidacion(dto.getIdAspirante());
-            String nombreDocumento = resolverNombreTitulo(dto);
-            AspiranteCheckoutDTO aspirante = aspiranteService.findCheckoutById(dto.getIdAspirante());
-            if (aspirante != null) {
-                sesService.enviarCorreoAsync(aspirante.correo(), EmailTemplates.ASUNTO_APROBACION_DOCUMENTO,
-                        EmailTemplates.cuerpoAprobacionDocumento(aspirante.nombres(), nombreDocumento));
-            }
-            return AprobarDocumentoOutput.builder()
-                    .id(approve.getId())
-                    .nombre(approve.getKeyfile())
-                    .estado(estadodocumentoDTO.getEstado())
-                    .build();
-        } catch (Exception e) {
-            throw new RuntimeException("Error approving Documento: " + e.getMessage(), e);
+        DocumentoDTO dto = service.findById(input.id());
+        EstadodocumentoDTO estadodocumentoDTO = estadodocumentoService.findByEstado("APROBADO");
+        dto.setEstadodocumento(estadodocumentoDTO);
+        dto.setIdEstadodocumento(estadodocumentoDTO.getId());
+        DocumentoDTO approve = service.update(input.id(), dto);
+        checkAndUpdateEstadoValidacion(dto.getIdAspirante());
+        String nombreDocumento = resolverNombreTitulo(dto);
+        AspiranteCheckoutDTO aspirante = aspiranteService.findCheckoutById(dto.getIdAspirante());
+        if (aspirante != null) {
+            sesService.enviarCorreoAsync(aspirante.correo(), EmailTemplates.ASUNTO_APROBACION_DOCUMENTO,
+                    EmailTemplates.cuerpoAprobacionDocumento(aspirante.nombres(), nombreDocumento));
         }
+        return AprobarDocumentoOutput.builder()
+                .id(approve.getId())
+                .nombre(approve.getKeyfile())
+                .estado(estadodocumentoDTO.getEstado())
+                .build();
     }
 
     public DocumentoEstadoOutput rejectDocument(DOCUMENTO_REJECT input) {
-        try {
-            DocumentoDTO dto = service.findById(input.id());
-            EstadodocumentoDTO estadodocumentoDTO = estadodocumentoService.findByEstado("RECHAZADO");
-            dto.setEstadodocumento(estadodocumentoDTO);
-            dto.setObservaciones(input.motivoRechazo());
-            dto.setIdEstadodocumento(estadodocumentoDTO.getId());
-            DocumentoDTO reject = service.update(input.id(), dto);
-            String nombreDocumento = resolverNombreTitulo(dto);
-            AspiranteDTO aspirante = aspiranteService.findById(dto.getIdAspirante());
-            PersonaDTO persona = aspirante != null ? aspirante.getPersona() : null;
-            if (persona != null) {
-                sesService.enviarCorreoAsync(persona.getCorreo(), EmailTemplates.ASUNTO_RECHAZO_DOCUMENTO,
-                        EmailTemplates.cuerpoRechazoDocumento(persona.getNombres(), nombreDocumento, input.motivoRechazo()));
-            }
-            return DocumentoEstadoOutput.builder()
-                    .id(reject.getId())
-                    .nombre(reject.getKeyfile())
-                    .estado(estadodocumentoDTO.getEstado())
-                    .motivoRechazo(reject.getObservaciones())
-                    .build();
-        } catch (Exception e) {
-            throw new RuntimeException("Error rejecting Documento: " + e.getMessage(), e);
+        DocumentoDTO dto = service.findById(input.id());
+        EstadodocumentoDTO estadodocumentoDTO = estadodocumentoService.findByEstado("RECHAZADO");
+        dto.setEstadodocumento(estadodocumentoDTO);
+        dto.setObservaciones(input.motivoRechazo());
+        dto.setIdEstadodocumento(estadodocumentoDTO.getId());
+        DocumentoDTO reject = service.update(input.id(), dto);
+        String nombreDocumento = resolverNombreTitulo(dto);
+        AspiranteDTO aspirante = aspiranteService.findById(dto.getIdAspirante());
+        PersonaDTO persona = aspirante != null ? aspirante.getPersona() : null;
+        if (persona != null) {
+            sesService.enviarCorreoAsync(persona.getCorreo(), EmailTemplates.ASUNTO_RECHAZO_DOCUMENTO,
+                    EmailTemplates.cuerpoRechazoDocumento(persona.getNombres(), nombreDocumento, input.motivoRechazo()));
         }
+        return DocumentoEstadoOutput.builder()
+                .id(reject.getId())
+                .nombre(reject.getKeyfile())
+                .estado(estadodocumentoDTO.getEstado())
+                .motivoRechazo(reject.getObservaciones())
+                .build();
     }
 
     public List<DocumentoOutput> findByAspiranteId(ASPIRANTE_FIND input) {
-        try {
-            return service.findByIdAspirante(input.id()).stream().map(map::toOutput).toList();
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding Documentos by Aspirante ID: " + e.getMessage(), e);
-        }
+        return service.findByIdAspirante(input.id()).stream().map(map::toOutput).toList();
     }
 
     private void checkAndUpdateEstadoValidacion(Integer idAspirante) {
@@ -232,61 +200,57 @@ public class DocumentoProcessor implements
     }
 
     public AspiranteDocumentosOutput getDocumentosDeAspirante(Integer aspiranteId) {
-        try {
-            AspiranteDTO aspirante = aspiranteService.findById(aspiranteId);
-            PersonaDTO p = aspirante != null ? aspirante.getPersona() : null;
-            String nombre = p != null
-                    ? ((p.getNombres() != null ? p.getNombres() : "") + " "
-                            + (p.getApellidos() != null ? p.getApellidos() : "")).trim()
-                    : "";
-            String cedula = p != null && p.getDocumentopersona() != null
-                    && p.getDocumentopersona().getNumerodocumento() != null
-                            ? p.getDocumentopersona().getNumerodocumento().toString()
-                            : null;
+        AspiranteDTO aspirante = aspiranteService.findById(aspiranteId);
+        PersonaDTO p = aspirante != null ? aspirante.getPersona() : null;
+        String nombre = p != null
+                ? ((p.getNombres() != null ? p.getNombres() : "") + " "
+                        + (p.getApellidos() != null ? p.getApellidos() : "")).trim()
+                : "";
+        String cedula = p != null && p.getDocumentopersona() != null
+                && p.getDocumentopersona().getNumerodocumento() != null
+                        ? p.getDocumentopersona().getNumerodocumento().toString()
+                        : null;
 
-            List<DocumentoDTO> docs = service.findByIdAspirante(aspiranteId);
-            long total = docs.size();
-            long validados = docs.stream()
-                    .filter(d -> d.getEstadodocumento() != null
-                            && "APROBADO".equalsIgnoreCase(d.getEstadodocumento().getEstado()))
-                    .count();
+        List<DocumentoDTO> docs = service.findByIdAspirante(aspiranteId);
+        long total = docs.size();
+        long validados = docs.stream()
+                .filter(d -> d.getEstadodocumento() != null
+                        && "APROBADO".equalsIgnoreCase(d.getEstadodocumento().getEstado()))
+                .count();
 
-            String estadoGeneral;
-            if (total > 0 && validados == total) {
-                estadoGeneral = "validados";
-            } else if (validados > 0) {
-                estadoGeneral = "en progreso";
-            } else {
-                estadoGeneral = "pendiente";
-            }
-
-            Integer idCohorte = aspirante != null ? aspirante.getIdCohorte() : null;
-            Map<Integer, String> nombresPorConsejoCohorte = buildNombreMapConsejo(idCohorte);
-            Map<Integer, String> nombresPorProgramaCohorte = buildNombreMapPrograma(idCohorte);
-
-            List<DocumentoResumenOutput> documentosResumen = docs.stream()
-                    .map(doc -> DocumentoResumenOutput.builder()
-                            .idDocumento(doc.getId())
-                            .idDocumentosrequisitoconsejocohorte(doc.getIdDocumentosrequisitoconsejocohorte())
-                            .idDocumentosrequisitoprogramacohorte(doc.getIdDocumentosrequisitoprogramacohorte())
-                            .nombreTitulo(resolverNombreTituloDesdeMap(doc, nombresPorConsejoCohorte, nombresPorProgramaCohorte))
-                            .estado(doc.getEstadodocumento() != null ? doc.getEstadodocumento().getEstado()
-                                    : "PENDIENTE")
-                            .motivoRechazo(doc.getObservaciones())
-                            .linkArchivo(doc.getEnlaceurl())
-                            .build())
-                    .toList();
-
-            return AspiranteDocumentosOutput.builder()
-                    .idAspirante(aspiranteId)
-                    .nombreAspirante(nombre)
-                    .cedula(cedula)
-                    .estadoGeneral(estadoGeneral)
-                    .documentos(documentosResumen)
-                    .build();
-        } catch (Exception e) {
-            throw new RuntimeException("Error obteniendo documentos del aspirante: " + e.getMessage(), e);
+        String estadoGeneral;
+        if (total > 0 && validados == total) {
+            estadoGeneral = "validados";
+        } else if (validados > 0) {
+            estadoGeneral = "en progreso";
+        } else {
+            estadoGeneral = "pendiente";
         }
+
+        Integer idCohorte = aspirante != null ? aspirante.getIdCohorte() : null;
+        Map<Integer, String> nombresPorConsejoCohorte = buildNombreMapConsejo(idCohorte);
+        Map<Integer, String> nombresPorProgramaCohorte = buildNombreMapPrograma(idCohorte);
+
+        List<DocumentoResumenOutput> documentosResumen = docs.stream()
+                .map(doc -> DocumentoResumenOutput.builder()
+                        .idDocumento(doc.getId())
+                        .idDocumentosrequisitoconsejocohorte(doc.getIdDocumentosrequisitoconsejocohorte())
+                        .idDocumentosrequisitoprogramacohorte(doc.getIdDocumentosrequisitoprogramacohorte())
+                        .nombreTitulo(resolverNombreTituloDesdeMap(doc, nombresPorConsejoCohorte, nombresPorProgramaCohorte))
+                        .estado(doc.getEstadodocumento() != null ? doc.getEstadodocumento().getEstado()
+                                : "PENDIENTE")
+                        .motivoRechazo(doc.getObservaciones())
+                        .linkArchivo(doc.getEnlaceurl())
+                        .build())
+                .toList();
+
+        return AspiranteDocumentosOutput.builder()
+                .idAspirante(aspiranteId)
+                .nombreAspirante(nombre)
+                .cedula(cedula)
+                .estadoGeneral(estadoGeneral)
+                .documentos(documentosResumen)
+                .build();
     }
 
     public String resolverNombreTitulo(DocumentoDTO doc) {
@@ -330,13 +294,7 @@ public class DocumentoProcessor implements
     }
 
     public AspiranteDocumentosOutput getDocumentosDeAspiranteParaDirector(Integer aspiranteId) {
-        try {
-            return buildAspiranteDocumentosOutputForDirector(aspiranteId);
-        } catch (DomainException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException("Error obteniendo documentos del aspirante para director: " + e.getMessage(), e);
-        }
+        return buildAspiranteDocumentosOutputForDirector(aspiranteId);
     }
 
         private AspiranteDocumentosOutput buildAspiranteDocumentosOutputForDirector(Integer aspiranteId) {
@@ -444,28 +402,24 @@ public class DocumentoProcessor implements
     }
 
     public DocumentoEstadoOutput updateEstadoDocumento(Integer docId, DOCUMENTO_ESTADO_UPDATE input) {
-        try {
-            DocumentoDTO dto = service.findById(docId);
-            EstadodocumentoDTO estadodocumentoDTO = estadodocumentoService.findByEstado(input.estado());
-            dto.setEstadodocumento(estadodocumentoDTO);
-            dto.setIdEstadodocumento(estadodocumentoDTO.getId());
-            dto.setObservaciones(input.motivoRechazo());
-            service.update(docId, dto);
-            if ("APROBADO".equalsIgnoreCase(input.estado())) {
-                checkAndUpdateEstadoValidacion(dto.getIdAspirante());
-            }
-
-            // TODO: Ya no se mapea el nombre del documento, habría que agregarlo al output
-            // o eliminarlo si no es necesario
-            return DocumentoEstadoOutput.builder()
-                    .id(docId)
-                    // .nombre(nombreDoc)
-                    .estado(input.estado())
-                    .motivoRechazo(input.motivoRechazo())
-                    .build();
-        } catch (Exception e) {
-            throw new RuntimeException("Error actualizando estado del documento: " + e.getMessage(), e);
+        DocumentoDTO dto = service.findById(docId);
+        EstadodocumentoDTO estadodocumentoDTO = estadodocumentoService.findByEstado(input.estado());
+        dto.setEstadodocumento(estadodocumentoDTO);
+        dto.setIdEstadodocumento(estadodocumentoDTO.getId());
+        dto.setObservaciones(input.motivoRechazo());
+        service.update(docId, dto);
+        if ("APROBADO".equalsIgnoreCase(input.estado())) {
+            checkAndUpdateEstadoValidacion(dto.getIdAspirante());
         }
+
+        // TODO: Ya no se mapea el nombre del documento, habría que agregarlo al output
+        // o eliminarlo si no es necesario
+        return DocumentoEstadoOutput.builder()
+                .id(docId)
+                // .nombre(nombreDoc)
+                .estado(input.estado())
+                .motivoRechazo(input.motivoRechazo())
+                .build();
     }
 
     private Map<Integer, String> buildNombreMapConsejo(Integer idCohorte) {
@@ -491,25 +445,21 @@ public class DocumentoProcessor implements
     }
 
     public DocumentoEstadoOutput updateEstadoDocumentoParaDirector(Integer docId, DOCUMENTO_ESTADO_UPDATE input) {
-        try {
-            EstadodocumentoDTO estadodocumentoDTO = estadodocumentoService.findByEstado(input.estado());
-            if (estadodocumentoDTO == null) {
-                throw new RuntimeException("Estado de documento no encontrado: " + input.estado());
-            }
-
-            int updatedRows = service.updateEstadoDocumentoById(docId, estadodocumentoDTO.getId(),
-                    input.motivoRechazo());
-            if (updatedRows == 0) {
-                throw new RuntimeException("Documento no encontrado con id: " + docId);
-            }
-
-            return DocumentoEstadoOutput.builder()
-                    .id(docId)
-                    .estado(estadodocumentoDTO.getEstado())
-                    .motivoRechazo(input.motivoRechazo())
-                    .build();
-        } catch (Exception e) {
-            throw new RuntimeException("Error actualizando estado del documento para director: " + e.getMessage(), e);
+        EstadodocumentoDTO estadodocumentoDTO = estadodocumentoService.findByEstado(input.estado());
+        if (estadodocumentoDTO == null) {
+            throw new RuntimeException("Estado de documento no encontrado: " + input.estado());
         }
+
+        int updatedRows = service.updateEstadoDocumentoById(docId, estadodocumentoDTO.getId(),
+                input.motivoRechazo());
+        if (updatedRows == 0) {
+            throw new RuntimeException("Documento no encontrado con id: " + docId);
+        }
+
+        return DocumentoEstadoOutput.builder()
+                .id(docId)
+                .estado(estadodocumentoDTO.getEstado())
+                .motivoRechazo(input.motivoRechazo())
+                .build();
     }
 }

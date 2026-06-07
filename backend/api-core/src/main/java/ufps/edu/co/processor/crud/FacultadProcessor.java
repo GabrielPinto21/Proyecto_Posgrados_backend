@@ -23,24 +23,16 @@ public class FacultadProcessor implements GlobalUseCase<FACULTAD_CREATE, FACULTA
 
     @Override
     public FacultadOutput create(FACULTAD_CREATE input) {
-        try {
-            FacultadDTO dto = map.toDto(input);
-            FacultadDTO created = service.create(dto);
-            return map.toOutput(created);
-        } catch (Exception e) {
-            throw new RuntimeException("Error creating Facultad: " + e.getMessage(), e);
-        }
+        FacultadDTO dto = map.toDto(input);
+        FacultadDTO created = service.create(dto);
+        return map.toOutput(created);
     }
 
     @Override
     public FacultadOutput update(FACULTAD_UPDATE input) {
-        try {
-            FacultadDTO dto = map.toDto(input);
-            FacultadDTO updated = service.update(input.id(), dto);
-            return map.toOutput(updated);
-        } catch (Exception e) {
-            throw new RuntimeException("Error updating Facultad: " + e.getMessage(), e);
-        }
+        FacultadDTO dto = map.toDto(input);
+        FacultadDTO updated = service.update(input.id(), dto);
+        return map.toOutput(updated);
     }
 
     @Override
@@ -50,28 +42,16 @@ public class FacultadProcessor implements GlobalUseCase<FACULTAD_CREATE, FACULTA
 
     @Override
     public FacultadOutput findById(FACULTAD_FIND input) {
-        try {
-            return map.toOutput(service.findById(input.id()));
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding Facultad: " + e.getMessage(), e);
-        }
+        return map.toOutput(service.findById(input.id()));
     }
 
     @Override
     public List<FacultadOutput> findAll() {
-        try {
-            return service.findAll().stream().map(map::toOutput).toList();
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding all Facultades: " + e.getMessage(), e);
-        }
+        return service.findAll().stream().map(map::toOutput).toList();
     }
 
     @Override
     public void deleteById(FACULTAD_DELETE input) {
-        try {
-            service.deleteById(input.id());
-        } catch (Exception e) {
-            throw new RuntimeException("Error deleting Facultad: " + e.getMessage(), e);
-        }
+        service.deleteById(input.id());
     }
 }

@@ -25,60 +25,32 @@ public class EstadoProcessor
 
     @Override
     public EstadoOutput create(ESTADO_CREATE input) {
-        try {
-            EstadoDTO dto = map.toDto(input);
-            try {
-                EstadoDTO created = service.create(dto);
-                return map.toOutput(created);
-            } catch (Exception e) {
-                throw new RuntimeException("Error creating Estado: " + e.getMessage(), e);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Error creating Estado: " + e.getMessage(), e);
-        }
+        EstadoDTO dto = map.toDto(input);
+        EstadoDTO created = service.create(dto);
+        return map.toOutput(created);
     }
 
     @Override
     public EstadoOutput update(ESTADO_UPDATE input) {
-        try {
-            EstadoDTO dto = map.toDto(input);
-            try {
-                EstadoDTO updated = service.update(input.id(), dto);
-                return map.toOutput(updated);
-            } catch (Exception e) {
-                throw new RuntimeException("Error updating Estado: " + e.getMessage(), e);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Error updating Estado: " + e.getMessage(), e);
-        }
+        EstadoDTO dto = map.toDto(input);
+        EstadoDTO updated = service.update(input.id(), dto);
+        return map.toOutput(updated);
     }
 
     @Override
     public EstadoOutput findById(ESTADO_FIND input) {
-        try {
-            EstadoDTO dto = service.findById(input.id());
-            return map.toOutput(dto);
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding Estado by ID: " + e.getMessage(), e);
-        }
+        EstadoDTO dto = service.findById(input.id());
+        return map.toOutput(dto);
     }
 
     @Override
     public List<EstadoOutput> findAll() {
-        try {
-            return service.findAll().stream().map(map::toOutput).collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding all Estados: " + e.getMessage(), e);
-        }
+        return service.findAll().stream().map(map::toOutput).collect(Collectors.toList());
     }
 
     @Override
     public void deleteById(ESTADO_DELETE input) {
-        try {
-            service.deleteById(input.id());
-        } catch (Exception e) {
-            throw new RuntimeException("Error deleting Estado by ID: " + e.getMessage(), e);
-        }
+        service.deleteById(input.id());
     }
 
     @Override

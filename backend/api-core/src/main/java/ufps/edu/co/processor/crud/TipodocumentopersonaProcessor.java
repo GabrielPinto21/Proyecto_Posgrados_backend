@@ -22,24 +22,16 @@ public class TipodocumentopersonaProcessor implements
 
     @Override
     public TipodocumentopersonaOutput create(TIPODOCUMENTOPERSONA_CREATE input) {
-        try {
-            TipodocumentopersonaDTO dto = map.toDto(input);
-            TipodocumentopersonaDTO created = service.create(dto);
-            return map.toOutput(created);
-        } catch (Exception e) {
-            throw new RuntimeException("Error creating Tipodocumentopersona: " + e.getMessage(), e);
-        }
+        TipodocumentopersonaDTO dto = map.toDto(input);
+        TipodocumentopersonaDTO created = service.create(dto);
+        return map.toOutput(created);
     }
 
     @Override
     public TipodocumentopersonaOutput update(TIPODOCUMENTOPERSONA_UPDATE input) {
-        try {
-            TipodocumentopersonaDTO dto = map.toDto(input);
-            TipodocumentopersonaDTO updated = service.update(input.id(), dto);
-            return map.toOutput(updated);
-        } catch (Exception e) {
-            throw new RuntimeException("Error updating Tipodocumentopersona: " + e.getMessage(), e);
-        }
+        TipodocumentopersonaDTO dto = map.toDto(input);
+        TipodocumentopersonaDTO updated = service.update(input.id(), dto);
+        return map.toOutput(updated);
     }
 
     @Override
@@ -49,29 +41,17 @@ public class TipodocumentopersonaProcessor implements
 
     @Override
     public TipodocumentopersonaOutput findById(TIPODOCUMENTOPERSONA_FIND input) {
-        try {
-            TipodocumentopersonaDTO dto = service.findById(input.id());
-            return map.toOutput(dto);
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding Tipodocumentopersona by ID: " + e.getMessage(), e);
-        }
+        TipodocumentopersonaDTO dto = service.findById(input.id());
+        return map.toOutput(dto);
     }
 
     @Override
     public List<TipodocumentopersonaOutput> findAll() {
-        try {
-            return service.findAll().stream().map(map::toOutput).toList();
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding all Tipodocumentopersonas: " + e.getMessage(), e);
-        }
+        return service.findAll().stream().map(map::toOutput).toList();
     }
 
     @Override
     public void deleteById(TIPODOCUMENTOPERSONA_DELETE input) {
-        try {
-            service.deleteById(input.id());
-        } catch (Exception e) {
-            throw new RuntimeException("Error deleting Tipodocumentopersona by ID: " + e.getMessage(), e);
-        }
+        service.deleteById(input.id());
     }
 }

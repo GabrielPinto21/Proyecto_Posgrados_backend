@@ -22,24 +22,16 @@ public class TipopruebaProcessor implements
 
     @Override
     public TipopruebaOutput create(TIPOPRUEBA_CREATE input) {
-        try {
-            TipopruebaDTO dto = map.toDto(input);
-            TipopruebaDTO created = service.create(dto);
-            return map.toOutput(created);
-        } catch (Exception e) {
-            throw new RuntimeException("Error creating Tipoprueba: " + e.getMessage(), e);
-        }
+        TipopruebaDTO dto = map.toDto(input);
+        TipopruebaDTO created = service.create(dto);
+        return map.toOutput(created);
     }
 
     @Override
     public TipopruebaOutput update(TIPOPRUEBA_UPDATE input) {
-        try {
-            TipopruebaDTO dto = map.toDto(input);
-            TipopruebaDTO updated = service.update(input.id(), dto);
-            return map.toOutput(updated);
-        } catch (Exception e) {
-            throw new RuntimeException("Error updating Tipoprueba: " + e.getMessage(), e);
-        }
+        TipopruebaDTO dto = map.toDto(input);
+        TipopruebaDTO updated = service.update(input.id(), dto);
+        return map.toOutput(updated);
     }
 
     @Override
@@ -49,29 +41,17 @@ public class TipopruebaProcessor implements
 
     @Override
     public TipopruebaOutput findById(TIPOPRUEBA_FIND input) {
-        try {
-            TipopruebaDTO dto = service.findById(input.id());
-            return map.toOutput(dto);
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding Tipoprueba by ID: " + e.getMessage(), e);
-        }
+        TipopruebaDTO dto = service.findById(input.id());
+        return map.toOutput(dto);
     }
 
     @Override
     public List<TipopruebaOutput> findAll() {
-        try {
-            return service.findAll().stream().map(map::toOutput).toList();
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding all Tipopruebas: " + e.getMessage(), e);
-        }
+        return service.findAll().stream().map(map::toOutput).toList();
     }
 
     @Override
     public void deleteById(TIPOPRUEBA_DELETE input) {
-        try {
-            service.deleteById(input.id());
-        } catch (Exception e) {
-            throw new RuntimeException("Error deleting Tipoprueba by ID: " + e.getMessage(), e);
-        }
+        service.deleteById(input.id());
     }
 }

@@ -22,24 +22,16 @@ public class RolProcessor implements
 
     @Override
     public RolOutput create(ROL_CREATE input) {
-        try {
-            RolDTO dto = map.toDto(input);
-            RolDTO created = service.create(dto);
-            return map.toOutput(created);
-        } catch (Exception e) {
-            throw new RuntimeException("Error creating Rol: " + e.getMessage(), e);
-        }
+        RolDTO dto = map.toDto(input);
+        RolDTO created = service.create(dto);
+        return map.toOutput(created);
     }
 
     @Override
     public RolOutput update(ROL_UPDATE input) {
-        try {
-            RolDTO dto = map.toDto(input);
-            RolDTO updated = service.update(input.id(), dto);
-            return map.toOutput(updated);
-        } catch (Exception e) {
-            throw new RuntimeException("Error updating Rol: " + e.getMessage(), e);
-        }
+        RolDTO dto = map.toDto(input);
+        RolDTO updated = service.update(input.id(), dto);
+        return map.toOutput(updated);
     }
 
     @Override
@@ -49,38 +41,22 @@ public class RolProcessor implements
 
     @Override
     public RolOutput findById(ROL_FIND input) {
-        try {
-            RolDTO dto = service.findById(input.id());
-            return map.toOutput(dto);
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding Rol by ID: " + e.getMessage(), e);
-        }
+        RolDTO dto = service.findById(input.id());
+        return map.toOutput(dto);
     }
 
     @Override
     public List<RolOutput> findAll() {
-        try {
-            return service.findAll().stream().map(map::toOutput).toList();
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding all Roles: " + e.getMessage(), e);
-        }
+        return service.findAll().stream().map(map::toOutput).toList();
     }
 
     @Override
     public void deleteById(ROL_DELETE input) {
-        try {
-            service.deleteById(input.id());
-        } catch (Exception e) {
-            throw new RuntimeException("Error deleting Rol by ID: " + e.getMessage(), e);
-        }
+        service.deleteById(input.id());
     }
 
     public RolOutput findByNombre(String nombre) {
-        try {
-            RolDTO dto = service.findByNombre(nombre);
-            return map.toOutput(dto);
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding Rol by nombre: " + e.getMessage(), e);
-        }
+        RolDTO dto = service.findByNombre(nombre);
+        return map.toOutput(dto);
     }
 }
