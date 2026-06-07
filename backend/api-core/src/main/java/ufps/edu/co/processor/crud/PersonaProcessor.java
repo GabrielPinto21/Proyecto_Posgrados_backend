@@ -28,24 +28,16 @@ public class PersonaProcessor implements
 
     @Override
     public PersonaOutput create(PERSONA_CREATE input) {
-        try {
-            PersonaDTO dto = map.toDto(input);
-            PersonaDTO created = service.create(dto);
-            return map.toOutput(created);
-        } catch (Exception e) {
-            throw new RuntimeException("Error creating Persona: " + e.getMessage(), e);
-        }
+        PersonaDTO dto = map.toDto(input);
+        PersonaDTO created = service.create(dto);
+        return map.toOutput(created);
     }
 
     @Override
     public PersonaOutput update(PERSONA_UPDATE input) {
-        try {
-            PersonaDTO dto = map.toDto(input);
-            PersonaDTO updated = service.update(input.id(), dto);
-            return map.toOutput(updated);
-        } catch (Exception e) {
-            throw new RuntimeException("Error updating Persona: " + e.getMessage(), e);
-        }
+        PersonaDTO dto = map.toDto(input);
+        PersonaDTO updated = service.update(input.id(), dto);
+        return map.toOutput(updated);
     }
 
     @Override
@@ -55,29 +47,17 @@ public class PersonaProcessor implements
 
     @Override
     public PersonaOutput findById(PERSONA_FIND input) {
-        try {
-            PersonaDTO dto = service.findById(input.id());
-            return map.toOutput(dto);
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding Persona by ID: " + e.getMessage(), e);
-        }
+        PersonaDTO dto = service.findById(input.id());
+        return map.toOutput(dto);
     }
 
     @Override
     public List<PersonaOutput> findAll() {
-        try {
-            return service.findAll().stream().map(map::toOutput).toList();
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding all Personas: " + e.getMessage(), e);
-        }
+        return service.findAll().stream().map(map::toOutput).toList();
     }
 
     @Override
     public void deleteById(PERSONA_DELETE input) {
-        try {
-            service.deleteById(input.id());
-        } catch (Exception e) {
-            throw new RuntimeException("Error deleting Persona by ID: " + e.getMessage(), e);
-        }
+        service.deleteById(input.id());
     }
 }

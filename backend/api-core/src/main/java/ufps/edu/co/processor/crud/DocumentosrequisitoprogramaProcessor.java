@@ -30,53 +30,37 @@ public class DocumentosrequisitoprogramaProcessor implements
 
     @Override
     public DocumentosrequisitoprogramaOutput create(DOCUMENTOSREQUISITOPROGRAMA_CREATE input) {
-        try {
-            DocumentosrequisitoprogramaDTO dto = map.toDto(input);
-            return map.toOutput(service.create(dto));
-        } catch (Exception e) {
-            throw new RuntimeException("Error creating Documentosrequisitoprograma: " + e.getMessage(), e);
-        }
+        DocumentosrequisitoprogramaDTO dto = map.toDto(input);
+        return map.toOutput(service.create(dto));
     }
 
     public DocumentosrequisitoprogramaOutput create(DOCUMENTOSREQUISITOPROGRAMA_CREATEDOCUMENT input, Integer idPrograma) {
-        try {
-            DocumentosrequisitoprogramaDTO dto = DocumentosrequisitoprogramaDTO.builder()
-                    .nombre(input.nombre())
-                    .tamanomaximo(input.tamanomaximo())
-                    .urlformato(input.urlformato())
-                    .id_programa(idPrograma)
-                    .build();
-            dto.setId_programa(idPrograma);
-            return map.toOutput(service.create(dto));
-        } catch (Exception e) {
-            throw new RuntimeException("Error creating Documentosrequisitoprograma: " + e.getMessage(), e);
-        }
+        DocumentosrequisitoprogramaDTO dto = DocumentosrequisitoprogramaDTO.builder()
+                .nombre(input.nombre())
+                .tamanomaximo(input.tamanomaximo())
+                .urlformato(input.urlformato())
+                .id_programa(idPrograma)
+                .build();
+        dto.setId_programa(idPrograma);
+        return map.toOutput(service.create(dto));
     }
 
     public DocumentosrequisitoprogramaOutput update(DOCUMENTOSREQUISITOPROGRAMA_CREATEDOCUMENT input, Integer idDocumento,
             Integer idPrograma) {
-        try {
-            DocumentosrequisitoprogramaDTO dto = DocumentosrequisitoprogramaDTO.builder()
-                    .nombre(input.nombre())
-                    .tamanomaximo(input.tamanomaximo())
-                    .urlformato(input.urlformato())
-                    .id_programa(idPrograma)
-                    .build();
-            dto.setId(idDocumento);
-            return map.toOutput(service.update(idDocumento, dto));
-        } catch (Exception e) {
-            throw new RuntimeException("Error updating Documentosrequisitoprograma: " + e.getMessage(), e);
-        }
+        DocumentosrequisitoprogramaDTO dto = DocumentosrequisitoprogramaDTO.builder()
+                .nombre(input.nombre())
+                .tamanomaximo(input.tamanomaximo())
+                .urlformato(input.urlformato())
+                .id_programa(idPrograma)
+                .build();
+        dto.setId(idDocumento);
+        return map.toOutput(service.update(idDocumento, dto));
     }
 
     @Override
     public DocumentosrequisitoprogramaOutput update(DOCUMENTOSREQUISITOPROGRAMA_UPDATE input) {
-        try {
-            DocumentosrequisitoprogramaDTO dto = map.toDto(input);
-            return map.toOutput(service.update(input.id(), dto));
-        } catch (Exception e) {
-            throw new RuntimeException("Error updating Documentosrequisitoprograma: " + e.getMessage(), e);
-        }
+        DocumentosrequisitoprogramaDTO dto = map.toDto(input);
+        return map.toOutput(service.update(input.id(), dto));
     }
 
     @Override
@@ -86,28 +70,16 @@ public class DocumentosrequisitoprogramaProcessor implements
 
     @Override
     public DocumentosrequisitoprogramaOutput findById(DOCUMENTOSREQUISITOPROGRAMA_FIND input) {
-        try {
-            return map.toOutput(service.findById(input.id()));
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding Documentosrequisitoprograma by ID: " + e.getMessage(), e);
-        }
+        return map.toOutput(service.findById(input.id()));
     }
 
     @Override
     public List<DocumentosrequisitoprogramaOutput> findAll() {
-        try {
-            return service.findAll().stream().map(map::toOutput).toList();
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding all Documentosrequisitoprograma: " + e.getMessage(), e);
-        }
+        return service.findAll().stream().map(map::toOutput).toList();
     }
 
     @Override
     public void deleteById(DOCUMENTOSREQUISITOPROGRAMA_DELETE input) {
-        try {
-            service.deleteById(input.id());
-        } catch (Exception e) {
-            throw new RuntimeException("Error deleting Documentosrequisitoprograma by ID: " + e.getMessage(), e);
-        }
+        service.deleteById(input.id());
     }
 }

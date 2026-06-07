@@ -24,24 +24,16 @@ public class SemestreProcessor implements
 
     @Override
     public SemestreOutput create(SEMESTRE_CREATE input) {
-        try {
-            SemestreDTO dto = map.toDto(input);
-            SemestreDTO created = service.create(dto);
-            return map.toOutput(created);
-        } catch (Exception e) {
-            throw new RuntimeException("Error creating Semestre: " + e.getMessage(), e);
-        }
+        SemestreDTO dto = map.toDto(input);
+        SemestreDTO created = service.create(dto);
+        return map.toOutput(created);
     }
 
     @Override
     public SemestreOutput update(SEMESTRE_UPDATE input) {
-        try {
-            SemestreDTO dto = map.toDto(input);
-            SemestreDTO updated = service.update(input.id(), dto);
-            return map.toOutput(updated);
-        } catch (Exception e) {
-            throw new RuntimeException("Error updating Semestre: " + e.getMessage(), e);
-        }
+        SemestreDTO dto = map.toDto(input);
+        SemestreDTO updated = service.update(input.id(), dto);
+        return map.toOutput(updated);
     }
 
     @Override
@@ -51,30 +43,18 @@ public class SemestreProcessor implements
 
     @Override
     public SemestreOutput findById(SEMESTRE_FIND input) {
-        try {
-            SemestreDTO dto = service.findById(input.id());
-            return map.toOutput(dto);
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding Semestre by ID: " + e.getMessage(), e);
-        }
+        SemestreDTO dto = service.findById(input.id());
+        return map.toOutput(dto);
     }
 
     @Override
     public List<SemestreOutput> findAll() {
-        try {
-            return service.findAll().stream().map(map::toOutput).toList();
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding all Semestres: " + e.getMessage(), e);
-        }
+        return service.findAll().stream().map(map::toOutput).toList();
     }
 
     @Override
     public void deleteById(SEMESTRE_DELETE input) {
-        try {
-            service.deleteById(input.id());
-        } catch (Exception e) {
-            throw new RuntimeException("Error deleting Semestre by ID: " + e.getMessage(), e);
-        }
+        service.deleteById(input.id());
     }
 }
 

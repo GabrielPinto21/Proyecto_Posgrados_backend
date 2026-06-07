@@ -57,25 +57,17 @@ public class AspiranteProcessor implements
 
     @Override
     public AspiranteOutput create(ASPIRANTE_CREATE input) {
-        try {
-            AspiranteDTO dto = map.toDto(input);
-            AspiranteDTO created = service.create(dto);
-            pagoProcessor.ensureInitialPaymentsForAspirante(created.getId());
-            return map.toOutput(created);
-        } catch (Exception e) {
-            throw new RuntimeException("Error creating Aspirante: " + e.getMessage(), e);
-        }
+        AspiranteDTO dto = map.toDto(input);
+        AspiranteDTO created = service.create(dto);
+        pagoProcessor.ensureInitialPaymentsForAspirante(created.getId());
+        return map.toOutput(created);
     }
 
     @Override
     public AspiranteOutput update(ASPIRANTE_UPDATE input) {
-        try {
-            AspiranteDTO dto = map.toDto(input);
-            AspiranteDTO updated = service.update(input.id(), dto);
-            return map.toOutput(updated);
-        } catch (Exception e) {
-            throw new RuntimeException("Error updating Aspirante: " + e.getMessage(), e);
-        }
+        AspiranteDTO dto = map.toDto(input);
+        AspiranteDTO updated = service.update(input.id(), dto);
+        return map.toOutput(updated);
     }
 
     @Override
@@ -85,21 +77,13 @@ public class AspiranteProcessor implements
 
     @Override
     public AspiranteOutput findById(ASPIRANTE_FIND input) {
-        try {
-            AspiranteDTO dto = service.findById(input.id());
-            return map.toOutput(dto);
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding Aspirante by ID: " + e.getMessage(), e);
-        }
+        AspiranteDTO dto = service.findById(input.id());
+        return map.toOutput(dto);
     }
 
     @Override
     public List<AspiranteOutput> findAll() {
-        try {
-            return service.findAll().stream().map(map::toOutput).toList();
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding all Aspirantes: " + e.getMessage(), e);
-        }
+        return service.findAll().stream().map(map::toOutput).toList();
     }
 
     public Page<AspiranteOutput> findAll(Pageable pageable) {
@@ -108,43 +92,23 @@ public class AspiranteProcessor implements
 
     @Override
     public void deleteById(ASPIRANTE_DELETE input) {
-        try {
-            service.deleteById(input.id());
-        } catch (Exception e) {
-            throw new RuntimeException("Error deleting Aspirante by ID: " + e.getMessage(), e);
-        }
+        service.deleteById(input.id());
     }
 
     public List<AspiranteOutput> findWithDocuments() {
-        try {
-            return service.findWithDocuments().stream().map(map::toOutput).toList();
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding Aspirantes with documents: " + e.getMessage(), e);
-        }
+        return service.findWithDocuments().stream().map(map::toOutput).toList();
     }
 
     public long countValidados() {
-        try {
-            return service.countValidados();
-        } catch (Exception e) {
-            throw new RuntimeException("Error counting validados: " + e.getMessage(), e);
-        }
+        return service.countValidados();
     }
 
     public long countPorCalificar() {
-        try {
-            return service.countPorCalificar();
-        } catch (Exception e) {
-            throw new RuntimeException("Error counting por calificar: " + e.getMessage(), e);
-        }
+        return service.countPorCalificar();
     }
 
     public long countCalificados() {
-        try {
-            return service.countCalificados();
-        } catch (Exception e) {
-            throw new RuntimeException("Error counting calificados: " + e.getMessage(), e);
-        }
+        return service.countCalificados();
     }
 
     public List<AspiranteCalificacionOutput> findAllValidadosCalificacion() {
@@ -170,58 +134,46 @@ public class AspiranteProcessor implements
     }
 
     public AspiranteCriteriosOutput findCriteriosCalificacion(ASPIRANTE_FIND input) {
-        try {
-            Integer idCohorte = service.findIdCohorteById(input.id());
-            if (idCohorte == null) {
-                return AspiranteCriteriosOutput.builder()
-                        .criterios(List.of())
-                        .puntajeTotal(null)
-                        .build();
-            }
-            BigDecimal puntuacion = service.findPuntuacionById(input.id());
-
-            List<CriterioFilaOutput> filas = criteriocohorteService
-                    .findCriteriosConCalificacion(idCohorte, input.id())
-                    .stream()
-                    .map(v -> CriterioFilaOutput.builder()
-                            .id(v.getId())
-                            .nombreCriterio(v.getNombreCriterio())
-                            .peso(v.getPesoSnapshot())
-                            .puntajeObtenido(v.getPuntajeObtenido())
-                            .build())
-                    .toList();
-
+        Integer idCohorte = service.findIdCohorteById(input.id());
+        if (idCohorte == null) {
             return AspiranteCriteriosOutput.builder()
-                    .criterios(filas)
-                    .puntajeTotal(puntuacion)
+                    .criterios(List.of())
+                    .puntajeTotal(null)
                     .build();
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding criterios for Aspirante: " + e.getMessage(), e);
         }
+        BigDecimal puntuacion = service.findPuntuacionById(input.id());
+
+        List<CriterioFilaOutput> filas = criteriocohorteService
+                .findCriteriosConCalificacion(idCohorte, input.id())
+                .stream()
+                .map(v -> CriterioFilaOutput.builder()
+                        .id(v.getId())
+                        .nombreCriterio(v.getNombreCriterio())
+                        .peso(v.getPesoSnapshot())
+                        .puntajeObtenido(v.getPuntajeObtenido())
+                        .build())
+                .toList();
+
+        return AspiranteCriteriosOutput.builder()
+                .criterios(filas)
+                .puntajeTotal(puntuacion)
+                .build();
     }
 
     public EstadoOutput findEstadoById(ASPIRANTE_FIND input) {
-        try {
-            AspiranteDTO dto = service.findById(input.id());
-            if (dto == null || dto.getEstado() == null) {
-                return null;
-            }
-            return estadoMap.toOutput(dto.getEstado());
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding estado for Aspirante: " + e.getMessage(), e);
+        AspiranteDTO dto = service.findById(input.id());
+        if (dto == null || dto.getEstado() == null) {
+            return null;
         }
+        return estadoMap.toOutput(dto.getEstado());
     }
 
     public List<AspiranteOutput> findPazYSalvoByCohorte(Integer cohorteId) {
-        try {
-            return service.findByCohorte(cohorteId).stream()
-                    .filter(a -> a.getEstado() != null
-                            && "PAZ Y SALVO".equalsIgnoreCase(a.getEstado().getTipo()))
-                    .map(map::toOutput)
-                    .toList();
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding aspirantes PAZ Y SALVO: " + e.getMessage(), e);
-        }
+        return service.findByCohorte(cohorteId).stream()
+                .filter(a -> a.getEstado() != null
+                        && "PAZ Y SALVO".equalsIgnoreCase(a.getEstado().getTipo()))
+                .map(map::toOutput)
+                .toList();
     }
 
     public List<PasoProcesoOutput> getPasosProceso(Integer idAspirante) {

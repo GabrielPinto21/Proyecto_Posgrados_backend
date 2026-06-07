@@ -22,24 +22,16 @@ public class PlazoProcessor implements
 
     @Override
     public PlazoOutput create(PLAZO_CREATE input) {
-        try {
-            PlazoDTO dto = map.toDto(input);
-            PlazoDTO created = service.create(dto);
-            return map.toOutput(created);
-        } catch (Exception e) {
-            throw new RuntimeException("Error creating Plazo: " + e.getMessage(), e);
-        }
+        PlazoDTO dto = map.toDto(input);
+        PlazoDTO created = service.create(dto);
+        return map.toOutput(created);
     }
 
     @Override
     public PlazoOutput update(PLAZO_UPDATE input) {
-        try {
-            PlazoDTO dto = map.toDto(input);
-            PlazoDTO updated = service.update(input.id(), dto);
-            return map.toOutput(updated);
-        } catch (Exception e) {
-            throw new RuntimeException("Error updating Plazo: " + e.getMessage(), e);
-        }
+        PlazoDTO dto = map.toDto(input);
+        PlazoDTO updated = service.update(input.id(), dto);
+        return map.toOutput(updated);
     }
 
     @Override
@@ -49,29 +41,17 @@ public class PlazoProcessor implements
 
     @Override
     public PlazoOutput findById(PLAZO_FIND input) {
-        try {
-            PlazoDTO dto = service.findById(input.id());
-            return map.toOutput(dto);
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding Plazo by ID: " + e.getMessage(), e);
-        }
+        PlazoDTO dto = service.findById(input.id());
+        return map.toOutput(dto);
     }
 
     @Override
     public List<PlazoOutput> findAll() {
-        try {
-            return service.findAll().stream().map(map::toOutput).toList();
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding all Plazos: " + e.getMessage(), e);
-        }
+        return service.findAll().stream().map(map::toOutput).toList();
     }
 
     @Override
     public void deleteById(PLAZO_DELETE input) {
-        try {
-            service.deleteById(input.id());
-        } catch (Exception e) {
-            throw new RuntimeException("Error deleting Plazo by ID: " + e.getMessage(), e);
-        }
+        service.deleteById(input.id());
     }
 }

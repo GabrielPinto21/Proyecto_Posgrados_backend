@@ -55,18 +55,14 @@ public class ProgramaProcessor implements
 
     @Override
     public ProgramaOutput create(PROGRAMA_CREATE input) {
-        try {
-            ProgramaDTO dto = map.toDto(input);
-            resolveModalidad(dto);
-            ProgramaDTO created = service.create(dto);
-            ultimocodigoprogramaService.create(UltimocodigoprogramaDTO.builder()
-                    .idPrograma(created.getId())
-                    .codigo(0)
-                    .build());
-            return map.toOutput(created);
-        } catch (Exception e) {
-            throw new RuntimeException("Error creating Programa: " + e.getMessage(), e);
-        }
+        ProgramaDTO dto = map.toDto(input);
+        resolveModalidad(dto);
+        ProgramaDTO created = service.create(dto);
+        ultimocodigoprogramaService.create(UltimocodigoprogramaDTO.builder()
+                .idPrograma(created.getId())
+                .codigo(0)
+                .build());
+        return map.toOutput(created);
     }
 
     private void resolveModalidad(ProgramaDTO dto) {
@@ -85,13 +81,9 @@ public class ProgramaProcessor implements
 
     @Override
     public ProgramaOutput update(PROGRAMA_UPDATE input) {
-        try {
-            ProgramaDTO dto = map.toDto(input);
-            ProgramaDTO updated = service.update(input.id(), dto);
-            return map.toOutput(updated);
-        } catch (Exception e) {
-            throw new RuntimeException("Error updating Programa: " + e.getMessage(), e);
-        }
+        ProgramaDTO dto = map.toDto(input);
+        ProgramaDTO updated = service.update(input.id(), dto);
+        return map.toOutput(updated);
     }
 
     @Override
@@ -101,85 +93,65 @@ public class ProgramaProcessor implements
 
     @Override
     public ProgramaOutput findById(PROGRAMA_FIND input) {
-        try {
-            return map.toOutput(service.findById(input.id()));
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding Programa: " + e.getMessage(), e);
-        }
+        return map.toOutput(service.findById(input.id()));
     }
 
     @Override
     public List<ProgramaOutput> findAll() {
-        try {
-            return service.findAll().stream().map(map::toOutput).toList();
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding all Programas: " + e.getMessage(), e);
-        }
+        return service.findAll().stream().map(map::toOutput).toList();
     }
 
     @Override
     public void deleteById(PROGRAMA_DELETE input) {
-        try {
-            UltimocodigoprogramaDTO ultimoCodigo = ultimocodigoprogramaService.findByIdPrograma(input.id());
-            if (ultimoCodigo != null) {
-                ultimocodigoprogramaService.deleteById(ultimoCodigo.getId());
-            }
-            service.deleteById(input.id());
-        } catch (Exception e) {
-            throw new RuntimeException("Error deleting Programa: " + e.getMessage(), e);
+        UltimocodigoprogramaDTO ultimoCodigo = ultimocodigoprogramaService.findByIdPrograma(input.id());
+        if (ultimoCodigo != null) {
+            ultimocodigoprogramaService.deleteById(ultimoCodigo.getId());
         }
+        service.deleteById(input.id());
     }
 
     // #region PERSONALIZADOS
 
     public List<ProgramaOutput> findByIdFacultad(Integer idFacultad) {
-        try {
-            return map.toOutputList(service.findByIdFacultad(idFacultad));
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding Programas by Facultad ID: " + e.getMessage(), e);
-        }
+        return map.toOutputList(service.findByIdFacultad(idFacultad));
     }
 
     public List<ModalidadOutput> findModalidadesByPrograma(Integer programaId) {
-        try {
-            ProgramaDTO programa = service.findById(programaId);
-            if (programa == null) {
-                throw new DomainException(ProgramaErrorCode.PROGRAMA_NOT_FOUND, programaId);
-            }
-
-            String tipoRegistro = programa.getTiporegistro() != null ? programa.getTiporegistro().getTipo() : null;
-            if (tipoRegistro == null) {
-                throw new DomainException(ProgramaErrorCode.PROGRAMA_SIN_TIPO_REGISTRO, programaId);
-            }
-
-            if ("UNICO".equalsIgnoreCase(tipoRegistro)) {
-                return modalidadService.findAll().stream()
-                        .filter(modalidad -> modalidad != null
-                                && modalidad.getNombre() != null
-                                && !"HIBRIDA".equalsIgnoreCase(modalidad.getNombre()))
-                        .map(this::toModalidadOutput)
-                        .toList();
-            }
-
-            if ("ESTANDAR".equalsIgnoreCase(tipoRegistro)) {
-                if (programa.getIdModalidad() == null) {
-                    throw new DomainException(ProgramaErrorCode.PROGRAMA_SIN_MODALIDAD_ASIGNADA, programaId);
-                }
-
-                ModalidadDTO modalidad = modalidadService.findById(programa.getIdModalidad());
-                if (modalidad == null) {
-                    throw new DomainException(ProgramaErrorCode.MODALIDAD_NOT_FOUND, programa.getIdModalidad());
-                }
-
-                return List.of(toModalidadOutput(modalidad));
-            }
-
-            throw new DomainException(ProgramaErrorCode.PROGRAMA_TIPO_REGISTRO_NO_VALIDO, tipoRegistro);
-        } catch (RuntimeException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding modalidades by programa: " + e.getMessage(), e);
+        ProgramaDTO programa = service.findById(programaId);
+        if (programa == null) {
+            throw new DomainException(ProgramaErrorCode.PROGRAMA_NOT_FOUND, programaId);
         }
+
+        String tipoRegistro = programa.getTiporegistro() != null ? programa.getTiporegistro().getTipo() : null;
+        if (tipoRegistro == null) {
+            throw new DomainException(ProgramaErrorCode.PROGRAMA_SIN_TIPO_REGISTRO, programaId);
+        }
+
+        if ("UNICO".equalsIgnoreCase(tipoRegistro)) {
+            return modalidadService.findAll().stream()
+                    .filter(modalidad -> modalidad != null
+                            && modalidad.getNombre() != null
+                            && !"HIBRIDA".equalsIgnoreCase(modalidad.getNombre()))
+                    .map(this::toModalidadOutput)
+                    .toList();
+        }
+
+        if ("ESTANDAR".equalsIgnoreCase(tipoRegistro)) {
+            if (programa.getIdModalidad() == null) {
+                throw new DomainException(ProgramaErrorCode.PROGRAMA_SIN_MODALIDAD_ASIGNADA, programaId);
+            }
+
+            ModalidadDTO modalidad = modalidadService.findById(programa.getIdModalidad());
+            if (modalidad == null) {
+                throw new DomainException(ProgramaErrorCode.MODALIDAD_NOT_FOUND, programa.getIdModalidad());
+            }
+
+            return List.of(toModalidadOutput(modalidad));
+        }
+
+        throw new DomainException(ProgramaErrorCode.PROGRAMA_TIPO_REGISTRO_NO_VALIDO, tipoRegistro);
+        } catch (RuntimeException e) {
+        throw e;
     }
 
     private ModalidadOutput toModalidadOutput(ModalidadDTO dto) {
@@ -198,57 +170,49 @@ public class ProgramaProcessor implements
     }
 
     public ProgramaOutput createWithRelations(PROGRAMA_CREATE_WITH_RELATIONS input, Integer idFacultad) {
-        try {
-            ProgramaDTO dto = buildDtoFromRelations(
-                    input.codigo(),
-                    input.nombre(),
-                    input.duracion(),
-                    input.correo(),
-                    input.registrosnies(),
-                    input.nivelformacion(),
-                    input.titulo(),
-                    input.rcmineducacion(),
-                    input.creditos(),
-                    input.periodicidad(),
-                    input.valormatricula(),
-                    input.sedeNombre(),
-                    input.tiporegistroTipo(),
-                    input.otrosvalores(),
-                    idFacultad);
-            ProgramaDTO created = service.create(dto);
-            ultimocodigoprogramaService.create(UltimocodigoprogramaDTO.builder()
-                    .idPrograma(created.getId())
-                    .codigo(0)
-                    .build());
-            return map.toOutput(created);
-        } catch (Exception e) {
-            throw new RuntimeException("Error creating Programa with relations: " + e.getMessage(), e);
-        }
+        ProgramaDTO dto = buildDtoFromRelations(
+                input.codigo(),
+                input.nombre(),
+                input.duracion(),
+                input.correo(),
+                input.registrosnies(),
+                input.nivelformacion(),
+                input.titulo(),
+                input.rcmineducacion(),
+                input.creditos(),
+                input.periodicidad(),
+                input.valormatricula(),
+                input.sedeNombre(),
+                input.tiporegistroTipo(),
+                input.otrosvalores(),
+                idFacultad);
+        ProgramaDTO created = service.create(dto);
+        ultimocodigoprogramaService.create(UltimocodigoprogramaDTO.builder()
+                .idPrograma(created.getId())
+                .codigo(0)
+                .build());
+        return map.toOutput(created);
     }
 
     public ProgramaOutput updateWithRelations(PROGRAMA_UPDATE_WITH_RELATIONS input, Integer idFacultad) {
-        try {
-            ProgramaDTO dto = buildDtoFromRelations(
-                    input.codigo(),
-                    input.nombre(),
-                    input.duracion(),
-                    input.correo(),
-                    input.registrosnies(),
-                    input.nivelformacion(),
-                    input.titulo(),
-                    input.rcmineducacion(),
-                    input.creditos(),
-                    input.periodicidad(),
-                    input.valormatricula(),
-                    input.sedeNombre(),
-                    input.tiporegistroTipo(),
-                    input.otrosvalores(),
-                    idFacultad);
-            ProgramaDTO updated = service.update(input.id(), dto);
-            return map.toOutput(updated);
-        } catch (Exception e) {
-            throw new RuntimeException("Error updating Programa with relations: " + e.getMessage(), e);
-        }
+        ProgramaDTO dto = buildDtoFromRelations(
+                input.codigo(),
+                input.nombre(),
+                input.duracion(),
+                input.correo(),
+                input.registrosnies(),
+                input.nivelformacion(),
+                input.titulo(),
+                input.rcmineducacion(),
+                input.creditos(),
+                input.periodicidad(),
+                input.valormatricula(),
+                input.sedeNombre(),
+                input.tiporegistroTipo(),
+                input.otrosvalores(),
+                idFacultad);
+        ProgramaDTO updated = service.update(input.id(), dto);
+        return map.toOutput(updated);
     }
 
         private ProgramaDTO buildDtoFromRelations(

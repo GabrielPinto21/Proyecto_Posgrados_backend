@@ -258,46 +258,42 @@ public class CohorteProcessor implements GlobalUseCase<COHORTE_CREATE, COHORTE_U
     }
 
     public List<ProgramaInicioOutput> getProgramaInicioByPrograma(Integer programaId) {
-        try {
-            return service.findResumenDataByIdPrograma(programaId).stream()
-                    .filter(cohorte -> cohorte.getEstado() != null
-                            && "ABIERTA".equalsIgnoreCase(cohorte.getEstado().getTipo()))
-                    .map(cohorte -> {
-                        Integer cohorteId = cohorte.getId();
-                        String nombre = cohorte.getNombre();
-                        LocalDate fechaLimiteDocumentos = cohorte.getPlazo() != null
-                                ? cohorte.getPlazo().getFechafin()
-                                : null;
-                        LocalDate fechaLimitePago = cohorte.getPlazo3() != null
-                                ? cohorte.getPlazo3().getFechafin()
-                                : null;
+        return service.findResumenDataByIdPrograma(programaId).stream()
+                .filter(cohorte -> cohorte.getEstado() != null
+                        && "ABIERTA".equalsIgnoreCase(cohorte.getEstado().getTipo()))
+                .map(cohorte -> {
+                    Integer cohorteId = cohorte.getId();
+                    String nombre = cohorte.getNombre();
+                    LocalDate fechaLimiteDocumentos = cohorte.getPlazo() != null
+                            ? cohorte.getPlazo().getFechafin()
+                            : null;
+                    LocalDate fechaLimitePago = cohorte.getPlazo3() != null
+                            ? cohorte.getPlazo3().getFechafin()
+                            : null;
 
-                        long totalInscritos = aspiranteService.countByCohorte(cohorteId);
-                        long validados = aspiranteService.countValidadosByCohorte(cohorteId);
-                        long calificados = aspiranteService.countCalificadosByCohorte(cohorteId);
+                    long totalInscritos = aspiranteService.countByCohorte(cohorteId);
+                    long validados = aspiranteService.countValidadosByCohorte(cohorteId);
+                    long calificados = aspiranteService.countCalificadosByCohorte(cohorteId);
 
-                        return ProgramaInicioOutput.builder()
-                                .cohorteActual(ProgramaInicioOutput.CohorteResumen.builder()
-                                        .id(cohorteId)
-                                        .nombre(nombre)
-                                        .activa(true)
-                                        .fechaLimiteDocumentos(fechaLimiteDocumentos)
-                                        .fechaLimitePago(fechaLimitePago)
-                                        .build())
-                                .validacion(ProgramaInicioOutput.ValidacionResumen.builder()
-                                        .totalInscritos(totalInscritos)
-                                        .aspirantesValidados(validados)
-                                        .build())
-                                .calificacion(ProgramaInicioOutput.CalificacionResumen.builder()
-                                        .totalValidados(validados)
-                                        .aspirantesCalificados(calificados)
-                                        .build())
-                                .build();
-                    })
-                    .toList();
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding programa inicio for programa: " + e.getMessage(), e);
-        }
+                    return ProgramaInicioOutput.builder()
+                            .cohorteActual(ProgramaInicioOutput.CohorteResumen.builder()
+                                    .id(cohorteId)
+                                    .nombre(nombre)
+                                    .activa(true)
+                                    .fechaLimiteDocumentos(fechaLimiteDocumentos)
+                                    .fechaLimitePago(fechaLimitePago)
+                                    .build())
+                            .validacion(ProgramaInicioOutput.ValidacionResumen.builder()
+                                    .totalInscritos(totalInscritos)
+                                    .aspirantesValidados(validados)
+                                    .build())
+                            .calificacion(ProgramaInicioOutput.CalificacionResumen.builder()
+                                    .totalValidados(validados)
+                                    .aspirantesCalificados(calificados)
+                                    .build())
+                            .build();
+                })
+                .toList();
     }
 
     public CohorteDetalleOutput getCohorteDetalle(Integer cohorteId) {
