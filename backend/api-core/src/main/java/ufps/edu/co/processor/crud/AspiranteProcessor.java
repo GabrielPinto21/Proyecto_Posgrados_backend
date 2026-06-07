@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import ufps.edu.co.domain.exceptions.DomainException;
+import ufps.edu.co.domain.exceptions.errorcodes.CohorteErrorCode;
 import ufps.edu.co.maps.specific.AspiranteMap;
 import ufps.edu.co.maps.specific.EstadoMap;
 import ufps.edu.co.records.input.entity.AspiranteInput.*;
@@ -383,7 +385,7 @@ public class AspiranteProcessor implements
     public RankingAdmitidosOutput getRankingAdmitidos(Integer cohorteId) {
         CohorteDTO cohorte = cohorteService.findById(cohorteId);
         if (cohorte == null) {
-            throw new RuntimeException("Cohorte no encontrada: " + cohorteId);
+            throw new DomainException(CohorteErrorCode.COHORTE_NOT_FOUND, cohorteId);
         }
         boolean activa = cohorte.getEstado() != null
                 && "ABIERTA".equalsIgnoreCase(cohorte.getEstado().getTipo());

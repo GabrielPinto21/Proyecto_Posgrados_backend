@@ -16,6 +16,8 @@ import ufps.edu.co.domain.exceptions.DomainException;
 import ufps.edu.co.domain.exceptions.errorcodes.CohorteErrorCode;
 import ufps.edu.co.domain.exceptions.errorcodes.CriteriocohorteErrorCode;
 import ufps.edu.co.domain.exceptions.errorcodes.CriterioevaluacionErrorCode;
+import ufps.edu.co.domain.exceptions.errorcodes.SemestreErrorCode;
+import ufps.edu.co.domain.exceptions.errorcodes.TipoplazoErrorCode;
 import ufps.edu.co.maps.specific.CohorteMap;
 import ufps.edu.co.records.input.entity.CohorteInput.*;
 import ufps.edu.co.records.output.entity.CohorteDetalleOutput;
@@ -182,7 +184,7 @@ public class CohorteProcessor implements GlobalUseCase<COHORTE_CREATE, COHORTE_U
     public CriteriosCohorteOutput getCriteriosByCohorte(Integer cohorteId) {
         CohorteDTO cohorte = service.findById(cohorteId);
         if (cohorte == null) {
-            throw new RuntimeException("Cohorte no encontrada: " + cohorteId);
+            throw new DomainException(CohorteErrorCode.COHORTE_NOT_FOUND, cohorteId);
         }
         boolean activa = cohorte.getEstado() != null
                 && "ABIERTA".equalsIgnoreCase(cohorte.getEstado().getTipo());
@@ -231,7 +233,7 @@ public class CohorteProcessor implements GlobalUseCase<COHORTE_CREATE, COHORTE_U
     public ProgramaInicioOutput getProgramaInicio(Integer cohorteId) {
         CohorteDTO cohorte = service.findById(cohorteId);
         if (cohorte == null) {
-            throw new RuntimeException("Cohorte no encontrada: " + cohorteId);
+            throw new DomainException(CohorteErrorCode.COHORTE_NOT_FOUND, cohorteId);
         }
 
         long totalInscritos = aspiranteService.countByCohorte(cohorte.getId());
@@ -443,7 +445,7 @@ public class CohorteProcessor implements GlobalUseCase<COHORTE_CREATE, COHORTE_U
 
         List<TipoplazoDTO> tipoplazos = tipoplazoService.findAll();
         if (tipoplazos.isEmpty()) {
-            throw new RuntimeException("No hay tipos de plazo configurados");
+            throw new DomainException(TipoplazoErrorCode.TIPOPLAZO_NO_CONFIGURADO, "tipoplazo");
         }
         Integer tipoplazoDocId = tipoplazos.stream()
                 .filter(t -> "DOCUMENTACION".equalsIgnoreCase(t.getTipo()))
@@ -481,7 +483,7 @@ public class CohorteProcessor implements GlobalUseCase<COHORTE_CREATE, COHORTE_U
 
         SemestreDTO semestre = semestreService.findById(body.idSemestre());
         if (semestre == null) {
-            throw new DomainException(CohorteErrorCode.COHORTE_NOT_FOUND, body.idSemestre());
+            throw new DomainException(SemestreErrorCode.SEMESTRE_NOT_FOUND, body.idSemestre());
         }
         String tipoEstadoSemestre = semestre.getEstado() != null ? semestre.getEstado().getTipo() : null;
         if (!"EN CURSO".equalsIgnoreCase(tipoEstadoSemestre) && !"PROGRAMADO".equalsIgnoreCase(tipoEstadoSemestre)) {
@@ -491,7 +493,7 @@ public class CohorteProcessor implements GlobalUseCase<COHORTE_CREATE, COHORTE_U
 
         EstadoDTO estadoCohorte = estadoService.findByTipoAndEntidad("CERRADA", "cohorte");
         if (estadoCohorte == null) {
-            throw new RuntimeException("No hay estado CERRADA configurado para cohorte");
+            throw new DomainException(CohorteErrorCode.COHORTE_ESTADO_NO_CONFIGURADO, "CERRADA");
         }
 
         Integer cohorteId = service.createAndGetId(CohorteDTO.builder()
@@ -607,11 +609,11 @@ public class CohorteProcessor implements GlobalUseCase<COHORTE_CREATE, COHORTE_U
     private CohorteListadoOutput cambiarEstadoCohorte(Integer cohorteId, String nuevoEstado) {
         CohorteDTO cohorte = service.findById(cohorteId);
         if (cohorte == null) {
-            throw new RuntimeException("Cohorte no encontrada: " + cohorteId);
+            throw new DomainException(CohorteErrorCode.COHORTE_NOT_FOUND, cohorteId);
         }
         EstadoDTO estado = estadoService.findByTipoAndEntidad(nuevoEstado, "cohorte");
         if (estado == null) {
-            throw new RuntimeException("Estado '" + nuevoEstado + "' no configurado para cohorte");
+            throw new DomainException(CohorteErrorCode.COHORTE_ESTADO_NO_CONFIGURADO, nuevoEstado);
         }
         cohorte.setIdEstado(estado.getId());
         service.update(cohorteId, cohorte);
@@ -634,15 +636,15 @@ public class CohorteProcessor implements GlobalUseCase<COHORTE_CREATE, COHORTE_U
     public CohorteListadoOutput updateCohorte(Integer cohorteId, COHORTE_DIRECTOR_UPDATE body) {
         Integer targetCohorteId = body.id() != null ? body.id() : cohorteId;
         if (targetCohorteId == null) {
-            throw new RuntimeException("Debe enviar el id de la cohorte a actualizar");
+            throw new DomainException(CohorteErrorCode.COHORTE_ID_REQUERIDO, "id");
         }
         if (cohorteId != null && !cohorteId.equals(targetCohorteId)) {
-            throw new RuntimeException("El id de la ruta no coincide con el id del body");
+            throw new DomainException(CohorteErrorCode.COHORTE_ID_MISMATCH_CONFLICT, targetCohorteId);
         }
 
         CohorteDTO cohorte = service.findById(targetCohorteId);
         if (cohorte == null) {
-            throw new RuntimeException("Cohorte no encontrada: " + targetCohorteId);
+            throw new DomainException(CohorteErrorCode.COHORTE_NOT_FOUND, targetCohorteId);
         }
 
         boolean cohorteChanged = false;
@@ -665,7 +667,7 @@ public class CohorteProcessor implements GlobalUseCase<COHORTE_CREATE, COHORTE_U
 
         SemestreDTO semestre = semestreService.findById(body.idSemestre());
         if (semestre == null) {
-            throw new DomainException(CohorteErrorCode.COHORTE_NOT_FOUND, body.idSemestre());
+            throw new DomainException(SemestreErrorCode.SEMESTRE_NOT_FOUND, body.idSemestre());
         }
         String tipoEstadoSemestre = semestre.getEstado() != null ? semestre.getEstado().getTipo() : null;
         if (!"EN CURSO".equalsIgnoreCase(tipoEstadoSemestre) && !"PROGRAMADO".equalsIgnoreCase(tipoEstadoSemestre)) {
