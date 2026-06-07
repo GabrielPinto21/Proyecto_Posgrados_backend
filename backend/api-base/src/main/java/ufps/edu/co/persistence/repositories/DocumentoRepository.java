@@ -28,6 +28,10 @@ public interface DocumentoRepository extends JpaRepository<DocumentoEntity, Inte
 	@Query("SELECT d FROM DocumentoEntity d WHERE d.idAspirante = :idAspirante")
 	List<DocumentoEntity> findByIdAspirante(@Param("idAspirante") Integer idAspirante);
 
+	@EntityGraph(attributePaths = {"estadodocumento"}, type = EntityGraph.EntityGraphType.FETCH)
+	@Query("SELECT d FROM DocumentoEntity d WHERE d.idAspirante IN :ids")
+	List<DocumentoEntity> findByIdAspiranteIn(@Param("ids") List<Integer> ids);
+
 	@Query("SELECT d FROM DocumentoEntity d LEFT JOIN FETCH d.estadodocumento WHERE d.idAspirante = :idAspirante AND d.idDocumentosrequisitoconsejocohorte = :idDocReqConsejoCohorte")
 	Optional<DocumentoEntity> findByIdAspiranteAndIdDocumentosrequisitoconsejocohorte(
 		@Param("idAspirante") Integer idAspirante,

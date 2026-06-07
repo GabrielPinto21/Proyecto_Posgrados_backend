@@ -30,7 +30,13 @@ public enum CohorteErrorCode implements BaseErrorCode {
             "La cohorte indicada no tiene programa asociado"),
     COHORTE_CON_DEPENDENCIAS_CONFLICT(
             "COHORTE_CON_DEPENDENCIAS_CONFLICT",
-            "No se puede eliminar la cohorte porque tiene registros dependientes asociados (criterios de cohorte u otros)");
+            "No se puede eliminar la cohorte porque tiene registros dependientes asociados (criterios de cohorte u otros)"),
+    COHORTE_ESTADO_NO_CONFIGURADO(
+            "COHORTE_ESTADO_NO_CONFIGURADO",
+            "El estado requerido no está configurado para la entidad cohorte"),
+    COHORTE_ID_MISMATCH_CONFLICT(
+            "COHORTE_ID_MISMATCH_CONFLICT",
+            "El id de la ruta no coincide con el id del body");
 
     private final String code;
     private final String defaultMessage;
