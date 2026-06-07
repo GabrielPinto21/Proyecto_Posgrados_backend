@@ -150,8 +150,6 @@ public class ProgramaProcessor implements
         }
 
         throw new DomainException(ProgramaErrorCode.PROGRAMA_TIPO_REGISTRO_NO_VALIDO, tipoRegistro);
-        } catch (RuntimeException e) {
-        throw e;
     }
 
     private ModalidadOutput toModalidadOutput(ModalidadDTO dto) {

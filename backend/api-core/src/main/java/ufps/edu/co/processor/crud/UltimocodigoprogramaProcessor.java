@@ -33,8 +33,6 @@ public class UltimocodigoprogramaProcessor implements
         }
         UltimocodigoprogramaDTO dto = map.toDto(input);
         return map.toOutput(service.create(dto));
-        } catch (DomainException e) {
-        throw e;
     }
 
     @Override

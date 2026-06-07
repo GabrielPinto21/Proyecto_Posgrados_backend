@@ -130,11 +130,11 @@ public class PruebaProcessor implements
     public PruebaResumenOutput crearPrueba(Integer idAspirante, PRUEBA_CREAR_REQUEST request) {
         TipopruebaDTO tipoprueba = tipopruebaService.findById(request.idTipoprueba());
         if (tipoprueba == null) {
-            throw new RuntimeException("Tipo de prueba no encontrado: " + request.idTipoprueba());
+            throw new DomainException(PruebaErrorCode.PRUEBA_NOT_FOUND, request.idTipoprueba());
         }
         EstadoDTO estadoInicial = estadoService.findByTipoAndEntidad("PENDIENTE DE CONFIRMACION", "prueba");
         if (estadoInicial == null) {
-            throw new RuntimeException("Estado 'PENDIENTE DE CONFIRMACION' no encontrado para entidad 'prueba'");
+            throw new DomainException(PruebaErrorCode.PRUEBA_NOT_FOUND, "PENDIENTE DE CONFIRMACION");
         }
         AspiranteDTO aspirante = aspiranteService.findById(idAspirante);
         UbicacionDTO ubicacion = ubicacionService.create(
@@ -158,7 +158,7 @@ public class PruebaProcessor implements
     public PruebaResumenOutput reagendarPrueba(Integer idPrueba, PRUEBA_REAGENDAR_REQUEST request) {
         TipopruebaDTO tipoprueba = tipopruebaService.findById(request.idTipoprueba());
         if (tipoprueba == null) {
-            throw new RuntimeException("Tipo de prueba no encontrado: " + request.idTipoprueba());
+            throw new DomainException(PruebaErrorCode.PRUEBA_NOT_FOUND, request.idTipoprueba());
         }
         UbicacionDTO ubicacion = ubicacionService.create(
                 UbicacionDTO.builder().direccion(request.ubicacion()).zonaurbana(true).build());
@@ -170,8 +170,6 @@ public class PruebaProcessor implements
                 EmailTemplates.cuerpoReagendarPrueba(aspirante.getPersona().getNombres(), result.nombre(),
                         request.fecha(), request.tiempo(), tipoprueba.getTipo(), request.ubicacion()));
         return result;
-        } catch (IllegalStateException e) {
-        throw e;
     }
 
     public PruebaResumenOutput editPrueba(Integer idPrueba, PRUEBA_EDITAR_REQUEST request) {
@@ -179,7 +177,7 @@ public class PruebaProcessor implements
         if (request.idTipoprueba() != null) {
             TipopruebaDTO tipoprueba = tipopruebaService.findById(request.idTipoprueba());
             if (tipoprueba == null) {
-                throw new RuntimeException("Tipo de prueba no encontrado: " + request.idTipoprueba());
+                throw new DomainException(PruebaErrorCode.PRUEBA_NOT_FOUND, request.idTipoprueba());
             }
             idTipoprueba = tipoprueba.getId();
         }
@@ -197,7 +195,7 @@ public class PruebaProcessor implements
     public PruebaSimpleOutput completarPrueba(Integer idPrueba) {
         EstadoDTO estadoCompletada = estadoService.findByTipoAndEntidad("COMPLETADA", "prueba");
         if (estadoCompletada == null) {
-            throw new RuntimeException("Estado 'COMPLETADA' no encontrado para entidad 'prueba'");
+            throw new DomainException(PruebaErrorCode.PRUEBA_NOT_FOUND, "COMPLETADA");
         }
         PruebaDTO updated = service.changeEstado(idPrueba, estadoCompletada.getId(), "CONFIRMADA");
         PruebaDTO full = service.findById(updated.getId());
@@ -208,7 +206,7 @@ public class PruebaProcessor implements
     public PruebaSimpleOutput confirmarPrueba(Integer idPrueba) {
         EstadoDTO estadoConfirmada = estadoService.findByTipoAndEntidad("CONFIRMADA", "prueba");
         if (estadoConfirmada == null) {
-            throw new RuntimeException("Estado 'CONFIRMADA' no encontrado para entidad 'prueba'");
+            throw new DomainException(PruebaErrorCode.PRUEBA_NOT_FOUND, "CONFIRMADA");
         }
         PruebaDTO updated = service.changeEstado(idPrueba, estadoConfirmada.getId(), "PENDIENTE DE CONFIRMACION");
         PruebaDTO full = service.findById(updated.getId());
@@ -219,7 +217,7 @@ public class PruebaProcessor implements
     public PruebaSimpleOutput solicitarCambioPrueba(Integer idPrueba, String motivocambio) {
         EstadoDTO estadoSolicitud = estadoService.findByTipoAndEntidad("SOLICITUD DE CAMBIO", "prueba");
         if (estadoSolicitud == null) {
-            throw new RuntimeException("Estado 'SOLICITUD DE CAMBIO' no encontrado para entidad 'prueba'");
+            throw new DomainException(PruebaErrorCode.PRUEBA_NOT_FOUND, "SOLICITUD DE CAMBIO");
         }
         PruebaDTO updated = service.changeEstadoWithMotivo(idPrueba, estadoSolicitud.getId(), "PENDIENTE DE CONFIRMACION", motivocambio);
         PruebaDTO full = service.findById(updated.getId());
@@ -230,7 +228,7 @@ public class PruebaProcessor implements
     public PruebaSimpleOutput cancelarPrueba(Integer idPrueba, String motivocambio, String canceladoPor) {
         EstadoDTO estadoCancelada = estadoService.findByTipoAndEntidad("CANCELADA", "prueba");
         if (estadoCancelada == null) {
-            throw new RuntimeException("Estado 'CANCELADA' no encontrado para entidad 'prueba'");
+            throw new DomainException(PruebaErrorCode.PRUEBA_NOT_FOUND, "CANCELADA");
         }
         PruebaDTO updated = service.changeEstadoWithMotivo(idPrueba, estadoCancelada.getId(), "CONFIRMADA", motivocambio);
         PruebaDTO full = service.findById(updated.getId());
