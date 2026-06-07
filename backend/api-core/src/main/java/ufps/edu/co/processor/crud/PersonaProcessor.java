@@ -15,6 +15,9 @@ import ufps.edu.co.records.output.entity.PersonaOutput;
 import ufps.edu.co.rest.dto.PersonaDTO;
 import ufps.edu.co.rest.services.PersonaService;
 import ufps.edu.co.usecase.GlobalUseCase;
+import org.springframework.dao.DataIntegrityViolationException;
+import ufps.edu.co.domain.exceptions.DomainException;
+import ufps.edu.co.domain.exceptions.errorcodes.PersonaErrorCode;
 
 @Service
 public class PersonaProcessor implements
@@ -28,10 +31,16 @@ public class PersonaProcessor implements
 
     @Override
     public PersonaOutput create(PERSONA_CREATE input) {
+        PersonaDTO dto = map.toDto(input);
         try {
-            PersonaDTO dto = map.toDto(input);
             PersonaDTO created = service.create(dto);
             return map.toOutput(created);
+        } catch (DataIntegrityViolationException ex) {
+            String msg = ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : ex.getMessage();
+            if (msg != null && (msg.contains("persona.persona_index_5") || msg.toLowerCase().contains("duplicate"))) {
+                throw new DomainException(PersonaErrorCode.PERSONA_CORREO_DUPLICADO, dto.getCorreo());
+            }
+            throw new DomainException(PersonaErrorCode.PERSONA_CREATION_ERROR, msg != null ? msg : ex.toString());
         } catch (Exception e) {
             throw new RuntimeException("Error creating Persona: " + e.getMessage(), e);
         }
