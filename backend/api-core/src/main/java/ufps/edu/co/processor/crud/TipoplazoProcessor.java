@@ -22,24 +22,16 @@ public class TipoplazoProcessor implements
 
     @Override
     public TipoplazoOutput create(TIPOPLAZO_CREATE input) {
-        try {
-            TipoplazoDTO dto = map.toDto(input);
-            TipoplazoDTO created = service.create(dto);
-            return map.toOutput(created);
-        } catch (Exception e) {
-            throw new RuntimeException("Error creating Tipoplazo: " + e.getMessage(), e);
-        }
+        TipoplazoDTO dto = map.toDto(input);
+        TipoplazoDTO created = service.create(dto);
+        return map.toOutput(created);
     }
 
     @Override
     public TipoplazoOutput update(TIPOPLAZO_UPDATE input) {
-        try {
-            TipoplazoDTO dto = map.toDto(input);
-            TipoplazoDTO updated = service.update(input.id(), dto);
-            return map.toOutput(updated);
-        } catch (Exception e) {
-            throw new RuntimeException("Error updating Tipoplazo: " + e.getMessage(), e);
-        }
+        TipoplazoDTO dto = map.toDto(input);
+        TipoplazoDTO updated = service.update(input.id(), dto);
+        return map.toOutput(updated);
     }
 
     @Override
@@ -49,29 +41,17 @@ public class TipoplazoProcessor implements
 
     @Override
     public TipoplazoOutput findById(TIPOPLAZO_FIND input) {
-        try {
-            TipoplazoDTO dto = service.findById(input.id());
-            return map.toOutput(dto);
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding Tipoplazo by ID: " + e.getMessage(), e);
-        }
+        TipoplazoDTO dto = service.findById(input.id());
+        return map.toOutput(dto);
     }
 
     @Override
     public List<TipoplazoOutput> findAll() {
-        try {
-            return service.findAll().stream().map(map::toOutput).toList();
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding all Tipoplazos: " + e.getMessage(), e);
-        }
+        return service.findAll().stream().map(map::toOutput).toList();
     }
 
     @Override
     public void deleteById(TIPOPLAZO_DELETE input) {
-        try {
-            service.deleteById(input.id());
-        } catch (Exception e) {
-            throw new RuntimeException("Error deleting Tipoplazo by ID: " + e.getMessage(), e);
-        }
+        service.deleteById(input.id());
     }
 }

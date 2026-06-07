@@ -22,24 +22,16 @@ public class TipoentrevistaProcessor implements
 
     @Override
     public TipoentrevistaOutput create(TIPOENTREVISTA_CREATE input) {
-        try {
-            TipoentrevistaDTO dto = map.toDto(input);
-            TipoentrevistaDTO created = service.create(dto);
-            return map.toOutput(created);
-        } catch (Exception e) {
-            throw new RuntimeException("Error creating Tipoentrevista: " + e.getMessage(), e);
-        }
+        TipoentrevistaDTO dto = map.toDto(input);
+        TipoentrevistaDTO created = service.create(dto);
+        return map.toOutput(created);
     }
 
     @Override
     public TipoentrevistaOutput update(TIPOENTREVISTA_UPDATE input) {
-        try {
-            TipoentrevistaDTO dto = map.toDto(input);
-            TipoentrevistaDTO updated = service.update(input.id(), dto);
-            return map.toOutput(updated);
-        } catch (Exception e) {
-            throw new RuntimeException("Error updating Tipoentrevista: " + e.getMessage(), e);
-        }
+        TipoentrevistaDTO dto = map.toDto(input);
+        TipoentrevistaDTO updated = service.update(input.id(), dto);
+        return map.toOutput(updated);
     }
 
     @Override
@@ -49,29 +41,17 @@ public class TipoentrevistaProcessor implements
 
     @Override
     public TipoentrevistaOutput findById(TIPOENTREVISTA_FIND input) {
-        try {
-            TipoentrevistaDTO dto = service.findById(input.id());
-            return map.toOutput(dto);
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding Tipoentrevista by ID: " + e.getMessage(), e);
-        }
+        TipoentrevistaDTO dto = service.findById(input.id());
+        return map.toOutput(dto);
     }
 
     @Override
     public List<TipoentrevistaOutput> findAll() {
-        try {
-            return service.findAll().stream().map(map::toOutput).toList();
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding all Tipoentrevistas: " + e.getMessage(), e);
-        }
+        return service.findAll().stream().map(map::toOutput).toList();
     }
 
     @Override
     public void deleteById(TIPOENTREVISTA_DELETE input) {
-        try {
-            service.deleteById(input.id());
-        } catch (Exception e) {
-            throw new RuntimeException("Error deleting Tipoentrevista by ID: " + e.getMessage(), e);
-        }
+        service.deleteById(input.id());
     }
 }

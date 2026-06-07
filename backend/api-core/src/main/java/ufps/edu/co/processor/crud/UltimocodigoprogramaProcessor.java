@@ -31,14 +31,8 @@ public class UltimocodigoprogramaProcessor implements
             throw new DomainException(UltimocodigoprogramaErrorCode.ULTIMOCODIGOPROGRAMA_ALREADY_EXISTS_CONFLICT,
                     "idPrograma=" + input.idPrograma());
         }
-        try {
-            UltimocodigoprogramaDTO dto = map.toDto(input);
-            return map.toOutput(service.create(dto));
-        } catch (DomainException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException("Error creating UltimoCodigoPrograma: " + e.getMessage(), e);
-        }
+        UltimocodigoprogramaDTO dto = map.toDto(input);
+        return map.toOutput(service.create(dto));
     }
 
     @Override

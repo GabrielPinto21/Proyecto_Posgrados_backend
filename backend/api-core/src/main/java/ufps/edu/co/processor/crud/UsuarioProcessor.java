@@ -22,24 +22,16 @@ public class UsuarioProcessor implements
 
     @Override
     public UsuarioOutput create(USUARIO_CREATE input) {
-        try {
-            UsuarioDTO dto = map.toDto(input);
-            UsuarioDTO created = service.create(dto);
-            return map.toOutput(created);
-        } catch (Exception e) {
-            throw new RuntimeException("Error creating Usuario: " + e.getMessage(), e);
-        }
+        UsuarioDTO dto = map.toDto(input);
+        UsuarioDTO created = service.create(dto);
+        return map.toOutput(created);
     }
 
     @Override
     public UsuarioOutput update(USUARIO_UPDATE input) {
-        try {
-            UsuarioDTO dto = map.toDto(input);
-            UsuarioDTO updated = service.update(input.id(), dto);
-            return map.toOutput(updated);
-        } catch (Exception e) {
-            throw new RuntimeException("Error updating Usuario: " + e.getMessage(), e);
-        }
+        UsuarioDTO dto = map.toDto(input);
+        UsuarioDTO updated = service.update(input.id(), dto);
+        return map.toOutput(updated);
     }
 
     @Override
@@ -49,29 +41,17 @@ public class UsuarioProcessor implements
 
     @Override
     public UsuarioOutput findById(USUARIO_FIND input) {
-        try {
-            UsuarioDTO dto = service.findById(input.id());
-            return map.toOutput(dto);
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding Usuario by ID: " + e.getMessage(), e);
-        }
+        UsuarioDTO dto = service.findById(input.id());
+        return map.toOutput(dto);
     }
 
     @Override
     public List<UsuarioOutput> findAll() {
-        try {
-            return service.findAll().stream().map(map::toOutput).toList();
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding all Usuarios: " + e.getMessage(), e);
-        }
+        return service.findAll().stream().map(map::toOutput).toList();
     }
 
     @Override
     public void deleteById(USUARIO_DELETE input) {
-        try {
-            service.deleteById(input.id());
-        } catch (Exception e) {
-            throw new RuntimeException("Error deleting Usuario by ID: " + e.getMessage(), e);
-        }
+        service.deleteById(input.id());
     }
 }

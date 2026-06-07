@@ -22,22 +22,14 @@ public class DocumentosrequisitoconsejoProcessor implements
 
     @Override
     public DocumentosrequisitoconsejoOutput create(DOCUMENTOSREQUISITOCONSEJO_CREATE input) {
-        try {
-            DocumentosrequisitoconsejoDTO dto = map.toDto(input);
-            return map.toOutput(service.create(dto));
-        } catch (Exception e) {
-            throw new RuntimeException("Error creating Documentosrequisitoconsejo: " + e.getMessage(), e);
-        }
+        DocumentosrequisitoconsejoDTO dto = map.toDto(input);
+        return map.toOutput(service.create(dto));
     }
 
     @Override
     public DocumentosrequisitoconsejoOutput update(DOCUMENTOSREQUISITOCONSEJO_UPDATE input) {
-        try {
-            DocumentosrequisitoconsejoDTO dto = map.toDto(input);
-            return map.toOutput(service.update(input.id(), dto));
-        } catch (Exception e) {
-            throw new RuntimeException("Error updating Documentosrequisitoconsejo: " + e.getMessage(), e);
-        }
+        DocumentosrequisitoconsejoDTO dto = map.toDto(input);
+        return map.toOutput(service.update(input.id(), dto));
     }
 
     @Override
@@ -47,29 +39,17 @@ public class DocumentosrequisitoconsejoProcessor implements
 
     @Override
     public DocumentosrequisitoconsejoOutput findById(DOCUMENTOSREQUISITOCONSEJO_FIND input) {
-        try {
-            return map.toOutput(service.findById(input.id()));
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding Documentosrequisitoconsejo by ID: " + e.getMessage(), e);
-        }
+        return map.toOutput(service.findById(input.id()));
     }
 
     @Override
     public List<DocumentosrequisitoconsejoOutput> findAll() {
-        try {
-            return service.findAll().stream().map(map::toOutput).toList();
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding all Documentosrequisitoconsejo: " + e.getMessage(), e);
-        }
+        return service.findAll().stream().map(map::toOutput).toList();
     }
 
     @Override
     public void deleteById(DOCUMENTOSREQUISITOCONSEJO_DELETE input) {
-        try {
-            service.deleteById(input.id());
-        } catch (Exception e) {
-            throw new RuntimeException("Error deleting Documentosrequisitoconsejo by ID: " + e.getMessage(), e);
-        }
+        service.deleteById(input.id());
     }
 
     /**
@@ -77,15 +57,11 @@ public class DocumentosrequisitoconsejoProcessor implements
      * This is a small helper used by controllers that upload a formato to S3.
      */
     public void updateUrlFormato(Integer id, String urlformato) {
-        try {
-            DocumentosrequisitoconsejoDTO existing = service.findById(id);
-            if (existing == null) {
-                throw new RuntimeException("Documentosrequisitoconsejo no encontrado con id: " + id);
-            }
-            existing.setUrlformato(urlformato);
-            service.update(id, existing);
-        } catch (Exception e) {
-            throw new RuntimeException("Error updating urlformato: " + e.getMessage(), e);
+        DocumentosrequisitoconsejoDTO existing = service.findById(id);
+        if (existing == null) {
+            throw new RuntimeException("Documentosrequisitoconsejo no encontrado con id: " + id);
         }
+        existing.setUrlformato(urlformato);
+        service.update(id, existing);
     }
 }
