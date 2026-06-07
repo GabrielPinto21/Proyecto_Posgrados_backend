@@ -3,6 +3,7 @@ package ufps.edu.co.processor.crud;
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -321,7 +322,12 @@ public class AspiranteProcessor implements
     }
 
     public List<AspiranteCohorteOutput> findByCohorteConResumen(Integer cohorteId) {
-        return service.findByCohorte(cohorteId).stream().map(aspirante -> {
+        List<AspiranteDTO> aspirantes = service.findByCohorte(cohorteId);
+        Map<Integer, List<DocumentoDTO>> docsPorAspirante = documentoService
+                .findByIdAspiranteIn(aspirantes.stream().map(AspiranteDTO::getId).toList())
+                .stream().collect(Collectors.groupingBy(DocumentoDTO::getIdAspirante));
+
+        return aspirantes.stream().map(aspirante -> {
             PersonaDTO p = aspirante.getPersona();
             String nombre = p != null
                     ? ((p.getNombres() != null ? p.getNombres() : "") + " "
@@ -331,28 +337,30 @@ public class AspiranteProcessor implements
                     && p.getDocumentopersona().getNumerodocumento() != null
                             ? p.getDocumentopersona().getNumerodocumento().toString()
                             : null;
-
-            List<DocumentoDTO> docs = documentoService.findByIdAspirante(aspirante.getId());
-            long total = docs.size();
+            List<DocumentoDTO> docs = docsPorAspirante.getOrDefault(aspirante.getId(), List.of());
             long validados = docs.stream()
                     .filter(d -> d.getEstadodocumento() != null
                             && "APROBADO".equalsIgnoreCase(d.getEstadodocumento().getEstado()))
                     .count();
-
             return AspiranteCohorteOutput.builder()
                     .id(aspirante.getId())
                     .nombre(nombre)
                     .cedula(cedula)
                     .correo(p != null ? p.getCorreo() : null)
                     .documentosValidados(validados)
-                    .totalDocumentos(total)
+                    .totalDocumentos(docs.size())
                     .estadoGeneral(aspirante.getEstado().getTipo())
                     .build();
         }).toList();
     }
 
     public List<AspiranteCohorteOutput> findAValidarByCohorte(Integer cohorteId) {
-        return service.findAValidarByCohorte(cohorteId).stream().map(aspirante -> {
+        List<AspiranteDTO> aspirantes = service.findAValidarByCohorte(cohorteId);
+        Map<Integer, List<DocumentoDTO>> docsPorAspirante = documentoService
+                .findByIdAspiranteIn(aspirantes.stream().map(AspiranteDTO::getId).toList())
+                .stream().collect(Collectors.groupingBy(DocumentoDTO::getIdAspirante));
+
+        return aspirantes.stream().map(aspirante -> {
             PersonaDTO p = aspirante.getPersona();
             String nombre = p != null
                     ? ((p.getNombres() != null ? p.getNombres() : "") + " "
@@ -362,21 +370,18 @@ public class AspiranteProcessor implements
                     && p.getDocumentopersona().getNumerodocumento() != null
                             ? p.getDocumentopersona().getNumerodocumento().toString()
                             : null;
-
-            List<DocumentoDTO> docs = documentoService.findByIdAspirante(aspirante.getId());
-            long total = docs.size();
+            List<DocumentoDTO> docs = docsPorAspirante.getOrDefault(aspirante.getId(), List.of());
             long validados = docs.stream()
                     .filter(d -> d.getEstadodocumento() != null
                             && "APROBADO".equalsIgnoreCase(d.getEstadodocumento().getEstado()))
                     .count();
-
             return AspiranteCohorteOutput.builder()
                     .id(aspirante.getId())
                     .nombre(nombre)
                     .cedula(cedula)
                     .correo(p != null ? p.getCorreo() : null)
                     .documentosValidados(validados)
-                    .totalDocumentos(total)
+                    .totalDocumentos(docs.size())
                     .estadoGeneral(aspirante.getEstado().getTipo())
                     .build();
         }).toList();

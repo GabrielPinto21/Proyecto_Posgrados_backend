@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -188,10 +189,14 @@ public class CohorteProcessor implements GlobalUseCase<COHORTE_CREATE, COHORTE_U
         }
         boolean activa = cohorte.getEstado() != null
                 && "ABIERTA".equalsIgnoreCase(cohorte.getEstado().getTipo());
-        List<CriteriosCohorteOutput.CriterioInfo> criterios = criteriocohorteService
-                .findByIdCohorte(cohorteId).stream()
+        List<CriteriocohorteDTO> criteriocohortes = criteriocohorteService.findByIdCohorte(cohorteId);
+        Map<Integer, CriterioevaluacionDTO> criteriosMap = criterioevaluacionService
+                .findAllByIds(criteriocohortes.stream().map(CriteriocohorteDTO::getIdCriterio)
+                        .filter(java.util.Objects::nonNull).toList())
+                .stream().collect(Collectors.toMap(CriterioevaluacionDTO::getId, Function.identity()));
+        List<CriteriosCohorteOutput.CriterioInfo> criterios = criteriocohortes.stream()
                 .map(cc -> {
-                    CriterioevaluacionDTO ce = criterioevaluacionService.findById(cc.getIdCriterio());
+                    CriterioevaluacionDTO ce = criteriosMap.get(cc.getIdCriterio());
                     return CriteriosCohorteOutput.CriterioInfo.builder()
                             .id(cc.getId())
                             .nombre(ce != null ? ce.getNombre() : null)
@@ -306,10 +311,15 @@ public class CohorteProcessor implements GlobalUseCase<COHORTE_CREATE, COHORTE_U
         boolean activa = cohorte.getEstado() != null
                 && "ABIERTA".equalsIgnoreCase(cohorte.getEstado().getTipo());
 
-        List<CohorteDetalleOutput.CriterioInfo> criterios = criteriocohorteService
-                .findByIdCohorte(cohorteId).stream()
+        List<CriteriocohorteDTO> criteriocohorteDetalle = criteriocohorteService.findByIdCohorte(cohorteId);
+        Map<Integer, CriterioevaluacionDTO> criteriosMapDetalle = criterioevaluacionService
+                .findAllByIds(criteriocohorteDetalle.stream()
+                        .map(CriteriocohorteDTO::getIdCriterio)
+                        .filter(java.util.Objects::nonNull).toList())
+                .stream().collect(Collectors.toMap(CriterioevaluacionDTO::getId, Function.identity()));
+        List<CohorteDetalleOutput.CriterioInfo> criterios = criteriocohorteDetalle.stream()
                 .map(cc -> {
-                    CriterioevaluacionDTO ce = criterioevaluacionService.findById(cc.getIdCriterio());
+                    CriterioevaluacionDTO ce = criteriosMapDetalle.get(cc.getIdCriterio());
                     return CohorteDetalleOutput.CriterioInfo.builder()
                             .id(cc.getId())
                             .idCriterioevaluacion(cc.getIdCriterio())
@@ -319,18 +329,38 @@ public class CohorteProcessor implements GlobalUseCase<COHORTE_CREATE, COHORTE_U
                 })
                 .toList();
 
-        List<CohorteDetalleOutput.DocumentoAsignadoInfo> documentosConsejo = documentosrequisitoconsejocohorteService
+        List<DocumentosrequisitoconsejocohorteDTO> consejoCohorteList = documentosrequisitoconsejocohorteService
                 .findByIdCohorte(cohorteId).stream()
                 .filter(doc -> doc.getIdCohorte() != null && doc.getIdCohorte().equals(cohorteId)
                         && doc.getIdDocrequisito() != null)
-                .map(this::mapDocumentoConsejo)
+                .toList();
+        Map<Integer, String> nombreConsejoMap = documentosrequisitoconsejoService
+                .findAllByIds(consejoCohorteList.stream().map(DocumentosrequisitoconsejocohorteDTO::getIdDocrequisito).toList())
+                .stream().collect(Collectors.toMap(DocumentosrequisitoconsejoDTO::getId, DocumentosrequisitoconsejoDTO::getNombre));
+        List<CohorteDetalleOutput.DocumentoAsignadoInfo> documentosConsejo = consejoCohorteList.stream()
+                .map(dto -> CohorteDetalleOutput.DocumentoAsignadoInfo.builder()
+                        .id(dto.getId())
+                        .idDocrequisito(dto.getIdDocrequisito())
+                        .idCohorte(dto.getIdCohorte())
+                        .nombre(nombreConsejoMap.get(dto.getIdDocrequisito()))
+                        .build())
                 .toList();
 
-        List<CohorteDetalleOutput.DocumentoAsignadoInfo> documentosPrograma = documentosrequisitoprogramacohorteService
+        List<DocumentosrequisitoprogramacohorteDTO> programaCohorteList = documentosrequisitoprogramacohorteService
                 .findByIdCohorte(cohorteId).stream()
                 .filter(doc -> doc.getIdCohorte() != null && doc.getIdCohorte().equals(cohorteId)
                         && doc.getIdDocrequisito() != null)
-                .map(this::mapDocumentoPrograma)
+                .toList();
+        Map<Integer, String> nombreProgramaMap = documentosrequisitoprogramaService
+                .findAllByIds(programaCohorteList.stream().map(DocumentosrequisitoprogramacohorteDTO::getIdDocrequisito).toList())
+                .stream().collect(Collectors.toMap(DocumentosrequisitoprogramaDTO::getId, DocumentosrequisitoprogramaDTO::getNombre));
+        List<CohorteDetalleOutput.DocumentoAsignadoInfo> documentosPrograma = programaCohorteList.stream()
+                .map(dto -> CohorteDetalleOutput.DocumentoAsignadoInfo.builder()
+                        .id(dto.getId())
+                        .idDocrequisito(dto.getIdDocrequisito())
+                        .idCohorte(dto.getIdCohorte())
+                        .nombre(nombreProgramaMap.get(dto.getIdDocrequisito()))
+                        .build())
                 .toList();
 
         List<AspiranteDTO> aspirantes = aspiranteService.findByCohorte(cohorteId);
@@ -404,38 +434,6 @@ public class CohorteProcessor implements GlobalUseCase<COHORTE_CREATE, COHORTE_U
                         .build())
                 .inscritosData(inscritosData)
                 .admitidosData(admitidosData)
-                .build();
-    }
-
-    private CohorteDetalleOutput.DocumentoAsignadoInfo mapDocumentoConsejo(
-            DocumentosrequisitoconsejocohorteDTO dto) {
-        String nombre = null;
-        if (dto.getIdDocrequisito() != null) {
-            DocumentosrequisitoconsejoDTO documento = documentosrequisitoconsejoService
-                    .findById(dto.getIdDocrequisito());
-            nombre = documento != null ? documento.getNombre() : null;
-        }
-        return CohorteDetalleOutput.DocumentoAsignadoInfo.builder()
-                .id(dto.getId())
-                .idDocrequisito(dto.getIdDocrequisito())
-                .idCohorte(dto.getIdCohorte())
-                .nombre(nombre)
-                .build();
-    }
-
-    private CohorteDetalleOutput.DocumentoAsignadoInfo mapDocumentoPrograma(
-            DocumentosrequisitoprogramacohorteDTO dto) {
-        String nombre = null;
-        if (dto.getIdDocrequisito() != null) {
-            DocumentosrequisitoprogramaDTO documento = documentosrequisitoprogramaService
-                    .findById(dto.getIdDocrequisito());
-            nombre = documento != null ? documento.getNombre() : null;
-        }
-        return CohorteDetalleOutput.DocumentoAsignadoInfo.builder()
-                .id(dto.getId())
-                .idDocrequisito(dto.getIdDocrequisito())
-                .idCohorte(dto.getIdCohorte())
-                .nombre(nombre)
                 .build();
     }
 

@@ -91,6 +91,12 @@ public class DocumentoService extends GenericService<DocumentoEntity, DocumentoD
     }
 
     @Transactional(readOnly = true)
+    public List<DocumentoDTO> findByIdAspiranteIn(List<Integer> ids) {
+        if (ids == null || ids.isEmpty()) return List.of();
+        return entityListToDtoList(repository.findByIdAspiranteIn(ids));
+    }
+
+    @Transactional(readOnly = true)
     public Optional<DocumentoDTO> findByIdAspiranteAndIdDocumentosrequisitoconsejocohorte(Integer idAspirante,
             Integer idDocumentosrequisitoconsejocohorte) {
         return repository
