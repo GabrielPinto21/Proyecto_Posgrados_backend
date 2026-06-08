@@ -5,3 +5,36 @@ de Usuario, y a ese repository hay que definirle un método llamado
 
 Arreglar los maps de ofertaacademica -> Semestre
 Arreglar los maps de cohorte (cohorte actual)
+
+https://rep0010-projectposgradosufps-production.up.railway.app/posgrados-project/api/dev/endpoint/superadmin/administrativo/asignar-programa
+500
+https://rep0010-projectposgradosufps-production.up.railway.app/posgrados-project/api/application/case/superadmin/persona/crear-completo 500
+
+{
+    "nombres": "nueva",
+    "apellidos": "persona",
+    "correo": "correo@ejemplo.com",
+    "fechanacimiento": "2006-06-06",
+    "celular": "3452424234",
+    "telefono": null,
+    "idGenero": 1,
+    "idEstadocivil": 1,
+    "idGrupoetnico": 2,
+    "idPoblacionindigena": 2,
+    "idDiscapacidad": 5,
+    "idCapacidadexepcional": 1,
+    "promediopregrado": null,
+    "titulopregrado": null,
+    "titulosposgrados": null,
+    "empresa": null,
+    "experiencialaboral": null,
+    "egresadoufps": null,
+    "ubicacionvivienda": null,
+    "ubicacionnacimiento": null,
+    "ubicaciontrabajo": null,
+    "numerodocumento": "",
+    "idTipodocumento": null,
+    "lugarexpedicion": null
+}
+
+el de director de programa cuando lo esté revisando vea que se pueda asignar que no dirija ningún programa

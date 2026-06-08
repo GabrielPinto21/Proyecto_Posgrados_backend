@@ -1,6 +1,9 @@
 package ufps.edu.co.records.input.entity;
 
 import java.time.LocalDate;
+
+import lombok.Builder;
+
 import java.math.BigDecimal;
 import ufps.edu.co.records.contracts.CreateType;
 import ufps.edu.co.records.contracts.DeleteType;
@@ -12,6 +15,7 @@ import ufps.edu.co.records.input.entity.UbicacionInput.UBICACION_CREATE;
 public enum PersonaInput {
         ;
 
+        @Builder
         public record PERSONA_CREATE(
                         String nombres,
                         String apellidos,
@@ -37,6 +41,7 @@ public enum PersonaInput {
                         Boolean egresadoufps) implements CreateType {
         }
 
+        @Builder
         public record PERSONA_UPDATE(
                         Integer id,
                         String nombres,
@@ -63,6 +68,7 @@ public enum PersonaInput {
                         Boolean egresadoufps) implements UpdateType {
         }
 
+        @Builder
         public record PERSONA_PATCH(
                         Integer id,
                         String nombres,
@@ -89,6 +95,7 @@ public enum PersonaInput {
                         Boolean egresadoufps) implements PatchType {
         }
 
+        @Builder
         public record PERSONA_FULL_CREATE(
                         String nombres,
                         String apellidos,
@@ -116,10 +123,12 @@ public enum PersonaInput {
                         UBICACION_CREATE lugarexpedicion) implements CreateType {
         }
 
+        @Builder
         public record PERSONA_DELETE(
                         Integer id) implements DeleteType {
         }
 
+        @Builder
         public record PERSONA_FIND(
                         Integer id) implements FindType {
         }

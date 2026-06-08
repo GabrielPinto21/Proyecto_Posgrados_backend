@@ -48,25 +48,12 @@ public class DepartamentoRestController {
         }
     }
 
-    /**
-     * Create
-     *
-     * @param departamentoDTO
-     * @return 201 creado o 409 si ya existe
-     */
     @PostMapping("/create")
     public ResponseEntity<DepartamentoOutput> create(@RequestBody DEPARTAMENTO_CREATE request) {
         DepartamentoOutput output = processor.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(output);
     }
 
-    /**
-     * Update if exists
-     *
-     * @param id
-     * @param departamentoDTO
-     * @return 200 con DTO actualizado o 404 si no existe
-     */
     @PutMapping("/update")
     public ResponseEntity<DepartamentoOutput> update(@RequestBody DEPARTAMENTO_UPDATE request) {
         try {
@@ -77,12 +64,6 @@ public class DepartamentoRestController {
         }
     }
 
-    /**
-     * Delete by PK
-     *
-     * @param id
-     * @return 204 eliminado o 404 si no existe
-     */
     @DeleteMapping("/delete")
     public ResponseEntity<Void> deleteById(@RequestBody DEPARTAMENTO_DELETE request) {
         try {

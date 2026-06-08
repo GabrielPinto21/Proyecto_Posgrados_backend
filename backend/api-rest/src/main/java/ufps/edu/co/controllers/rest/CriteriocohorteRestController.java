@@ -32,24 +32,13 @@ public class CriteriocohorteRestController {
 
     @Autowired
     private CriteriocohorteProcessor processor;
-
-    /**
-     * Get ALL
-     *
-     * @return 200 con lista de DTO
-     */
+    
     @GetMapping("")
     public ResponseEntity<List<CriteriocohorteOutput>> findAll() {
         List<CriteriocohorteOutput> list = processor.findAll();
         return ResponseEntity.ok(list); // 200 OK
     }
-
-    /**
-     * Get ONE identified by the given PK
-     *
-     * @param id
-     * @return 200 con DTO o 404 si no existe
-     */
+    
     @GetMapping("/{id}")
     public ResponseEntity<CriteriocohorteOutput> findById(@PathVariable Integer id) {
         try {
@@ -64,25 +53,12 @@ public class CriteriocohorteRestController {
         }
     }
 
-    /**
-     * Create
-     *
-     * @param criteriocohorteDTO
-     * @return 201 creado o 409 si ya existe
-     */
     @PostMapping("")
     public ResponseEntity<CriteriocohorteOutput> create(@RequestBody CRITERIOCOHORTE_CREATE request) {
         CriteriocohorteOutput created = processor.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created); // 201 Created
     }
 
-    /**
-     * Update if exists
-     *
-     * @param id
-     * @param criteriocohorteDTO
-     * @return 200 con DTO actualizado o 404 si no existe
-     */
     @PutMapping("/{id}")
     public ResponseEntity<CriteriocohorteOutput> update(@PathVariable Integer id, @RequestBody CRITERIOCOHORTE_UPDATE request) {
         try {
@@ -94,12 +70,6 @@ public class CriteriocohorteRestController {
         }
     }
 
-    /**
-     * Delete by PK
-     *
-     * @param id
-     * @return 204 eliminado o 404 si no existe
-     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(@PathVariable Integer id) {
         try {

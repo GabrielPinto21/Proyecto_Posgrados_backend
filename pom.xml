@@ -157,6 +157,13 @@
 	</dependencyManagement>
 
 	<build>
+
+		<plugins>
+			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+			</plugin>
+		</plugins>
+
 		<pluginManagement>
 			<plugins>
 
@@ -177,6 +184,39 @@
 								<version>${lombok.version}</version>
 							</path>
 						</annotationProcessorPaths>
+					</configuration>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>3.12.0</version>
+
+					<configuration>
+						<tags>
+							<tag>
+								<name>category</name>
+								<placement>a</placement>
+								<head>Category:</head>
+							</tag>
+							<tag>
+								<name>apiNote</name>
+								<placement>a</placement>
+								<head>API Note:</head>
+							</tag>
+
+							<tag>
+								<name>implSpec</name>
+								<placement>a</placement>
+								<head>Implementation Requirements:</head>
+							</tag>
+
+							<tag>
+								<name>implNote</name>
+								<placement>a</placement>
+								<head>Implementation Note:</head>
+							</tag>
+						</tags>
 					</configuration>
 				</plugin>
 

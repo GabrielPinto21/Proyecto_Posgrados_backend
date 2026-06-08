@@ -6,14 +6,6 @@ import ufps.edu.co.records.contracts.*;
 public enum PagoconceptoInput {
     ;
 
-    /**
-     * private Integer id ;
-     * //--- OTHER DATA FIELDS
-     * private String tipo ;
-     * //--- LINKS ( RELATIONSHIPS )
-     * private List<PagoDTO> pagoList ;
-     */
-
     public record PAGOCONCEPTO_CREATE(
             @NotNull String tipo) implements CreateType {
     }

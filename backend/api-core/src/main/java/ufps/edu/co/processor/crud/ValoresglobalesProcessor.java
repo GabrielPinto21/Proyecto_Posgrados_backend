@@ -94,6 +94,7 @@ public class ValoresglobalesProcessor {
         return Integer.parseInt(matcher.group("version"));
     }
 
+    @SuppressWarnings("unused")
     private Boolean matchesCurrentFamily(String clave, String prefix, int year) {
         for (String candidatePrefix : resolvePrefixAliases(prefix)) {
             if (clave.startsWith(candidatePrefix + "_" + year + "_")) {
@@ -103,6 +104,7 @@ public class ValoresglobalesProcessor {
         return false;
     }
 
+    @SuppressWarnings("unused")
     private Boolean matchesFamily(String clave, String prefix) {
         for (String candidatePrefix : resolvePrefixAliases(prefix)) {
             if (clave.startsWith(candidatePrefix + "_")) {
