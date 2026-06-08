@@ -56,6 +56,12 @@ public class CriterioevaluacionService extends GenericService<Criterioevaluacion
         return entityToDto(repository.findById(id));
     }
 
+    @Transactional(readOnly = true)
+    public List<CriterioevaluacionDTO> findAllByIds(List<Integer> ids) {
+        if (ids == null || ids.isEmpty()) return List.of();
+        return entityListToDtoList(repository.findAllById(ids));
+    }
+
     public CriterioevaluacionDTO create(CriterioevaluacionDTO dto) {
         return entityToDto(repository.save(toEntity(dto)));
     }
