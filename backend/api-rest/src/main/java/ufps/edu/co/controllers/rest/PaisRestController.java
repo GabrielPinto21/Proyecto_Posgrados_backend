@@ -21,18 +21,7 @@ public class PaisRestController {
 
     @Autowired
     private PaisProcessor processor;
-
-    /**
-     * Get ALL
-     *
-     * @return 200 con lista de DTO
-     */
-    /**
-     * Get ONE identified by the given PK
-     *
-     * @param id
-     * @return 200 con DTO o 404 si no existe
-     */
+    
     @PostMapping(value = "/list", consumes   = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PaisOutput> findById(@RequestBody PAIS_FIND find) {
         PaisOutput paisOutput = processor.findById(find);
@@ -43,25 +32,12 @@ public class PaisRestController {
         }
     }
 
-    /**
-     * Create
-     *
-     * @param departamentoDTO
-     * @return 201 creado o 409 si ya existe
-     */
     @PostMapping("/create")
     public ResponseEntity<PaisOutput> create(@RequestBody PAIS_CREATE request) {
         PaisOutput output = processor.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(output);
     }
 
-    /**
-     * Update if exists
-     *
-     * @param id
-     * @param departamentoDTO
-     * @return 200 con DTO actualizado o 404 si no existe
-     */
     @PutMapping("/update")
     public ResponseEntity<PaisOutput> update(@RequestBody PAIS_UPDATE request) {
         try {
@@ -72,12 +48,6 @@ public class PaisRestController {
         }
     }
 
-    /**
-     * Delete by PK
-     *
-     * @param id
-     * @return 204 eliminado o 404 si no existe
-     */
     @DeleteMapping("/delete")
     public ResponseEntity<Void> deleteById(@RequestBody PAIS_DELETE request) {
         try {

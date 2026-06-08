@@ -8,18 +8,7 @@ import ufps.edu.co.records.contracts.*;
 
 public enum SemestreInput {
         ;
-
-        /**
-         * private Integer id ;
-         * //--- OTHER DATA FIELDS
-         * private LocalDate fechaFin ;
-         * private LocalDate fechaInicio ;
-         * private Integer idEstado ;
-         * private String nombre ;
-         * //--- LINKS ( RELATIONSHIPS )
-         * private List<CohorteDTO> cohorteList ;
-         * private EstadoDTO estado ;
-         */
+        
         public record SEMESTRE_CREATE(
                         @NotNull LocalDate fechaInicio,
                         @NotNull LocalDate fechaFin,

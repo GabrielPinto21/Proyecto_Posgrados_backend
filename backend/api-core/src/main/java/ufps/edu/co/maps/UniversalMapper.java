@@ -11,22 +11,52 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import ufps.edu.co.domain.annotations.UniversalMapping;
 import ufps.edu.co.records.InputRequest;
 import ufps.edu.co.records.OutputResponse;
 import ufps.edu.co.records.contracts.CreateType;
 import ufps.edu.co.records.contracts.DeleteType;
 import ufps.edu.co.records.contracts.FindType;
-import ufps.edu.co.records.contracts.PatchType;
 import ufps.edu.co.records.contracts.UpdateType;
 
+/**
+ * UniversalMapper is a base class for mapping between various input types
+ * (CreateType, UpdateType, DeleteType, FindType), designed to map using
+ * reflection. It automatically maps properties from input records or beans to a
+ * DTO based on matching property names and compatible types. The mapping is
+ * case-insensitive and ignores underscores, allowing for flexible naming
+ * conventions. Subclasses must implement the toOutput method to convert the DTO
+ * to the desired output response type. This class is intended for use in
+ * scenarios where multiple input types need to be mapped to a common DTO
+ * without writing repetitive mapping code.
+ * @implSpec To use this class, create a subclass and annotate it with
+ *           {@link ufps.edu.co.domain.annotations.UniversalMapping}. This
+ *           annotation specifies which input types the mapper should support.
+ *           For example:
+ *           {@snippet :
+ *             @UniversalMapping(
+ *                 create = MyCreate.class,
+ *                 update = MyUpdate.class,
+ *                 delete = MyDelete.class,
+ *                 find = MyFind.class
+ *             )
+ *             public class MyMapper extends UniversalMapper<MyOutput, MyDto> {}
+ *           }
+ * 
+ * @apiNote This class relies heavily on reflection and may have performance
+ *          implications. It is recommended to use it in scenarios where the
+ *          flexibility of mapping outweighs the performance cost, such as in
+ *          administrative interfaces or when dealing with a large number of
+ *          input types. For performance-critical paths, consider implementing
+ *          custom mappers.
+ * @param <O>   The output response type that the mapper will produce.
+ * @param <DTO> The data transfer object type that the mapper will populate from
+ */
 public abstract class UniversalMapper<O extends OutputResponse, DTO> {
 
     private final Class<? extends CreateType> createClass;
     private final Class<? extends UpdateType> updateClass;
     private final Class<? extends DeleteType> deleteClass;
-    private final Class<? extends PatchType> patchClass;
     private final Class<? extends FindType> findClass;
     private final Class<?> dtoClass;
     private final SetterIndex setterIndex;
@@ -40,7 +70,6 @@ public abstract class UniversalMapper<O extends OutputResponse, DTO> {
         this.createClass = mapping.create();
         this.updateClass = mapping.update();
         this.deleteClass = mapping.delete();
-        this.patchClass = mapping.patch();
         this.findClass = mapping.find();
         this.dtoClass = resolveDtoClass();
         if (this.dtoClass == null) {
@@ -57,7 +86,6 @@ public abstract class UniversalMapper<O extends OutputResponse, DTO> {
         if (createClass.isInstance(input)
                 || updateClass.isInstance(input)
                 || deleteClass.isInstance(input)
-                || patchClass.isInstance(input)
                 || findClass.isInstance(input)) {
             return autoMap(input);
         }
