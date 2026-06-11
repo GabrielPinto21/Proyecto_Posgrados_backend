@@ -210,6 +210,21 @@ public class DocumentoProcessor implements
         }
     }
 
+    private void revertirEstadoValidacionSiAplica(Integer idAspirante) {
+        try {
+            AspiranteDTO aspirante = aspiranteService.findById(idAspirante);
+            if (aspirante == null || aspirante.getEstado() == null) return;
+            String estadoActual = aspirante.getEstado().getTipo();
+            if (!"VALIDADO_POR_CALIFICAR".equalsIgnoreCase(estadoActual)) return;
+            EstadoDTO estadoPazYSalvo = estadoService.findByTipoAndEntidad("PAZ Y SALVO", "aspirante");
+            if (estadoPazYSalvo != null) {
+                aspiranteService.updateEstado(idAspirante, estadoPazYSalvo.getId());
+            }
+        } catch (Exception e) {
+            logger.warn("No se pudo revertir estado de validación del aspirante {}: {}", idAspirante, e.getMessage());
+        }
+    }
+
     public PersonaOutput findPersonByDocument(DOCUMENTO_FIND input) {
         DocumentoDTO documento = service.findById(input.id());
         PersonaDTO persona = documento.getAspirante().getPersona();
@@ -427,6 +442,8 @@ public class DocumentoProcessor implements
         service.update(docId, dto);
         if ("APROBADO".equalsIgnoreCase(input.estado())) {
             checkAndUpdateEstadoValidacion(dto.getIdAspirante());
+        } else if ("RECHAZADO".equalsIgnoreCase(input.estado())) {
+            revertirEstadoValidacionSiAplica(dto.getIdAspirante());
         }
 
         // TODO: Ya no se mapea el nombre del documento, habría que agregarlo al output
