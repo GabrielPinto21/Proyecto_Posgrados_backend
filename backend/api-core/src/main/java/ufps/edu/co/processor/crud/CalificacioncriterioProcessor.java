@@ -3,27 +3,21 @@ package ufps.edu.co.processor.crud;
 import java.math.BigDecimal;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.*;
+import org.springframework.beans.factory.annotation.*;
+import org.springframework.dao.*;
 import org.springframework.data.domain.*;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.retry.annotation.*;
+import org.springframework.stereotype.*;
+import org.springframework.transaction.annotation.*;
 
-import ufps.edu.co.domain.exceptions.DomainException;
-import ufps.edu.co.domain.exceptions.errorcodes.CalificacioncriterioErrorCode;
-import ufps.edu.co.maps.specific.CalificacioncriterioMap;
+import ufps.edu.co.domain.exceptions.*;
+import ufps.edu.co.domain.exceptions.errorcodes.*;
+import ufps.edu.co.maps.specific.*;
 import ufps.edu.co.records.input.entity.CalificacioncriterioInput.*;
-import ufps.edu.co.records.output.entity.CalificacionCriterioSimpleOutput;
-import ufps.edu.co.records.output.entity.CalificacioncriterioOutput;
-import ufps.edu.co.rest.dto.AspiranteDTO;
-import ufps.edu.co.rest.dto.CalificacioncriterioDTO;
-import ufps.edu.co.rest.dto.CriteriocohorteDTO;
-import ufps.edu.co.rest.dto.EstadoDTO;
-import ufps.edu.co.rest.services.AspiranteService;
-import ufps.edu.co.rest.services.CalificacioncriterioService;
-import ufps.edu.co.rest.services.CriteriocohorteService;
-import ufps.edu.co.rest.services.EstadoService;
+import ufps.edu.co.records.output.entity.*;
+import ufps.edu.co.rest.dto.*;
+import ufps.edu.co.rest.services.*;
 import ufps.edu.co.services.*;
 import ufps.edu.co.utils.*;
 import ufps.edu.co.usecase.GlobalUseCase;
@@ -47,7 +41,7 @@ public class CalificacioncriterioProcessor implements
     private CriteriocohorteService criteriocohorteService;
 
     @Autowired
-    private EstadoService estadoService;
+    private CalificacionEstadoService calificacionEstadoService;
 
     @Autowired
     private SESService sesService;
@@ -65,7 +59,7 @@ public class CalificacioncriterioProcessor implements
         CalificacioncriterioDTO dto = map.toDto(input);
         CalificacioncriterioOutput output = map.toOutput(service.create(dto));
         recalcularPuntuacionAspirante(input.idAspirante());
-        actualizarEstadoCalificacion(input.idAspirante());
+        calificacionEstadoService.actualizarEstadoCalificacion(input.idAspirante());
         return output;
     }
 
@@ -76,8 +70,10 @@ public class CalificacioncriterioProcessor implements
             CalificacioncriterioDTO dto = map.toDto(input);
             CalificacioncriterioOutput output = map.toOutput(service.update(input.id(), dto));
             recalcularPuntuacionAspirante(input.idAspirante());
-            actualizarEstadoCalificacion(input.idAspirante());
+            calificacionEstadoService.actualizarEstadoCalificacion(input.idAspirante());
             return output;
+        } catch (CannotAcquireLockException | DeadlockLoserDataAccessException e) {
+            throw e;
         } catch (Exception e) {
             throw new DomainException(CalificacioncriterioErrorCode.CALIFICACIONCRITERIO_NOT_FOUND, input.id());
         }
@@ -123,6 +119,11 @@ public class CalificacioncriterioProcessor implements
         return service.findByIdCriterio(idCriterio).stream().map(map::toOutput).toList();
     }
 
+    @Retryable(
+        retryFor = { CannotAcquireLockException.class, DeadlockLoserDataAccessException.class },
+        maxAttempts = 3,
+        backoff = @Backoff(delay = 100, multiplier = 2)
+    )
     @Transactional
     public CalificacionCriterioSimpleOutput calificarCriterio(Integer idAspirante, Integer idCriterio,
             BigDecimal puntaje) {
@@ -179,37 +180,6 @@ public class CalificacioncriterioProcessor implements
                 .build();
     }
 
-    private void actualizarEstadoCalificacion(Integer idAspirante) {
-        try {
-            AspiranteDTO aspirante = aspiranteService.findById(idAspirante);
-            if (aspirante == null || aspirante.getIdCohorte() == null) return;
-
-            List<CriteriocohorteDTO> criteriosCohorte = criteriocohorteService.findByIdCohorte(aspirante.getIdCohorte());
-            if (criteriosCohorte.isEmpty()) return;
-
-            List<CalificacioncriterioDTO> calificaciones = service.findByIdAspirante(idAspirante);
-            java.util.Set<Integer> calificadosIds = calificaciones.stream()
-                    .filter(c -> c.getPuntuacion() != null)
-                    .map(CalificacioncriterioDTO::getIdCriteriocohorte)
-                    .filter(java.util.Objects::nonNull)
-                    .collect(java.util.stream.Collectors.toSet());
-
-            boolean todosCalificados = criteriosCohorte.stream()
-                    .map(CriteriocohorteDTO::getId)
-                    .allMatch(calificadosIds::contains);
-
-            if (todosCalificados) {
-                EstadoDTO estado = estadoService.findByTipoAndEntidad("VALIDADO_CALIFICADO", "aspirante");
-                if (estado != null) aspiranteService.updateEstado(idAspirante, estado.getId());
-            } else if (!calificadosIds.isEmpty()) {
-                EstadoDTO estado = estadoService.findByTipoAndEntidad("VALIDADO_EN_PROGRESO", "aspirante");
-                if (estado != null) aspiranteService.updateEstado(idAspirante, estado.getId());
-            }
-        } catch (Exception e) {
-            logger.warn("No se pudo actualizar estado de calificación del aspirante {}: {}", idAspirante, e.getMessage());
-        }
-    }
-
     @Transactional
     public void actualizarPesoSnapshotYRecalcular(Integer idCriterio, BigDecimal newPeso) {
         List<CalificacioncriterioDTO> calificaciones = service.findByIdCriterio(idCriterio);
@@ -233,8 +203,6 @@ public class CalificacioncriterioProcessor implements
                 .filter(c -> c.getPuntuacion() != null)
                 .map(CalificacioncriterioDTO::getPuntuacion)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        AspiranteDTO aspirante = aspiranteService.findById(idAspirante);
-        aspirante.setPuntuacion(total);
-        aspiranteService.update(idAspirante, aspirante);
+        aspiranteService.updatePuntuacion(idAspirante, total);
     }
 }
