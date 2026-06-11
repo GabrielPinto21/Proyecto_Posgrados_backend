@@ -15,4 +15,5 @@ public class UltimocodigoprogramaDTO implements Serializable {
     private Integer id;
     private Integer idPrograma;
     private Integer codigo;
+    private String nombrePrograma;
 }
