@@ -105,6 +105,7 @@ public class DocumentoProcessor implements
         EstadodocumentoDTO estadodocumentoDTO = estadodocumentoService.findByEstado("APROBADO");
         dto.setEstadodocumento(estadodocumentoDTO);
         dto.setIdEstadodocumento(estadodocumentoDTO.getId());
+        dto.setObservaciones(null);
         DocumentoDTO approve = service.update(input.id(), dto);
         checkAndUpdateEstadoValidacion(dto.getIdAspirante());
         String nombreDocumento = resolverNombreTitulo(dto);
