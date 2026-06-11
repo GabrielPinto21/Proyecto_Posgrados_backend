@@ -768,7 +768,7 @@ public class PagoProcessor {
             throw new DomainException(PagoErrorCode.PAGO_NOT_FOUND, pago.getIdAspirante());
         }
 
-        recibo.setIdEstado(resolveEstadoReciboCompletado().getId());
+        recibo.setIdEstado(resolveEstadoReciboCompletado("pagoinscripcion").getId());
         pagoreciboinscripcionService.update(recibo.getId(), recibo);
 
         pago.setIdEstado(estadoRealizado.getId());
@@ -788,7 +788,7 @@ public class PagoProcessor {
         log.info("Recibo matricula encontrado id={} idPago={} idEstadoActual={}", recibo.getId(), recibo.getIdPago(),
                 recibo.getIdEstado());
 
-        Integer nuevoEstadoRecibo = resolveEstadoReciboCompletado().getId();
+        Integer nuevoEstadoRecibo = resolveEstadoReciboCompletado("pagomatricula").getId();
         log.info("Seteando nuevo estado de recibo matricula id={} -> idEstado={}", recibo.getId(), nuevoEstadoRecibo);
         recibo.setIdEstado(nuevoEstadoRecibo);
         pagorecibomatriculaService.update(recibo.getId(), recibo);
@@ -801,42 +801,19 @@ public class PagoProcessor {
 
     private void actualizarEstadoAspirantePazYSalvo(Integer idAspirante) {
         EstadoDTO estadoPazYSalvo = resolveEstadoAspirantePazYSalvo();
-        AspiranteDTO aspirante = aspiranteService.findById(idAspirante);
-        if (aspirante == null) {
-            throw new DomainException(AspiranteErrorCode.ASPIRANTE_NOT_FOUND, idAspirante);
-        }
-
-        aspirante.setIdEstado(estadoPazYSalvo.getId());
-        aspirante.setEstado(estadoPazYSalvo);
-        aspiranteService.update(aspirante.getId(), aspirante);
+        aspiranteService.updateEstado(idAspirante, estadoPazYSalvo.getId());
     }
 
     private void actualizarEstadoAspiranteLegalizado(Integer idAspirante) {
         EstadoDTO estadoLegalizado = resolveEstadoAspiranteLegalizado();
-        AspiranteDTO aspirante = aspiranteService.findById(idAspirante);
-        if (aspirante == null) {
-            throw new DomainException(AspiranteErrorCode.ASPIRANTE_NOT_FOUND, idAspirante);
-        }
-
-        aspirante.setIdEstado(estadoLegalizado.getId());
-        aspirante.setEstado(estadoLegalizado);
-        aspiranteService.update(aspirante.getId(), aspirante);
+        aspiranteService.updateEstado(idAspirante, estadoLegalizado.getId());
         eventPublisher.publishEvent(new AspiranteLegalizadoEvent(idAspirante));
     }
 
-    private EstadoDTO resolveEstadoReciboCompletado() {
-        EstadoDTO estado = estadoService.findByTipoAndEntidad("COMPLETADO", "pagoinscripcion");
+    private EstadoDTO resolveEstadoReciboCompletado(String entidad) {
+        EstadoDTO estado = estadoService.findByTipoAndEntidad("COMPLETADO", entidad);
         if (estado == null) {
-            estado = estadoService.findByTipoAndEntidad("COMPLETADO", "PAGOINSCRIPCION");
-        }
-        if (estado == null) {
-            estado = estadoService.findByTipoAndEntidad("COMPLETADO", "pagomatricula");
-        }
-        if (estado == null) {
-            estado = estadoService.findByTipoAndEntidad("COMPLETADO", "PAGOMATRICULA");
-        }
-        if (estado == null) {
-            throw new DomainException(PagoErrorCode.PAGO_ESTADO_NOT_FOUND, "COMPLETADO");
+            throw new DomainException(PagoErrorCode.PAGO_ESTADO_NOT_FOUND, "COMPLETADO-" + entidad);
         }
         return estado;
     }
@@ -1506,7 +1483,7 @@ public class PagoProcessor {
 
         EstadoDTO estadoRealizado = resolveEstadoPago("REALIZADO");
 
-        Integer nuevoEstadoRecibo = resolveEstadoReciboCompletado().getId();
+        Integer nuevoEstadoRecibo = resolveEstadoReciboCompletado("pagoinscripcion").getId();
         recibo.setIdEstado(nuevoEstadoRecibo);
         pagoreciboinscripcionService.update(recibo.getId(), recibo);
 
@@ -1539,7 +1516,7 @@ public class PagoProcessor {
 
         EstadoDTO estadoRealizado = resolveEstadoPago("REALIZADO");
 
-        Integer nuevoEstadoRecibo = resolveEstadoReciboCompletado().getId();
+        Integer nuevoEstadoRecibo = resolveEstadoReciboCompletado("pagomatricula").getId();
         recibo.setIdEstado(nuevoEstadoRecibo);
         pagorecibomatriculaService.update(recibo.getId(), recibo);
 
