@@ -268,7 +268,7 @@ public class PagoProcessor {
                         ? pagoreciboShallow.getUrlrecibo()
                         : checkoutResponse.checkoutUrl();
 
-        WompiCheckoutResponse response = WompiCheckoutResponse.builder()
+        return WompiCheckoutResponse.builder()
                 .paymentId(checkoutResponse.paymentId())
                 .aspiranteId(checkoutResponse.aspiranteId())
                 .pagoconceptoId(checkoutResponse.pagoconceptoId())
@@ -293,12 +293,6 @@ public class PagoProcessor {
                 .creationDate(checkoutResponse.creationDate())
                 .status(checkoutResponse.status())
                 .build();
-
-        if (wompiGateway.isSimulated()) {
-            autoConfirmarPagoSimulado(pago.id(), response.reference(), response.transactionId());
-        }
-
-        return response;
     }
 
     @SuppressWarnings("null")
@@ -394,7 +388,7 @@ public class PagoProcessor {
                 && !pagoreciboShallow.getUrlrecibo().isBlank() ? pagoreciboShallow.getUrlrecibo()
                         : checkoutResponse.checkoutUrl();
 
-        WompiCheckoutResponse response = WompiCheckoutResponse.builder()
+        return WompiCheckoutResponse.builder()
                 .paymentId(checkoutResponse.paymentId())
                 .aspiranteId(checkoutResponse.aspiranteId())
                 .pagoconceptoId(checkoutResponse.pagoconceptoId())
@@ -420,12 +414,6 @@ public class PagoProcessor {
                 .creationDate(checkoutResponse.creationDate())
                 .status(checkoutResponse.status())
                 .build();
-
-        if (wompiGateway.isSimulated()) {
-            autoConfirmarPagoSimulado(pago.id(), response.reference(), response.transactionId());
-        }
-
-        return response;
     }
 
     public WompiReceiptData prepararReciboInscripcion(Integer idAspirante, Integer authenticatedUserId,
@@ -612,17 +600,6 @@ public class PagoProcessor {
 
     public PagoOutput confirmarWebhookAutomatico(WompiWebhookRequest request) {
         return procesarWebhook(request, true);
-    }
-
-    private void autoConfirmarPagoSimulado(Integer paymentId, String reference, String transactionId) {
-        WompiWebhookRequest webhookRequest = WompiWebhookRequest.builder()
-                .paymentId(paymentId)
-                .reference(reference)
-                .transactionId(transactionId)
-                .status("APPROVED")
-                .build();
-        log.info("Pago simulado: auto-confirmando paymentId={} referencia={}", paymentId, reference);
-        procesarWebhook(webhookRequest, true);
     }
 
     private PagoOutput procesarWebhook(WompiWebhookRequest request, boolean actualizarEstado) {
