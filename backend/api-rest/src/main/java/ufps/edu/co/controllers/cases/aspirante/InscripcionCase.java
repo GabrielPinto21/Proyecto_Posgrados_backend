@@ -356,6 +356,12 @@ public class InscripcionCase {
         }
 
         private void validarFormulario(FormularioInscripcionRequest body) {
+                if (body.fechaNacimiento() != null &&
+                                body.fechaNacimiento().isAfter(LocalDate.now().minusYears(18))) {
+                        throw new DomainException(PersonaErrorCode.PERSONA_MENOR_DE_EDAD,
+                                        body.fechaNacimiento().toString());
+                }
+
                 if (body.telefonoContacto() == null || body.telefonoContacto().trim().length() != 10) {
                         throw new DomainException(AspiranteErrorCode.TELEFONO_INSCRIPCION_INVALIDO_CONFLICT,
                                         body.telefonoContacto());
