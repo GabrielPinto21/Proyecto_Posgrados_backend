@@ -127,6 +127,7 @@ public class DocumentoProcessor implements
         dto.setObservaciones(input.motivoRechazo());
         dto.setIdEstadodocumento(estadodocumentoDTO.getId());
         DocumentoDTO reject = service.update(input.id(), dto);
+        revertirEstadoValidacionSiAplica(dto.getIdAspirante());
         String nombreDocumento = resolverNombreTitulo(dto);
         AspiranteDTO aspirante = aspiranteService.findById(dto.getIdAspirante());
         PersonaDTO persona = aspirante != null ? aspirante.getPersona() : null;
