@@ -1,6 +1,6 @@
 package ufps.edu.co.persistence.repositories;
 
-import java.util.Optional;
+import java.util.*;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.*;
 import ufps.edu.co.persistence.entities.UltimocodigoprogramaEntity;
@@ -11,4 +11,7 @@ public interface UltimocodigoprogramaRepository extends JpaRepository<Ultimocodi
     Optional<UltimocodigoprogramaEntity> findByIdPrograma(Integer idPrograma);
 
     boolean existsByIdPrograma(Integer idPrograma);
+
+    @Query("SELECT u FROM UltimocodigoprogramaEntity u JOIN FETCH u.programa")
+    List<UltimocodigoprogramaEntity> findAllWithPrograma();
 }
