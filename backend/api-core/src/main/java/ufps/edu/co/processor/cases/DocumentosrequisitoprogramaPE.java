@@ -1,21 +1,14 @@
 package ufps.edu.co.processor.cases;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import ufps.edu.co.maps.specific.DocumentosrequisitoprogramaMap;
-import ufps.edu.co.processor.crud.DocumentosrequisitoprogramaProcessor;
-import ufps.edu.co.records.output.cases.Listdocumentosprogramaconsejo;
-import ufps.edu.co.records.output.entity.DocumentoRequeridoOutput;
-import ufps.edu.co.records.output.entity.DocumentosrequisitoprogramaOutput;
-import ufps.edu.co.rest.dto.DocumentosrequisitoconsejoDTO;
-import ufps.edu.co.rest.services.DocumentosrequisitoprogramaService;
-import ufps.edu.co.rest.services.DocumentosrequisitoprogramacohorteService;
-import ufps.edu.co.rest.services.DocumentosrequisitoconsejoService;
-import ufps.edu.co.rest.services.DocumentosrequisitoconsejocohorteService;
+import java.util.*;
+import org.springframework.beans.factory.annotation.*;
+import org.springframework.stereotype.*;
+import ufps.edu.co.maps.specific.*;
+import ufps.edu.co.processor.crud.*;
+import ufps.edu.co.records.output.cases.*;
+import ufps.edu.co.records.output.entity.*;
+import ufps.edu.co.rest.dto.*;
+import ufps.edu.co.rest.services.*;
 
 @Service
 public class DocumentosrequisitoprogramaPE extends DocumentosrequisitoprogramaProcessor {
@@ -35,11 +28,31 @@ public class DocumentosrequisitoprogramaPE extends DocumentosrequisitoprogramaPr
     @Autowired
     private DocumentosrequisitoconsejocohorteService consejoCohorteService;
 
+    @Autowired
+    private AspiranteService aspiranteService;
+
+    @Autowired
+    private PersonaService personaService;
+
     public List<DocumentoRequeridoOutput> findByIdCohorte(Integer idCohorte, Integer idAspirante) {
         List<DocumentoRequeridoOutput> result = new ArrayList<>();
 
+        boolean esEgresadoUfps = false;
+        if (idAspirante != null) {
+            Integer idPersona = aspiranteService.findIdPersonaById(idAspirante);
+            if (idPersona != null) {
+                PersonaDTO persona = personaService.findById(idPersona);
+                esEgresadoUfps = persona != null && Boolean.TRUE.equals(persona.getEgresadoufps());
+            }
+        }
+        final boolean filtrarEgresado = esEgresadoUfps;
+
         consejoCohorteService.findByIdCohorte(idCohorte).forEach(junction -> {
             DocumentosrequisitoconsejoDTO doc = consejoService.findById(junction.getIdDocrequisito());
+            if (filtrarEgresado &&
+                    ("Título Profesional".equals(doc.getNombre()) || "Certificado de Notas".equals(doc.getNombre()))) {
+                return;
+            }
             result.add(DocumentoRequeridoOutput.builder()
                     .idDocumentosrequisitoconsejocohorte(junction.getId())
                     .idDocumentosrequisitoprogramacohorte(null)
