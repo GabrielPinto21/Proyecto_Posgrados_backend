@@ -57,6 +57,9 @@ public class DocumentoProcessor implements
     private DocumentosrequisitoconsejoService documentosrequisitoconsejoService;
 
     @Autowired
+    private PersonaService personaService;
+
+    @Autowired
     private SESService sesService;
 
     // @Autowired
@@ -158,6 +161,20 @@ public class DocumentoProcessor implements
             if (requisitosConsejo.isEmpty() && requisitosPrograma.isEmpty()) {
                 throw new RuntimeException(
                         "La cohorte con id " + idCohorte + " no tiene documentos requisito configurados.");
+            }
+
+            Integer idPersona = aspiranteService.findIdPersonaById(idAspirante);
+            if (idPersona != null) {
+                PersonaDTO persona = personaService.findById(idPersona);
+                if (persona != null && Boolean.TRUE.equals(persona.getEgresadoufps())) {
+                    requisitosConsejo = requisitosConsejo.stream()
+                            .filter(r -> {
+                                DocumentosrequisitoconsejoDTO doc = documentosrequisitoconsejoService.findById(r.getIdDocrequisito());
+                                String nombre = doc != null ? doc.getNombre() : "";
+                                return !"Título Profesional".equals(nombre) && !"Certificado de Notas".equals(nombre);
+                            })
+                            .collect(Collectors.toList());
+                }
             }
 
             // Cargar todos los documentos del aspirante en una sola query y verificar en memoria
