@@ -1096,7 +1096,17 @@ public class PagoProcessor {
         }
         BigDecimal salariosMinimos = programa.getValormatricula();
         BigDecimal salarioMinimoPesos = BigDecimal.valueOf(valoresglobalesProcessor.getCurrentSalaryMinimumPesos());
-        return salariosMinimos.multiply(salarioMinimoPesos);
+        BigDecimal monto = salariosMinimos.multiply(salarioMinimoPesos);
+
+        Integer idPersona = aspiranteService.findIdPersonaById(idAspirante);
+        if (idPersona != null) {
+            PersonaDTO persona = personaService.findById(idPersona);
+            if (persona != null && Boolean.TRUE.equals(persona.getEgresadoufps())) {
+                monto = monto.multiply(new BigDecimal("0.80"));
+            }
+        }
+
+        return monto;
     }
 
     private boolean isReciboInscripcionVencido(PagoreciboinscripcionDTO recibo) {
