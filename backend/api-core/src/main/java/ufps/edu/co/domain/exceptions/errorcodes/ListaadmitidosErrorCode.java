@@ -18,7 +18,11 @@ public enum ListaadmitidosErrorCode implements BaseErrorCode {
             "No se encontró el estado POR LEGALIZAR para aspirante en la tabla de estados"),
     NO_ADMITIDOS_EN_COHORTE(
             "NO_ADMITIDOS_EN_COHORTE",
-            "No hay aspirantes con estado ADMITIDO en la cohorte especificada");
+            "No hay aspirantes con estado ADMITIDO en la cohorte especificada"),
+
+    CUPOS_COHORTE_AGOTADOS(
+            "CUPOS_COHORTE_AGOTADOS",
+            "No se puede admitir al aspirante: la cohorte ya alcanzó el límite de cupos disponibles");
 
     private final String code;
     private final String defaultMessage;

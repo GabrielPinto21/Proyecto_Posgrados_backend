@@ -13,7 +13,11 @@ public enum PersonaErrorCode implements BaseErrorCode {
 
     PERSONA_CORREO_DUPLICADO(
         "PERSONA_CORREO_DUPLICADO",
-        "El correo ya existe");
+        "El correo ya existe"),
+
+    PERSONA_MENOR_DE_EDAD(
+        "PERSONA_MENOR_DE_EDAD",
+        "El aspirante debe ser mayor de edad (18 años)");
 
     private final String code;
     private final String defaultMessage;
