@@ -1,6 +1,7 @@
 package ufps.edu.co.maps.specific;
 
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ufps.edu.co.maps.GlobalMapper;
 import ufps.edu.co.records.input.entity.PagoInput.*;
@@ -10,6 +11,15 @@ import ufps.edu.co.rest.dto.PagoDTO;
 @Component
 public class PagoMap extends
         GlobalMapper<PAGO_CREATE, PAGO_UPDATE, PAGO_DELETE, PAGO_PATCH, PAGO_FIND, PagoOutput, PagoDTO> {
+
+    @Autowired
+    private AspiranteMap aspiranteMap;
+
+    @Autowired
+    private EstadoMap estadoMap;
+
+    @Autowired
+    private PagoconceptoMap pagoconceptoMap;
 
     public PagoMap() {
         super(PAGO_CREATE.class, PAGO_UPDATE.class, PAGO_DELETE.class, PAGO_PATCH.class,
@@ -62,10 +72,6 @@ public class PagoMap extends
     @Override
     public PagoOutput toOutput(PagoDTO dto) {
         if (dto == null) return null;
-
-        AspiranteMap aspiranteMap = new AspiranteMap();
-        EstadoMap estadoMap = new EstadoMap();
-        PagoconceptoMap pagoconceptoMap = new PagoconceptoMap();
 
         return PagoOutput.builder()
                 .id(dto.getId())
