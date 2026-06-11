@@ -35,6 +35,18 @@ public class UltimocodigoprogramaService extends GenericService<Ultimocodigoprog
     }
 
     @Transactional(readOnly = true)
+    public List<UltimocodigoprogramaDTO> findAllConNombrePrograma() {
+        return repository.findAllWithPrograma().stream()
+                .map(e -> UltimocodigoprogramaDTO.builder()
+                        .id(e.getId())
+                        .idPrograma(e.getIdPrograma())
+                        .codigo(e.getCodigo())
+                        .nombrePrograma(e.getPrograma() != null ? e.getPrograma().getNombre() : null)
+                        .build())
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public UltimocodigoprogramaDTO findById(Integer id) {
         return entityToDto(repository.findById(id));
     }
