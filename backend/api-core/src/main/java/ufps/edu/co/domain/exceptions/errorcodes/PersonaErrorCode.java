@@ -17,7 +17,7 @@ public enum PersonaErrorCode implements BaseErrorCode {
 
     PERSONA_MENOR_DE_EDAD(
         "PERSONA_MENOR_DE_EDAD",
-        "El aspirante debe ser mayor de edad (18 años)");
+        "No cuenta con la edad mínima");
 
     private final String code;
     private final String defaultMessage;

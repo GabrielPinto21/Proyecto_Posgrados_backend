@@ -357,7 +357,7 @@ public class InscripcionCase {
 
         private void validarFormulario(FormularioInscripcionRequest body) {
                 if (body.fechaNacimiento() != null &&
-                                body.fechaNacimiento().isAfter(LocalDate.now().minusYears(18))) {
+                                body.fechaNacimiento().isAfter(LocalDate.now().minusYears(10))) {
                         throw new DomainException(PersonaErrorCode.PERSONA_MENOR_DE_EDAD,
                                         body.fechaNacimiento().toString());
                 }
