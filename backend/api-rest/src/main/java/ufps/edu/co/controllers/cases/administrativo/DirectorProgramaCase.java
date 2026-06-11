@@ -1184,6 +1184,15 @@ public class DirectorProgramaCase {
                 return ResponseEntity.ok(resp);
             }
 
+            CohorteDTO cohorte = cohorteService.findById(cohorteId);
+            if (cohorte != null && cohorte.getCupos() != null) {
+                long admitidosActuales = aspiranteService.countAdmitidosByCohorte(cohorteId);
+                if (admitidosActuales >= cohorte.getCupos()) {
+                    throw new DomainException(ListaadmitidosErrorCode.CUPOS_COHORTE_AGOTADOS,
+                            cohorteId.toString());
+                }
+            }
+
             EstadoDTO estadoAdmitido = estadoService.findByTipoAndEntidad("ADMITIDO", "aspirante");
             if (estadoAdmitido == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -1196,6 +1205,8 @@ public class DirectorProgramaCase {
                     "aspiranteId", aspiranteId.toString(),
                     "admitido", true);
             return ResponseEntity.ok(resp);
+        } catch (DomainException e) {
+            throw e;
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();
