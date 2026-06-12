@@ -70,23 +70,23 @@ public class PruebaEntity implements Serializable {
     private Integer        idTipoprueba ;
 
     //--- LINKS ( RELATIONSHIPS )
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="id_aspirante", referencedColumnName="id", insertable=false, updatable=false)
     private AspiranteEntity  aspirante ; 
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="id_tipoprueba", referencedColumnName="id", insertable=false, updatable=false)
     private TipopruebaEntity tipoprueba ; 
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="id_ubicacion", referencedColumnName="id", insertable=false, updatable=false)
     private UbicacionEntity  ubicacion ; 
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="id_cohorte", referencedColumnName="id", insertable=false, updatable=false)
     private CohorteEntity    cohorte ; 
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="id_estado", referencedColumnName="id", insertable=false, updatable=false)
     private EstadoEntity     estado ; 
 
