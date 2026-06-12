@@ -244,4 +244,8 @@ public class AspiranteService extends GenericService<AspiranteEntity, AspiranteD
         repository.save(entity);
         return entityToDto(repository.findById(idAspirante).orElseThrow());
     }
+
+    public int updatePuntuacion(Integer idAspirante, java.math.BigDecimal puntuacion) {
+        return repository.updatePuntuacionById(idAspirante, puntuacion);
+    }
 }

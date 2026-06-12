@@ -58,19 +58,19 @@ public class AspiranteEntity implements Serializable {
     @OneToMany(mappedBy="aspirante")
     private List<AdmitidoEntity> admitidoList ; 
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="id_persona", referencedColumnName="id", insertable=false, updatable=false)
     private PersonaEntity    persona ; 
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="id_estado", referencedColumnName="id", insertable=false, updatable=false)
     private EstadoEntity     estado ; 
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="id_cohorte", referencedColumnName="id", insertable=false, updatable=false)
     private CohorteEntity    cohorte ; 
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="id_tipovinculacion", referencedColumnName="id", insertable=false, updatable=false)
     private TipovinculacionEntity tipovinculacion ; 
 
