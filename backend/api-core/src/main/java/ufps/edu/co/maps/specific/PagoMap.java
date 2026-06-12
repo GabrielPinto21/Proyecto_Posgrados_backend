@@ -71,19 +71,15 @@ public class PagoMap extends
 
     @Override
     public PagoOutput toOutput(PagoDTO dto) {
-        if (dto == null) return null;
+        if (dto == null)
+            return null;
 
         return PagoOutput.builder()
                 .id(dto.getId())
                 .idAspirante(dto.getIdAspirante())
                 .idEstado(dto.getIdEstado())
                 .idPagoconcepto(dto.getIdPagoconcepto())
-            .valorPagoPesos(null)
-            // TODO [PAGO_SCHEMA_FUTURO]: descomentar cuando el DTO incluya estos campos.
-            // .urlRecibo(dto.getUrlrecibo())
-            // .urlFactura(dto.getUrlfactura())
-            // .referenciaPago(dto.getReferenciapago())
-            // .valorPago(dto.getValorpago())
+                .valorPagoPesos(null)
                 .aspirante(dto.getAspirante() != null ? aspiranteMap.toOutput(dto.getAspirante()) : null)
                 .estado(dto.getEstado() != null ? estadoMap.toOutput(dto.getEstado()) : null)
                 .pagoconcepto(dto.getPagoconcepto() != null ? pagoconceptoMap.toOutput(dto.getPagoconcepto()) : null)

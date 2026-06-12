@@ -12,11 +12,6 @@ public record PagoOutput(
                 Integer idEstado,
                 Integer idPagoconcepto,
                 BigDecimal valorPagoPesos,
-                // TODO [PAGO_SCHEMA_FUTURO]: mapear cuando se agreguen columnas persistidas.
-                // String urlRecibo,
-                // String urlFactura,
-                // String referenciaPago,
-                // Integer valorPago,
                 AspiranteOutput aspirante,
                 EstadoOutput estado,
                 PagoconceptoOutput pagoconcepto) implements OutputResponse {

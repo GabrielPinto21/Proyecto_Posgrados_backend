@@ -224,9 +224,6 @@ public class EntrevistaProcessor implements
     }
 
     public EntrevistaOutput rateInterview(ENTREVISTA_RATE input) {
-        // TODO: Actualmente el método rateInterview no asigna la calificación a la
-        // entrevista. Habría que modificar el servicio para que lo haga, y luego este
-        // método funcionaría correctamente.
         EntrevistaDTO updated = service.rateInterview(input.id(), input.calificacion());
         return map.toOutput(updated);
     }
