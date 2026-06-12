@@ -1187,9 +1187,15 @@ public class DirectorProgramaCase {
             CohorteDTO cohorte = cohorteService.findById(cohorteId);
             if (cohorte != null && cohorte.getCupos() != null) {
                 long admitidosActuales = aspiranteService.countAdmitidosByCohorte(cohorteId);
-                if (admitidosActuales >= cohorte.getCupos()) {
-                    throw new DomainException(ListaadmitidosErrorCode.CUPOS_COHORTE_AGOTADOS,
-                            cohorteId.toString());
+                long cuposDisponibles = cohorte.getCupos() - admitidosActuales;
+                if (cuposDisponibles <= 0) {
+                    // Include some details in the exception param for debugging/handlers
+                    var detalle = Map.of(
+                            "idCohorte", cohorteId,
+                            "cuposTotales", cohorte.getCupos(),
+                            "admitidosActuales", admitidosActuales,
+                            "cuposDisponibles", cuposDisponibles);
+                    throw new DomainException(ListaadmitidosErrorCode.CUPOS_COHORTE_AGOTADOS, detalle);
                 }
             }
 
