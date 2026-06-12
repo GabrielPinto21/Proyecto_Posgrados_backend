@@ -75,6 +75,9 @@ public class PagoProcessor {
     private PersonaService personaService;
 
     @Autowired
+    private DocumentopersonaService documentopersonaService;
+
+    @Autowired
     private SESService sesService;
 
     @Autowired
@@ -1213,18 +1216,58 @@ public class PagoProcessor {
     }
 
     private String construirReferencia(PagoResumenDTO pago, AspiranteCheckoutDTO aspirante) {
-        String documento = aspirante != null && aspirante.numerodocumento() != null
-            ? String.valueOf(aspirante.numerodocumento()).replaceAll("[^a-zA-Z0-9]", "")
-            : "ND";
+        String documento = null;
+        if (aspirante != null && aspirante.numerodocumento() != null && !aspirante.numerodocumento().isBlank()) {
+            documento = aspirante.numerodocumento().replaceAll("[^a-zA-Z0-9]", "");
+        }
+        // fallback: try to fetch from persona -> documentopersona when available
+        if ((documento == null || documento.isBlank()) && aspirante != null && aspirante.idPersona() != null) {
+            try {
+                var persona = personaService.findById(aspirante.idPersona());
+                if (persona != null) {
+                    if (persona.getDocumentopersona() != null && persona.getDocumentopersona().getNumerodocumento() != null)
+                        documento = persona.getDocumentopersona().getNumerodocumento().replaceAll("[^a-zA-Z0-9]", "");
+                    else if (persona.getIdDocumentopersona() != null) {
+                        var dp = documentopersonaService.findById(persona.getIdDocumentopersona());
+                        if (dp != null && dp.getNumerodocumento() != null)
+                            documento = dp.getNumerodocumento().replaceAll("[^a-zA-Z0-9]", "");
+                    }
+                }
+            } catch (Exception e) {
+                log.debug("No fue posible recuperar documentopersona en fallback: {}", e.getMessage());
+            }
+        }
+        if (documento == null || documento.isBlank()) {
+            documento = "ND";
+        }
         // New format: <documento>-<year> (epoch millis will be appended by construirReferenciaUnica)
         return documento + "-" + LocalDate.now().getYear();
     }
 
     private String construirReferenciaMatricula(PagoResumenDTO pago, AspiranteCheckoutDTO aspirante) {
-        String documento = aspirante != null && aspirante.numerodocumento() != null
-            ? String.valueOf(aspirante.numerodocumento()).replaceAll("[^a-zA-Z0-9]", "")
-            : "ND";
-        // Use same base format for matrícula: <documento>-<year>
+        String documento = null;
+        if (aspirante != null && aspirante.numerodocumento() != null && !aspirante.numerodocumento().isBlank()) {
+            documento = aspirante.numerodocumento().replaceAll("[^a-zA-Z0-9]", "");
+        }
+        if ((documento == null || documento.isBlank()) && aspirante != null && aspirante.idPersona() != null) {
+            try {
+                var persona = personaService.findById(aspirante.idPersona());
+                if (persona != null) {
+                    if (persona.getDocumentopersona() != null && persona.getDocumentopersona().getNumerodocumento() != null)
+                        documento = persona.getDocumentopersona().getNumerodocumento().replaceAll("[^a-zA-Z0-9]", "");
+                    else if (persona.getIdDocumentopersona() != null) {
+                        var dp = documentopersonaService.findById(persona.getIdDocumentopersona());
+                        if (dp != null && dp.getNumerodocumento() != null)
+                            documento = dp.getNumerodocumento().replaceAll("[^a-zA-Z0-9]", "");
+                    }
+                }
+            } catch (Exception e) {
+                log.debug("No fue posible recuperar documentopersona en fallback (matricula): {}", e.getMessage());
+            }
+        }
+        if (documento == null || documento.isBlank()) {
+            documento = "ND";
+        }
         return documento + "-" + LocalDate.now().getYear();
     }
 
