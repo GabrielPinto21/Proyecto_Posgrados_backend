@@ -245,7 +245,10 @@ public class AspiranteService extends GenericService<AspiranteEntity, AspiranteD
         return entityToDto(repository.findById(idAspirante).orElseThrow());
     }
 
-    public int updatePuntuacion(Integer idAspirante, java.math.BigDecimal puntuacion) {
-        return repository.updatePuntuacionById(idAspirante, puntuacion);
+    public void updatePuntuacion(Integer idAspirante, java.math.BigDecimal puntuacion) {
+        AspiranteEntity entity = repository.findById(idAspirante)
+                .orElseThrow(() -> new RuntimeException("Aspirante no encontrado con id: " + idAspirante));
+        entity.setPuntuacion(puntuacion);
+        repository.save(entity);
     }
 }

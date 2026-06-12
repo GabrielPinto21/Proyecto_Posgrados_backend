@@ -233,11 +233,6 @@ public class CalificacioncriterioProcessor implements
                 .filter(c -> c.getPuntuacion() != null)
                 .map(CalificacioncriterioDTO::getPuntuacion)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        // Use a partial update to avoid saving the whole Aspirante entity (prevents large joins and immutable-property warnings)
-        try {
-            aspiranteService.updatePuntuacion(idAspirante, total);
-        } catch (Exception e) {
-            logger.warn("No se pudo actualizar la puntuación del aspirante {}: {}", idAspirante, e.getMessage());
-        }
+        aspiranteService.updatePuntuacion(idAspirante, total);
     }
 }
