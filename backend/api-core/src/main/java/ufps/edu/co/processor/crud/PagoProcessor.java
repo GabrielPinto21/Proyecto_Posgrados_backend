@@ -976,7 +976,8 @@ public class PagoProcessor {
         String correo = aspirante != null ? aspirante.correo() : null;
 
         ReciboInscripcionBuildInput input = new ReciboInscripcionBuildInput(
-                checkoutResponse.reference(),
+            // Use the pagorecibo's unique reference as the visible codigoRecibo
+            pagoreciboinscripcion.getReferenciapago(),
                 periodo,
                 programa,
                 nombreCompleto,
@@ -988,7 +989,8 @@ public class PagoProcessor {
                 checkoutResponse.amount(),
                 checkoutResponse.amountInCents(),
                 checkoutResponse.creationDate(),
-                checkoutResponse.reference());
+            // also pass the pagorecibo reference as referenciaPago (unique)
+            pagoreciboinscripcion.getReferenciapago());
 
         return reciboInscripcionBuilderPort.construirYSubirRecibo(input);
     }
@@ -1013,7 +1015,8 @@ public class PagoProcessor {
         String correo = aspirante != null ? aspirante.correo() : null;
 
         ReciboInscripcionBuildInput input = new ReciboInscripcionBuildInput(
-                checkoutResponse.reference(),
+            // Use the pagorecibomatricula's unique reference as the visible codigoRecibo
+            pagorecibomatricula.getReferenciapago(),
                 periodo,
                 programa,
                 nombreCompleto,
@@ -1025,7 +1028,8 @@ public class PagoProcessor {
                 checkoutResponse.amount(),
                 checkoutResponse.amountInCents(),
                 checkoutResponse.creationDate(),
-                checkoutResponse.reference());
+            // also pass the pagorecibo reference as referenciaPago (unique)
+            pagorecibomatricula.getReferenciapago());
 
         return reciboInscripcionBuilderPort.construirYSubirRecibo(input);
     }
@@ -1209,18 +1213,17 @@ public class PagoProcessor {
     }
 
     private String construirReferencia(PagoResumenDTO pago, AspiranteCheckoutDTO aspirante) {
-        String nombre = aspirante != null && aspirante.correo() != null
-                ? aspirante.correo().replaceAll("[^a-zA-Z0-9]", "")
-                : "aspirante";
-        return "PAGO-" + pago.id() + "-" + nombre.toUpperCase(Locale.ROOT) + "-" + LocalDate.now().getYear();
+        String documento = aspirante != null && aspirante.numerodocumento() != null
+            ? String.valueOf(aspirante.numerodocumento()).replaceAll("[^a-zA-Z0-9]", "")
+            : "ND";
+        return "PAGO-" + pago.id() + "-" + documento + "-" + LocalDate.now().getYear();
     }
 
     private String construirReferenciaMatricula(PagoResumenDTO pago, AspiranteCheckoutDTO aspirante) {
-        String nombre = aspirante != null && aspirante.correo() != null
-                ? aspirante.correo().replaceAll("[^a-zA-Z0-9]", "")
-                : "aspirante";
-        return "PAGO-" + pago.id() + "-MATRICULA-POSGRADOS-UFPS-" + nombre.toUpperCase(Locale.ROOT) + "-"
-                + LocalDate.now().getYear();
+        String documento = aspirante != null && aspirante.numerodocumento() != null
+            ? String.valueOf(aspirante.numerodocumento()).replaceAll("[^a-zA-Z0-9]", "")
+            : "ND";
+        return "PAGO-" + pago.id() + "-MATRICULA-POSGRADOS-UFPS-" + documento + "-" + LocalDate.now().getYear();
     }
 
     private String construirReferenciaUnica(String referenciaBase) {

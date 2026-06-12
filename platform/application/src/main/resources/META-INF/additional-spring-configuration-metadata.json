@@ -113,9 +113,40 @@
     "name": "app.frontend-login-url",
     "type": "java.lang.String",
     "description": "A description for 'app.frontend-login-url'"
-  },{
+  },
+  {
     "name": "app.base-url",
     "type": "java.lang.String",
     "description": "A description for 'app.base-url'"
+  },
+  {
+    "name": "BANK_META_INFO_EXPIREDATE_CODE",
+    "type": "java.lang.String",
+    "description": "A description for 'BANK_META_INFO_EXPIREDATE_CODE'"
+  },
+  {
+    "name": "BANK_META_INFO_VALUE_CODE",
+    "type": "java.lang.String",
+    "description": "A description for 'BANK_META_INFO_VALUE_CODE'"
+  },
+  {
+    "name": "BANK_META_INFO_REFERENCE_CODE",
+    "type": "java.lang.String",
+    "description": "A description for 'BANK_META_INFO_REFERENCE_CODE'"
+  },
+  {
+    "name": "BANK_META_INFO_GLOBALID_CODE",
+    "type": "java.lang.String",
+    "description": "A description for 'BANK_META_INFO_GLOBALID_CODE'"
+  },
+  {
+    "name": "BANK_META_INFO_BBVA",
+    "type": "java.lang.String",
+    "description": "A description for 'BANK_META_INFO_BBVA'"
+  },
+  {
+    "name": "BANK_META_INFO_BANCOLOMBIA",
+    "type": "java.lang.String",
+    "description": "A description for 'BANK_META_INFO_BANCOLOMBIA'"
   }
 ]}
