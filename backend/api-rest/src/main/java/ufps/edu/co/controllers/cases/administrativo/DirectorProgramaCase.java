@@ -120,6 +120,7 @@ import ufps.edu.co.rest.dto.CohorteDTO;
 import ufps.edu.co.rest.dto.PersonaDTO;
 import ufps.edu.co.rest.services.PagoreciboinscripcionService;
 import ufps.edu.co.rest.services.PagorecibomatriculaService;
+import ufps.edu.co.rest.services.PersonaService;
 import ufps.edu.co.rest.services.PagoService;
 import ufps.edu.co.rest.services.CohorteService;
 import ufps.edu.co.processor.crud.PagoProcessor;
@@ -211,6 +212,9 @@ public class DirectorProgramaCase {
 
     @Autowired
     private UltimocodigoprogramaProcessor ultimocodigoprogramaProcessor;
+
+    @Autowired
+    private PersonaService personaService;
 
     @GetMapping(value = "/cohortes")
     public ResponseEntity<List<CohorteResumenOutput>> getCohortesByPrograma() {
@@ -937,11 +941,11 @@ public class DirectorProgramaCase {
     public ResponseEntity<byte[]> generateAdmittedList(@PathVariable Integer idCohorte) {
         try {
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
-            Integer idPersona = usuarioService.findIdPersonaByNombreusuario(username);
-            var admin = administrativoService.findByIdPersona(idPersona);
-            String directorNombre = (admin != null && admin.getPersona() != null)
-                    ? admin.getPersona().getNombres() + " " + admin.getPersona().getApellidos()
-                    : "Director de Programa";
+                    Integer idPersona = usuarioService.findIdPersonaByNombreusuario(username);
+                    var personaDto = personaService.findById(idPersona);
+                    String directorNombre = personaDto != null
+                        ? (personaDto.getNombres() + " " + personaDto.getApellidos())
+                        : "Director de Programa";
 
             // Generate PDF from the Admitido table (do NOT update aspirante states here)
             List<ufps.edu.co.rest.dto.AdmitidoDTO> admitidos = listaadmitidosService.findByIdCohorte(idCohorte);
@@ -984,15 +988,14 @@ public class DirectorProgramaCase {
         try {
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
             Integer idPersona = usuarioService.findIdPersonaByNombreusuario(username);
-            var admin = administrativoService.findByIdPersona(idPersona);
+            Integer adminProgramaId = administrativoService.findIdProgramaByIdPersona(idPersona);
 
             CohorteDTO cohorte = cohorteService.findById(cohorteId);
             if (cohorte == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
-            if (admin == null || admin.getCargo() == null || cohorte.getIdPrograma() == null
-                    || admin.getCargo().getIdPrograma() == null
-                    || !cohorte.getIdPrograma().equals(admin.getCargo().getIdPrograma())) {
+            if (adminProgramaId == null || cohorte.getIdPrograma() == null
+                    || !cohorte.getIdPrograma().equals(adminProgramaId)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
 
