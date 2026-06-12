@@ -143,10 +143,9 @@ public class AspiranteProcessor implements
         if (idCohorte == null) {
             return AspiranteCriteriosOutput.builder()
                     .criterios(List.of())
-                    .puntajeTotal(null)
+                    .puntajeTotal(BigDecimal.ZERO)
                     .build();
         }
-        BigDecimal puntuacion = service.findPuntuacionById(input.id());
 
         List<CriterioFilaOutput> filas = criteriocohorteService
                 .findCriteriosConCalificacion(idCohorte, input.id())
@@ -159,9 +158,14 @@ public class AspiranteProcessor implements
                         .build())
                 .toList();
 
+        BigDecimal puntajeTotal = filas.stream()
+                .filter(f -> f.puntajeObtenido() != null)
+                .map(CriterioFilaOutput::puntajeObtenido)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         return AspiranteCriteriosOutput.builder()
                 .criterios(filas)
-                .puntajeTotal(puntuacion)
+                .puntajeTotal(puntajeTotal)
                 .build();
     }
 
