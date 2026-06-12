@@ -1216,21 +1216,24 @@ public class PagoProcessor {
         String documento = aspirante != null && aspirante.numerodocumento() != null
             ? String.valueOf(aspirante.numerodocumento()).replaceAll("[^a-zA-Z0-9]", "")
             : "ND";
-        return "PAGO-" + pago.id() + "-" + documento + "-" + LocalDate.now().getYear();
+        // New format: <documento>-<year> (epoch millis will be appended by construirReferenciaUnica)
+        return documento + "-" + LocalDate.now().getYear();
     }
 
     private String construirReferenciaMatricula(PagoResumenDTO pago, AspiranteCheckoutDTO aspirante) {
         String documento = aspirante != null && aspirante.numerodocumento() != null
             ? String.valueOf(aspirante.numerodocumento()).replaceAll("[^a-zA-Z0-9]", "")
             : "ND";
-        return "PAGO-" + pago.id() + "-MATRICULA-POSGRADOS-UFPS-" + documento + "-" + LocalDate.now().getYear();
+        // Use same base format for matrícula: <documento>-<year>
+        return documento + "-" + LocalDate.now().getYear();
     }
 
     private String construirReferenciaUnica(String referenciaBase) {
         if (referenciaBase == null || referenciaBase.isBlank()) {
             return referenciaBase;
         }
-        return referenciaBase + "-" + Instant.now().toEpochMilli();
+        // Append epoch millis directly after the year without additional hyphen
+        return referenciaBase + String.valueOf(Instant.now().toEpochMilli());
     }
 
     private String construirNombreAspirante(AspiranteCheckoutDTO aspirante) {
