@@ -233,8 +233,6 @@ public class CalificacioncriterioProcessor implements
                 .filter(c -> c.getPuntuacion() != null)
                 .map(CalificacioncriterioDTO::getPuntuacion)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        AspiranteDTO aspirante = aspiranteService.findById(idAspirante);
-        aspirante.setPuntuacion(total);
-        aspiranteService.update(idAspirante, aspirante);
+        aspiranteService.updatePuntuacion(idAspirante, total);
     }
 }
