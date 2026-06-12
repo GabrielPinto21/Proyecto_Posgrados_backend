@@ -48,11 +48,11 @@ public class CalificacioncriterioEntity implements Serializable {
     private Integer    idCriteriocohorte ;
 
     //--- LINKS ( RELATIONSHIPS )
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="id_aspirante", referencedColumnName="id", insertable=false, updatable=false)
     private AspiranteEntity  aspirante ; 
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="id_criteriocohorte", referencedColumnName="id", insertable=false, updatable=false)
     private CriteriocohorteEntity criteriocohorte ; 
 

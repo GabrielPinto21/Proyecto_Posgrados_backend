@@ -75,6 +75,9 @@ public class PagoProcessor {
     private PersonaService personaService;
 
     @Autowired
+    private DocumentopersonaService documentopersonaService;
+
+    @Autowired
     private SESService sesService;
 
     @Autowired
@@ -942,7 +945,14 @@ public class PagoProcessor {
         }
 
         BigDecimal valorValidado = validarMontoElegidoMatricula(montoElegido, montoTotal);
-        String referencia = construirReferenciaUnica(construirReferenciaMatricula(pago, null));
+        // Try to build the referencia using the aspirante checkout data when possible
+        AspiranteCheckoutDTO aspirante = null;
+        try {
+            aspirante = aspiranteService.findCheckoutById(idAspirante);
+        } catch (Exception ex) {
+            log.debug("No se pudo obtener aspirante para construir referencia matricula: {}", ex.getMessage());
+        }
+        String referencia = construirReferenciaUnica(construirReferenciaMatricula(pago, aspirante));
 
         EstadoDTO estadoEnCurso = resolveEstadoPagoMatriculaEnCurso();
         PagorecibomatriculaDTO nuevo = PagorecibomatriculaDTO.builder()
@@ -976,7 +986,8 @@ public class PagoProcessor {
         String correo = aspirante != null ? aspirante.correo() : null;
 
         ReciboInscripcionBuildInput input = new ReciboInscripcionBuildInput(
-                checkoutResponse.reference(),
+            // Use the pagorecibo's unique reference as the visible codigoRecibo
+            pagoreciboinscripcion.getReferenciapago(),
                 periodo,
                 programa,
                 nombreCompleto,
@@ -988,7 +999,8 @@ public class PagoProcessor {
                 checkoutResponse.amount(),
                 checkoutResponse.amountInCents(),
                 checkoutResponse.creationDate(),
-                checkoutResponse.reference());
+            // also pass the pagorecibo reference as referenciaPago (unique)
+            pagoreciboinscripcion.getReferenciapago());
 
         return reciboInscripcionBuilderPort.construirYSubirRecibo(input);
     }
@@ -1013,7 +1025,8 @@ public class PagoProcessor {
         String correo = aspirante != null ? aspirante.correo() : null;
 
         ReciboInscripcionBuildInput input = new ReciboInscripcionBuildInput(
-                checkoutResponse.reference(),
+            // Use the pagorecibomatricula's unique reference as the visible codigoRecibo
+            pagorecibomatricula.getReferenciapago(),
                 periodo,
                 programa,
                 nombreCompleto,
@@ -1025,7 +1038,8 @@ public class PagoProcessor {
                 checkoutResponse.amount(),
                 checkoutResponse.amountInCents(),
                 checkoutResponse.creationDate(),
-                checkoutResponse.reference());
+            // also pass the pagorecibo reference as referenciaPago (unique)
+            pagorecibomatricula.getReferenciapago());
 
         return reciboInscripcionBuilderPort.construirYSubirRecibo(input);
     }
@@ -1209,25 +1223,67 @@ public class PagoProcessor {
     }
 
     private String construirReferencia(PagoResumenDTO pago, AspiranteCheckoutDTO aspirante) {
-        String nombre = aspirante != null && aspirante.correo() != null
-                ? aspirante.correo().replaceAll("[^a-zA-Z0-9]", "")
-                : "aspirante";
-        return "PAGO-" + pago.id() + "-" + nombre.toUpperCase(Locale.ROOT) + "-" + LocalDate.now().getYear();
+        String documento = null;
+        if (aspirante != null && aspirante.numerodocumento() != null && !aspirante.numerodocumento().isBlank()) {
+            documento = aspirante.numerodocumento().replaceAll("[^a-zA-Z0-9]", "");
+        }
+        // fallback: try to fetch from persona -> documentopersona when available
+        if ((documento == null || documento.isBlank()) && aspirante != null && aspirante.idPersona() != null) {
+            try {
+                var persona = personaService.findById(aspirante.idPersona());
+                if (persona != null) {
+                    if (persona.getDocumentopersona() != null && persona.getDocumentopersona().getNumerodocumento() != null)
+                        documento = persona.getDocumentopersona().getNumerodocumento().replaceAll("[^a-zA-Z0-9]", "");
+                    else if (persona.getIdDocumentopersona() != null) {
+                        var dp = documentopersonaService.findById(persona.getIdDocumentopersona());
+                        if (dp != null && dp.getNumerodocumento() != null)
+                            documento = dp.getNumerodocumento().replaceAll("[^a-zA-Z0-9]", "");
+                    }
+                }
+            } catch (Exception e) {
+                log.debug("No fue posible recuperar documentopersona en fallback: {}", e.getMessage());
+            }
+        }
+        if (documento == null || documento.isBlank()) {
+            documento = "ND";
+        }
+        // New format: <documento>-<year> (epoch millis will be appended by construirReferenciaUnica)
+        return documento + "-" + LocalDate.now().getYear();
     }
 
     private String construirReferenciaMatricula(PagoResumenDTO pago, AspiranteCheckoutDTO aspirante) {
-        String nombre = aspirante != null && aspirante.correo() != null
-                ? aspirante.correo().replaceAll("[^a-zA-Z0-9]", "")
-                : "aspirante";
-        return "PAGO-" + pago.id() + "-MATRICULA-POSGRADOS-UFPS-" + nombre.toUpperCase(Locale.ROOT) + "-"
-                + LocalDate.now().getYear();
+        String documento = null;
+        if (aspirante != null && aspirante.numerodocumento() != null && !aspirante.numerodocumento().isBlank()) {
+            documento = aspirante.numerodocumento().replaceAll("[^a-zA-Z0-9]", "");
+        }
+        if ((documento == null || documento.isBlank()) && aspirante != null && aspirante.idPersona() != null) {
+            try {
+                var persona = personaService.findById(aspirante.idPersona());
+                if (persona != null) {
+                    if (persona.getDocumentopersona() != null && persona.getDocumentopersona().getNumerodocumento() != null)
+                        documento = persona.getDocumentopersona().getNumerodocumento().replaceAll("[^a-zA-Z0-9]", "");
+                    else if (persona.getIdDocumentopersona() != null) {
+                        var dp = documentopersonaService.findById(persona.getIdDocumentopersona());
+                        if (dp != null && dp.getNumerodocumento() != null)
+                            documento = dp.getNumerodocumento().replaceAll("[^a-zA-Z0-9]", "");
+                    }
+                }
+            } catch (Exception e) {
+                log.debug("No fue posible recuperar documentopersona en fallback (matricula): {}", e.getMessage());
+            }
+        }
+        if (documento == null || documento.isBlank()) {
+            documento = "ND";
+        }
+        return documento + "-" + LocalDate.now().getYear();
     }
 
     private String construirReferenciaUnica(String referenciaBase) {
         if (referenciaBase == null || referenciaBase.isBlank()) {
             return referenciaBase;
         }
-        return referenciaBase + "-" + Instant.now().toEpochMilli();
+        // Append epoch millis directly after the year without additional hyphen
+        return referenciaBase + String.valueOf(Instant.now().toEpochMilli());
     }
 
     private String construirNombreAspirante(AspiranteCheckoutDTO aspirante) {

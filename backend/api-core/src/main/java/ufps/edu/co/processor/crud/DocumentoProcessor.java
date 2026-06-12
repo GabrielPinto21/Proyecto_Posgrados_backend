@@ -447,9 +447,7 @@ public class DocumentoProcessor implements
         } else if ("RECHAZADO".equalsIgnoreCase(input.estado())) {
             revertirEstadoValidacionSiAplica(dto.getIdAspirante());
         }
-
-        // TODO: Ya no se mapea el nombre del documento, habría que agregarlo al output
-        // o eliminarlo si no es necesario
+        
         return DocumentoEstadoOutput.builder()
                 .id(docId)
                 // .nombre(nombreDoc)

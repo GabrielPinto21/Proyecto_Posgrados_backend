@@ -10,6 +10,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -117,9 +118,11 @@ import ufps.edu.co.records.input.entity.PagoEstadoInput;
 import ufps.edu.co.rest.dto.PagoDTO;
 import ufps.edu.co.rest.dto.AspiranteDTO;
 import ufps.edu.co.rest.dto.CohorteDTO;
+import ufps.edu.co.rest.dto.PlazoDTO;
 import ufps.edu.co.rest.dto.PersonaDTO;
 import ufps.edu.co.rest.services.PagoreciboinscripcionService;
 import ufps.edu.co.rest.services.PagorecibomatriculaService;
+import ufps.edu.co.rest.services.PersonaService;
 import ufps.edu.co.rest.services.PagoService;
 import ufps.edu.co.rest.services.CohorteService;
 import ufps.edu.co.processor.crud.PagoProcessor;
@@ -211,6 +214,12 @@ public class DirectorProgramaCase {
 
     @Autowired
     private UltimocodigoprogramaProcessor ultimocodigoprogramaProcessor;
+
+    @Autowired
+    private PersonaService personaService;
+
+    @Value("${system.in.dev.mode:false}")
+    private boolean systemInDevMode;
 
     @GetMapping(value = "/cohortes")
     public ResponseEntity<List<CohorteResumenOutput>> getCohortesByPrograma() {
@@ -937,11 +946,11 @@ public class DirectorProgramaCase {
     public ResponseEntity<byte[]> generateAdmittedList(@PathVariable Integer idCohorte) {
         try {
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
-            Integer idPersona = usuarioService.findIdPersonaByNombreusuario(username);
-            var admin = administrativoService.findByIdPersona(idPersona);
-            String directorNombre = (admin != null && admin.getPersona() != null)
-                    ? admin.getPersona().getNombres() + " " + admin.getPersona().getApellidos()
-                    : "Director de Programa";
+                    Integer idPersona = usuarioService.findIdPersonaByNombreusuario(username);
+                    var personaDto = personaService.findById(idPersona);
+                    String directorNombre = personaDto != null
+                        ? (personaDto.getNombres() + " " + personaDto.getApellidos())
+                        : "Director de Programa";
 
             // Generate PDF from the Admitido table (do NOT update aspirante states here)
             List<ufps.edu.co.rest.dto.AdmitidoDTO> admitidos = listaadmitidosService.findByIdCohorte(idCohorte);
@@ -984,15 +993,14 @@ public class DirectorProgramaCase {
         try {
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
             Integer idPersona = usuarioService.findIdPersonaByNombreusuario(username);
-            var admin = administrativoService.findByIdPersona(idPersona);
+            Integer adminProgramaId = administrativoService.findIdProgramaByIdPersona(idPersona);
 
             CohorteDTO cohorte = cohorteService.findById(cohorteId);
             if (cohorte == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
-            if (admin == null || admin.getCargo() == null || cohorte.getIdPrograma() == null
-                    || admin.getCargo().getIdPrograma() == null
-                    || !cohorte.getIdPrograma().equals(admin.getCargo().getIdPrograma())) {
+            if (adminProgramaId == null || cohorte.getIdPrograma() == null
+                    || !cohorte.getIdPrograma().equals(adminProgramaId)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
 
@@ -1048,6 +1056,45 @@ public class DirectorProgramaCase {
                 } catch (Exception ex) {
                     logger.warn("No se pudo actualizar estado de aspirante id={} : {}", a.getId(), ex.getMessage());
                 }
+            }
+
+            // Attempt to close the cohorte after finalizing admitidos (best-effort)
+            try {
+                // If running in dev mode, skip date checks
+                if (!systemInDevMode) {
+                    LocalDate localtoday = LocalDate.now();
+                    // Order: inscripción (plazo2), documentación (plazo), pago (plazo3)
+                    PlazoDTO plazoIns = cohorte.getPlazo2();
+                    if (plazoIns != null && plazoIns.getFechafin() != null) {
+                        if (!localtoday.isAfter(plazoIns.getFechafin())) {
+                            throw new DomainException(ListaadmitidosErrorCode.FECHA_INSCRIPCION_NO_FINALIZADA,
+                                    "No es posible culminar el proceso debido a que aún no ha finalizado la fecha limite para inscripción");
+                        }
+                    }
+
+                    PlazoDTO plazoDoc = cohorte.getPlazo();
+                    if (plazoDoc != null && plazoDoc.getFechafin() != null) {
+                        if (!localtoday.isAfter(plazoDoc.getFechafin())) {
+                            throw new DomainException(ListaadmitidosErrorCode.FECHA_DOCUMENTACION_NO_FINALIZADA,
+                                    "No es posible culminar el proceso debido a que aún no ha finalizado la fecha limite para documentación");
+                        }
+                    }
+
+                    PlazoDTO plazoPago = cohorte.getPlazo3();
+                    if (plazoPago != null && plazoPago.getFechafin() != null) {
+                        if (!localtoday.isAfter(plazoPago.getFechafin())) {
+                            throw new DomainException(ListaadmitidosErrorCode.FECHA_PAGO_NO_FINALIZADA,
+                                    "No es posible culminar el proceso debido a que aún no ha finalizado la fecha limite para pago");
+                        }
+                    }
+                }
+
+                cohorteProcessor.cerrarCohorte(cohorteId);
+            } catch (DomainException e) {
+                // rethrow domain exceptions generated by our checks so that handlers can map them
+                throw e;
+            } catch (Exception ex) {
+                logger.warn("No se pudo cerrar la cohorte {} automáticamente: {}", cohorteId, ex.getMessage());
             }
 
             return ResponseEntity.ok(created);
@@ -1187,9 +1234,15 @@ public class DirectorProgramaCase {
             CohorteDTO cohorte = cohorteService.findById(cohorteId);
             if (cohorte != null && cohorte.getCupos() != null) {
                 long admitidosActuales = aspiranteService.countAdmitidosByCohorte(cohorteId);
-                if (admitidosActuales >= cohorte.getCupos()) {
-                    throw new DomainException(ListaadmitidosErrorCode.CUPOS_COHORTE_AGOTADOS,
-                            cohorteId.toString());
+                long cuposDisponibles = cohorte.getCupos() - admitidosActuales;
+                if (cuposDisponibles <= 0) {
+                    // Include some details in the exception param for debugging/handlers
+                    var detalle = Map.of(
+                            "idCohorte", cohorteId,
+                            "cuposTotales", cohorte.getCupos(),
+                            "admitidosActuales", admitidosActuales,
+                            "cuposDisponibles", cuposDisponibles);
+                    throw new DomainException(ListaadmitidosErrorCode.CUPOS_COHORTE_AGOTADOS, detalle);
                 }
             }
 

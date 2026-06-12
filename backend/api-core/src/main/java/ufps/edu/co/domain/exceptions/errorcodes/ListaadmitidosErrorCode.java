@@ -20,6 +20,18 @@ public enum ListaadmitidosErrorCode implements BaseErrorCode {
             "NO_ADMITIDOS_EN_COHORTE",
             "No hay aspirantes con estado ADMITIDO en la cohorte especificada"),
 
+    FECHA_INSCRIPCION_NO_FINALIZADA(
+            "FECHA_INSCRIPCION_NO_FINALIZADA",
+            "No es posible culminar el proceso debido a que aún no ha finalizado la fecha limite para inscripción"),
+
+    FECHA_DOCUMENTACION_NO_FINALIZADA(
+            "FECHA_DOCUMENTACION_NO_FINALIZADA",
+            "No es posible culminar el proceso debido a que aún no ha finalizado la fecha limite para documentación"),
+
+    FECHA_PAGO_NO_FINALIZADA(
+            "FECHA_PAGO_NO_FINALIZADA",
+            "No es posible culminar el proceso debido a que aún no ha finalizado la fecha limite para pago"),
+
     CUPOS_COHORTE_AGOTADOS(
             "CUPOS_COHORTE_AGOTADOS",
             "No se puede admitir al aspirante: la cohorte ya alcanzó el límite de cupos disponibles");

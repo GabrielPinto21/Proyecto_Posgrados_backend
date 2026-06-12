@@ -12,6 +12,9 @@ import org.springframework.stereotype.*;
 
 import ufps.edu.co.persistence.entities.*;
 import ufps.edu.co.rest.dto.*;
+import java.math.BigDecimal;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Spring Data JPA repository for the AspiranteEntity entity.
@@ -96,6 +99,11 @@ public interface AspiranteRepository extends JpaRepository<AspiranteEntity, Inte
 
 	@Query("SELECT a.puntuacion FROM AspiranteEntity a WHERE a.id = :id")
 	Optional<java.math.BigDecimal> findPuntuacionById(@Param("id") Integer id);
+
+	@Modifying
+	@Transactional
+	@Query("UPDATE AspiranteEntity a SET a.puntuacion = :puntuacion WHERE a.id = :id")
+	int updatePuntuacionById(@Param("id") Integer id, @Param("puntuacion") BigDecimal puntuacion);
 
 	List<AspiranteEntity> findByDocumentoListIsNotEmpty();
 

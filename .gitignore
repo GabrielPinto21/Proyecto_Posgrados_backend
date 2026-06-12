@@ -40,3 +40,10 @@ TelosysTools/
 
 # Any SQL files (e.g., database dumps, migration scripts) that should not be committed
 .sql/
+
+
+# Ignore docker-related files
+.dockerignore
+Dockerfile
+docker-compose.yml
+README_DOCKER.md
