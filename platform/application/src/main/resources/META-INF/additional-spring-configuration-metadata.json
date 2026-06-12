@@ -148,5 +148,10 @@
     "name": "BANK_META_INFO_BANCOLOMBIA",
     "type": "java.lang.String",
     "description": "A description for 'BANK_META_INFO_BANCOLOMBIA'"
+  },
+  {
+    "name": "system.in.dev.mode",
+    "type": "java.lang.String",
+    "description": "A description for 'system.in.dev.mode'"
   }
 ]}

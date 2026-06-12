@@ -945,7 +945,14 @@ public class PagoProcessor {
         }
 
         BigDecimal valorValidado = validarMontoElegidoMatricula(montoElegido, montoTotal);
-        String referencia = construirReferenciaUnica(construirReferenciaMatricula(pago, null));
+        // Try to build the referencia using the aspirante checkout data when possible
+        AspiranteCheckoutDTO aspirante = null;
+        try {
+            aspirante = aspiranteService.findCheckoutById(idAspirante);
+        } catch (Exception ex) {
+            log.debug("No se pudo obtener aspirante para construir referencia matricula: {}", ex.getMessage());
+        }
+        String referencia = construirReferenciaUnica(construirReferenciaMatricula(pago, aspirante));
 
         EstadoDTO estadoEnCurso = resolveEstadoPagoMatriculaEnCurso();
         PagorecibomatriculaDTO nuevo = PagorecibomatriculaDTO.builder()
